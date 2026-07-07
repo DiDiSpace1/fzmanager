@@ -7,6 +7,7 @@ import {buildTaxCsv, fetchTaxExportData, getWorkspaceIdForUser, parseExportYear}
 
 export async function GET(request: NextRequest) {
   const year = parseExportYear(request.nextUrl.searchParams.get('year'));
+  const propertyId = request.nextUrl.searchParams.get('property_id');
 
   if (!year) {
     return NextResponse.json({error: 'Invalid year'}, {status: 400});
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/tax?error=billing_required', request.url));
   }
 
-  const exportData = await fetchTaxExportData({supabase, workspaceId, year});
+  const exportData = await fetchTaxExportData({propertyId, supabase, workspaceId, year});
 
   if (exportData.error || !exportData.data) {
     return NextResponse.json({error: exportData.error ?? 'Export failed'}, {status: 500});

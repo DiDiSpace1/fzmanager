@@ -9,6 +9,7 @@ export type RentExportRow = {
   status: string;
   total_due: number;
   leases: {
+    property_id?: string;
     properties: {
       name: string;
     } | null;
@@ -79,32 +80,41 @@ export async function getWorkspaceIdForUser(supabase: SupabaseClient, userId: st
 }
 
 export async function fetchTaxExportData(input: {
+  propertyId?: string | null;
   supabase: SupabaseClient;
   workspaceId: string;
   year: number;
 }): Promise<{data?: TaxExportData; error?: string}> {
   const range = yearRange(input.year);
-  const {data: rentCharges, error: rentError} = await input.supabase
+  let rentQuery = input.supabase
     .from('rent_charges')
-    .select('period_month, due_date, rent_amount, charges_amount, total_due, status, leases(properties(name), tenants(full_name), units(name))')
+    .select('period_month, due_date, rent_amount, charges_amount, total_due, status, leases!inner(property_id, properties(name), tenants(full_name), units(name))')
     .eq('workspace_id', input.workspaceId)
     .gte('period_month', range.start)
-    .lt('period_month', range.end)
-    .order('period_month', {ascending: true})
-    .returns<RentExportRow[]>();
+    .lt('period_month', range.end);
+
+  if (input.propertyId) {
+    rentQuery = rentQuery.eq('leases.property_id', input.propertyId);
+  }
+
+  const {data: rentCharges, error: rentError} = await rentQuery.order('period_month', {ascending: true}).returns<RentExportRow[]>();
 
   if (rentError) {
     return {error: rentError.message};
   }
 
-  const {data: expenses, error: expenseError} = await input.supabase
+  let expenseQuery = input.supabase
     .from('expenses')
     .select('expense_date, amount, currency, vendor, description, receipt_status, properties(name), tax_categories(label), documents(file_name, file_path)')
     .eq('workspace_id', input.workspaceId)
     .gte('expense_date', range.start)
-    .lt('expense_date', range.end)
-    .order('expense_date', {ascending: true})
-    .returns<ExpenseExportRow[]>();
+    .lt('expense_date', range.end);
+
+  if (input.propertyId) {
+    expenseQuery = expenseQuery.eq('property_id', input.propertyId);
+  }
+
+  const {data: expenses, error: expenseError} = await expenseQuery.order('expense_date', {ascending: true}).returns<ExpenseExportRow[]>();
 
   if (expenseError) {
     return {error: expenseError.message};
@@ -259,4 +269,3 @@ export async function buildTaxPdf(data: TaxExportData) {
 
   return Buffer.concat(chunks);
 }
-

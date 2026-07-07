@@ -58,6 +58,8 @@ export async function uploadDocumentAction(formData: FormData) {
     mime_type: file.type || null,
     period_month: value(formData, 'period_month') || null,
     property_id: value(formData, 'property_id') || null,
+    tenant_id: value(formData, 'tenant_id') || null,
+    unit_id: value(formData, 'unit_id') || null,
     size_bytes: file.size,
     workspace_id: workspaceId
   });
@@ -89,6 +91,7 @@ export async function createExpenseAction(formData: FormData) {
     document_id: documentId || null,
     expense_date: expenseDate,
     property_id: value(formData, 'property_id') || null,
+    unit_id: value(formData, 'unit_id') || null,
     receipt_status: documentId ? 'attached' : 'missing',
     tax_category_id: value(formData, 'tax_category_id') || null,
     vendor: value(formData, 'vendor') || null,

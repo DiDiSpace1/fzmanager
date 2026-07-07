@@ -11,6 +11,17 @@ type PropertyOption = {
   name: string;
 };
 
+type UnitOption = {
+  id: string;
+  name: string;
+  property_id: string;
+};
+
+type TenantOption = {
+  id: string;
+  full_name: string;
+};
+
 type DocumentRow = {
   id: string;
   document_type: string;
@@ -20,6 +31,12 @@ type DocumentRow = {
   size_bytes: number | null;
   created_at: string;
   properties: {
+    name: string;
+  } | null;
+  tenants: {
+    full_name: string;
+  } | null;
+  units: {
     name: string;
   } | null;
 };
@@ -51,6 +68,10 @@ type TaxCategory = {
 type DocumentsPageProps = {
   searchParams: Promise<{
     error?: string;
+    property_id?: string;
+    q?: string;
+    type?: string;
+    year?: string;
   }>;
 };
 
@@ -62,10 +83,28 @@ function formatBytes(bytes: number | null) {
   return `${Math.max(1, Math.round(bytes / 1024))} KB`;
 }
 
+function yearRange(value: string | undefined) {
+  const year = value ? Number.parseInt(value, 10) : null;
+
+  if (!year || !Number.isInteger(year) || year < 2000 || year > 2100) {
+    return null;
+  }
+
+  return {
+    end: `${year + 1}-01-01`,
+    start: `${year}-01-01`,
+    year
+  };
+}
+
 export default async function DocumentsPage({searchParams}: DocumentsPageProps) {
   const t = await getTranslations('documents');
   const locale = await getLocale();
   const params = await searchParams;
+  const query = params.q?.trim() ?? '';
+  const selectedPropertyId = params.property_id ?? '';
+  const selectedType = params.type ?? '';
+  const selectedYear = yearRange(params.year);
   const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
   const {data: properties} = await supabase
     .from('properties')
@@ -73,20 +112,60 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
     .eq('workspace_id', workspaceId)
     .order('name', {ascending: true})
     .returns<PropertyOption[]>();
-  const {data: documents, error: documentsError} = await supabase
-    .from('documents')
-    .select('id, document_type, file_name, file_path, mime_type, size_bytes, created_at, properties(name)')
+  const {data: units} = await supabase
+    .from('units')
+    .select('id, name, property_id')
     .eq('workspace_id', workspaceId)
-    .order('created_at', {ascending: false})
-    .limit(20)
-    .returns<DocumentRow[]>();
-  const {data: expenses, error: expensesError} = await supabase
+    .order('name', {ascending: true})
+    .returns<UnitOption[]>();
+  const {data: tenants} = await supabase
+    .from('tenants')
+    .select('id, full_name')
+    .eq('workspace_id', workspaceId)
+    .order('full_name', {ascending: true})
+    .returns<TenantOption[]>();
+  let documentQuery = supabase
+    .from('documents')
+    .select('id, document_type, file_name, file_path, mime_type, size_bytes, created_at, properties(name), units(name), tenants(full_name)')
+    .eq('workspace_id', workspaceId)
+    .order('created_at', {ascending: false});
+
+  if (selectedPropertyId) {
+    documentQuery = documentQuery.eq('property_id', selectedPropertyId);
+  }
+
+  if (selectedType) {
+    documentQuery = documentQuery.eq('document_type', selectedType);
+  }
+
+  if (selectedYear) {
+    documentQuery = documentQuery.gte('created_at', selectedYear.start).lt('created_at', selectedYear.end);
+  }
+
+  if (query) {
+    documentQuery = documentQuery.ilike('file_name', `%${query}%`);
+  }
+
+  const {data: documents, error: documentsError} = await documentQuery.limit(50).returns<DocumentRow[]>();
+  let expenseQuery = supabase
     .from('expenses')
     .select('id, amount, currency, expense_date, receipt_status, vendor, tax_categories(label), properties(name)')
     .eq('workspace_id', workspaceId)
-    .order('expense_date', {ascending: false})
-    .limit(20)
-    .returns<ExpenseRow[]>();
+    .order('expense_date', {ascending: false});
+
+  if (selectedPropertyId) {
+    expenseQuery = expenseQuery.eq('property_id', selectedPropertyId);
+  }
+
+  if (selectedYear) {
+    expenseQuery = expenseQuery.gte('expense_date', selectedYear.start).lt('expense_date', selectedYear.end);
+  }
+
+  if (query) {
+    expenseQuery = expenseQuery.ilike('vendor', `%${query}%`);
+  }
+
+  const {data: expenses, error: expensesError} = await expenseQuery.limit(50).returns<ExpenseRow[]>();
   const {data: categories} = await supabase
     .from('tax_categories')
     .select('id, label')
@@ -124,6 +203,43 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
         </div>
       ) : null}
 
+      <form className="mb-6 grid gap-3 rounded-lg border border-[var(--line)] bg-white p-4 md:grid-cols-[1fr_150px_180px_1fr_auto]">
+        <label className="grid gap-2 text-sm font-medium">
+          Recherche
+          <input className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" defaultValue={query} name="q" placeholder="Nom de fichier, fournisseur" />
+        </label>
+        <label className="grid gap-2 text-sm font-medium">
+          Annee
+          <input className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" defaultValue={selectedYear?.year ?? ''} max="2100" min="2000" name="year" type="number" />
+        </label>
+        <label className="grid gap-2 text-sm font-medium">
+          Type
+          <select className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" defaultValue={selectedType} name="type">
+            <option value="">Tous</option>
+            <option value="invoice">Facture</option>
+            <option value="lease">Bail</option>
+            <option value="rent_receipt">Quittance</option>
+            <option value="insurance">Assurance</option>
+            <option value="tax">Fiscal</option>
+            <option value="other">Autre</option>
+          </select>
+        </label>
+        <label className="grid gap-2 text-sm font-medium">
+          Bien
+          <select className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" defaultValue={selectedPropertyId} name="property_id">
+            <option value="">Tous les biens</option>
+            {(properties ?? []).map((property) => (
+              <option key={property.id} value={property.id}>
+                {property.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button className="focus-ring min-h-11 self-end rounded-md border border-[var(--line)] px-5 text-sm font-semibold hover:bg-[#f2f0ea]" type="submit">
+          Filtrer
+        </button>
+      </form>
+
       <section className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <div className="grid gap-6">
           <section className="rounded-lg border border-[var(--line)] bg-white">
@@ -137,7 +253,7 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
                     <div>
                       <p className="font-medium">{document.file_name}</p>
                       <p className="mt-1 text-sm text-[var(--muted)]">
-                        {[document.document_type, document.properties?.name, formatBytes(document.size_bytes)].filter(Boolean).join(' · ')}
+                        {[document.document_type, document.properties?.name, document.units?.name, document.tenants?.full_name, formatBytes(document.size_bytes)].filter(Boolean).join(' · ')}
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
@@ -218,6 +334,28 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
                 </select>
               </label>
               <label className="grid gap-2 text-sm font-medium">
+                Unite
+                <select className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" name="unit_id">
+                  <option value="">Non precise</option>
+                  {(units ?? []).map((unit) => (
+                    <option key={unit.id} value={unit.id}>
+                      {unit.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="grid gap-2 text-sm font-medium">
+                Locataire
+                <select className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" name="tenant_id">
+                  <option value="">Non precise</option>
+                  {(tenants ?? []).map((tenant) => (
+                    <option key={tenant.id} value={tenant.id}>
+                      {tenant.full_name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="grid gap-2 text-sm font-medium">
                 Mois
                 <input className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" name="period_month" type="date" />
               </label>
@@ -261,6 +399,17 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
                   {(properties ?? []).map((property) => (
                     <option key={property.id} value={property.id}>
                       {property.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="grid gap-2 text-sm font-medium">
+                Unite
+                <select className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" name="unit_id">
+                  <option value="">Non precise</option>
+                  {(units ?? []).map((unit) => (
+                    <option key={unit.id} value={unit.id}>
+                      {unit.name}
                     </option>
                   ))}
                 </select>
