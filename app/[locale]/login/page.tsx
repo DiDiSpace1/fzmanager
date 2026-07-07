@@ -1,10 +1,15 @@
 import Link from 'next/link';
 import {getTranslations} from 'next-intl/server';
 
-import {signInAction, signUpAction} from './actions';
+import {requestPasswordResetAction, signInAction, signUpAction} from './actions';
 
 const authErrorKeys = ['invalid_credentials', 'signup_failed'] as const;
-const registeredKeys = ['check_email'] as const;
+const registeredKeys = ['check_email', 'password_updated', 'reset_sent'] as const;
+const registeredMessages: Record<(typeof registeredKeys)[number], string> = {
+  check_email: '',
+  password_updated: 'Mot de passe mis a jour. Vous pouvez vous connecter.',
+  reset_sent: 'Si ce compte existe, un email de reinitialisation vient d etre envoye.'
+};
 
 type LoginPageProps = {
   params: Promise<{
@@ -41,7 +46,7 @@ export default async function LoginPage({params, searchParams}: LoginPageProps) 
 
         {registeredStatus ? (
           <p className="mt-4 rounded-md border border-[#b8ded5] bg-[#edf8f4] p-3 text-sm text-[var(--accent-strong)]">
-            {t(`registered.${registeredStatus}`)}
+            {registeredStatus === 'check_email' ? t(`registered.${registeredStatus}`) : registeredMessages[registeredStatus]}
           </p>
         ) : null}
 
@@ -57,6 +62,18 @@ export default async function LoginPage({params, searchParams}: LoginPageProps) 
           </label>
           <button className="focus-ring mt-2 min-h-12 rounded-md bg-[var(--accent)] px-5 text-sm font-semibold text-white" type="submit">
             {t('signIn')}
+          </button>
+        </form>
+
+        <form action={requestPasswordResetAction} className="mt-4 grid gap-3 rounded-md border border-[var(--line)] bg-[#fbfaf7] p-4">
+          <input name="locale" type="hidden" value={locale} />
+          <p className="text-sm font-semibold">Mot de passe oublie</p>
+          <label className="grid gap-2 text-sm font-medium">
+            {t('email')}
+            <input className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" name="email" required type="email" placeholder="vous@example.com" />
+          </label>
+          <button className="focus-ring min-h-11 rounded-md border border-[var(--line)] bg-white px-4 text-sm font-semibold" type="submit">
+            Envoyer le lien
           </button>
         </form>
 

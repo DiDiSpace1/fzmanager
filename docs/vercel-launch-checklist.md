@@ -23,8 +23,11 @@ Use the deployed URL for previews if you test Stripe Checkout on a preview deplo
 - Confirm the `documents` storage bucket exists.
 - Add production auth redirect URLs:
   - `https://your-domain.example/auth/callback`
+  - `https://your-domain.example/reset-password`
   - `https://your-domain.example/en/auth/callback`
+  - `https://your-domain.example/en/reset-password`
   - `https://your-domain.example/zh/auth/callback`
+  - `https://your-domain.example/zh/reset-password`
 - Keep `SUPABASE_SERVICE_ROLE_KEY` server-only.
 
 ## Stripe
@@ -48,6 +51,8 @@ Use the deployed URL for previews if you test Stripe Checkout on a preview deplo
 - Visit `/privacy` and `/terms` while logged out.
 - Confirm a free user sees the Pro prompt on `/tax` and cannot download `/api/tax/export.zip` directly.
 - Confirm a paid user can download the CSV and ZIP tax preparation package.
+- Confirm password reset email opens `/reset-password` and updates the password.
+- Confirm account deletion cancels an active Stripe subscription before deleting the user.
 
 ## Build
 

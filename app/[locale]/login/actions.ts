@@ -15,6 +15,11 @@ function getRequiredValue(formData: FormData, key: string) {
   return value.trim();
 }
 
+function getOptionalValue(formData: FormData, key: string) {
+  const value = formData.get(key);
+  return typeof value === 'string' ? value.trim() : '';
+}
+
 export async function signInAction(formData: FormData) {
   const email = getRequiredValue(formData, 'email');
   const password = getRequiredValue(formData, 'password');
@@ -62,4 +67,18 @@ export async function signUpAction(formData: FormData) {
   }
 
   redirect(localizedPath(locale, '/dashboard'));
+}
+
+export async function requestPasswordResetAction(formData: FormData) {
+  const email = getRequiredValue(formData, 'email');
+  const locale = getOptionalValue(formData, 'locale') || 'fr';
+  const supabase = await createSupabaseServerClient();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+  const redirectTo = `${appUrl}${localizedPath(locale, '/auth/callback')}?next=${encodeURIComponent(localizedPath(locale, '/reset-password'))}`;
+
+  await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo
+  });
+
+  redirect(`${localizedPath(locale, '/login')}?registered=reset_sent`);
 }

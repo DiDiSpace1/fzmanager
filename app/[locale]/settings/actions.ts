@@ -125,6 +125,13 @@ export async function deleteAccountAction(formData: FormData) {
   }
 
   const {supabase, user, workspaceId} = await getCurrentUserWorkspace(locale);
+  const billing = await getWorkspaceBilling(supabase, workspaceId);
+
+  if (billing?.stripe_subscription_id && ['active', 'trialing', 'past_due'].includes(billing.status)) {
+    const stripe = getStripe();
+    await stripe.subscriptions.cancel(billing.stripe_subscription_id);
+  }
+
   const {data: documents} = await supabase.from('documents').select('file_path').eq('workspace_id', workspaceId);
   const filePaths = (documents ?? [])
     .map((document) => document.file_path)
@@ -135,6 +142,16 @@ export async function deleteAccountAction(formData: FormData) {
   }
 
   const admin = createSupabaseAdminClient();
+  await admin
+    .from('workspace_billing')
+    .update({
+      current_period_end: null,
+      plan: 'free',
+      status: 'canceled',
+      stripe_subscription_id: null
+    })
+    .eq('workspace_id', workspaceId);
+
   const {error} = await admin.auth.admin.deleteUser(user.id);
 
   if (error) {

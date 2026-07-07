@@ -43,6 +43,7 @@ For local development:
 Site URL: http://localhost:3000
 Redirect URLs:
 http://localhost:3000/auth/callback
+http://localhost:3000/reset-password
 http://localhost:3000/zh/auth/callback
 http://localhost:3000/en/auth/callback
 ```
@@ -60,6 +61,7 @@ supabase/migrations/20260707130000_rent_charges_payments.sql
 supabase/migrations/20260707140000_documents_expenses.sql
 supabase/migrations/20260707150000_tax_exports.sql
 supabase/migrations/20260707160000_workspace_billing.sql
+supabase/migrations/20260707170000_document_storage_delete_policy.sql
 ```
 
 The first migration creates:
@@ -108,6 +110,10 @@ The sixth migration creates:
 - `workspace_billing`
 - free billing rows for existing workspaces
 - read-only RLS access for workspace members
+
+The seventh migration creates:
+
+- Storage delete policy for workspace document files
 
 ## 5. Local Test
 
