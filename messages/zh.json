@@ -30,17 +30,17 @@
   },
   "auth": {
     "title": "登录",
-    "subtitle": "Supabase 登录将在下一阶段接入。",
+    "subtitle": "使用邮箱和密码进入你的出租资料工作台。",
     "email": "邮箱",
     "password": "密码",
     "country": "国家",
     "countryFrance": "法国",
     "submit": "继续",
     "signIn": "登录",
-    "signUp": "注册新账户",
+    "signUp": "创建账号",
     "errors": {
       "invalid_credentials": "邮箱或密码不正确。",
-      "signup_failed": "注册失败，请检查邮箱和密码后重试。"
+      "signup_failed": "无法创建账号，请检查邮箱和密码后重试。"
     },
     "registered": {
       "check_email": "注册已提交，请检查邮箱并完成确认。"
@@ -48,7 +48,7 @@
   },
   "dashboard": {
     "title": "仪表盘",
-    "subtitle": "清楚查看你的租金、文件和税务准备事项。",
+    "subtitle": "清晰查看你的租金、文件和税务准备事项。",
     "monthlyRent": "本月租金",
     "missingReceipts": "缺失票据",
     "yearlyIncome": "年度收入",
@@ -79,7 +79,7 @@
   "settings": {
     "title": "设置",
     "subtitle": "管理国家、语言、账单和数据导出。",
-    "country": "账户国家",
+    "country": "账号国家",
     "locale": "语言",
     "billing": "账单"
   }
