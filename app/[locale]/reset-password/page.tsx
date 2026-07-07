@@ -7,18 +7,20 @@ type ResetPasswordPageProps = {
     locale: string;
   }>;
   searchParams: Promise<{
+    code?: string;
     error?: string;
   }>;
 };
 
 const errorMessages: Record<string, string> = {
   password_short: 'Le mot de passe doit contenir au moins 6 caracteres.',
+  session_failed: 'Le lien de reinitialisation a expire ou a deja ete utilise.',
   update_failed: 'Impossible de mettre a jour le mot de passe. Relancez le lien de reinitialisation.'
 };
 
 export default async function ResetPasswordPage({params, searchParams}: ResetPasswordPageProps) {
   const {locale} = await params;
-  const {error} = await searchParams;
+  const {code, error} = await searchParams;
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#f7f6f2] px-5 py-10">
@@ -37,6 +39,7 @@ export default async function ResetPasswordPage({params, searchParams}: ResetPas
 
         <form action={updatePasswordAction} className="mt-6 grid gap-4">
           <input name="locale" type="hidden" value={locale} />
+          <input name="code" type="hidden" value={code ?? ''} />
           <label className="grid gap-2 text-sm font-medium">
             Mot de passe
             <input className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" minLength={6} name="password" required type="password" placeholder="********" />

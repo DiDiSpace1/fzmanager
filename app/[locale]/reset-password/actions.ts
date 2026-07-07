@@ -13,12 +13,22 @@ function value(formData: FormData, key: string) {
 export async function updatePasswordAction(formData: FormData) {
   const locale = value(formData, 'locale') || 'fr';
   const password = value(formData, 'password');
+  const code = value(formData, 'code');
 
   if (password.length < 6) {
     redirect(`${localizedPath(locale, '/reset-password')}?error=password_short`);
   }
 
   const supabase = await createSupabaseServerClient();
+
+  if (code) {
+    const {error: codeError} = await supabase.auth.exchangeCodeForSession(code);
+
+    if (codeError) {
+      redirect(`${localizedPath(locale, '/reset-password')}?error=session_failed`);
+    }
+  }
+
   const {error} = await supabase.auth.updateUser({
     password
   });
