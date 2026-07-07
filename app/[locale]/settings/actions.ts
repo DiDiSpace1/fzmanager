@@ -14,6 +14,36 @@ function value(formData: FormData, key: string) {
   return typeof raw === 'string' ? raw.trim() : '';
 }
 
+export async function updateAccountSettingsAction(formData: FormData) {
+  const currentLocale = value(formData, 'current_locale') || 'fr';
+  const nextLocale = ['fr', 'en', 'zh'].includes(value(formData, 'locale')) ? value(formData, 'locale') : currentLocale;
+  const countryCode = value(formData, 'country_code') === 'FR' ? 'FR' : 'FR';
+  const taxRegime = value(formData, 'tax_regime') === 'LMNP' ? 'LMNP' : 'LMNP';
+  const {supabase, user, workspaceId} = await getCurrentUserWorkspace(currentLocale);
+
+  const {error: profileError} = await supabase
+    .from('profiles')
+    .update({
+      country_code: countryCode,
+      locale: nextLocale
+    })
+    .eq('id', user.id);
+
+  const {error: workspaceError} = await supabase
+    .from('workspaces')
+    .update({
+      country_code: countryCode,
+      tax_regime: taxRegime
+    })
+    .eq('id', workspaceId);
+
+  if (profileError || workspaceError) {
+    redirect(`${localizedPath(currentLocale, '/settings')}?error=settings_failed`);
+  }
+
+  redirect(`${localizedPath(nextLocale, '/settings')}?saved=settings`);
+}
+
 async function ensureStripeCustomer(locale: string) {
   const {profile, supabase, user, workspaceId} = await getCurrentUserWorkspace(locale);
   const billing = await getWorkspaceBilling(supabase, workspaceId);

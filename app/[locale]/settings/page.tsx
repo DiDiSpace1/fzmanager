@@ -7,12 +7,13 @@ import {FREE_PLAN_LIMITS, hasPaidAccess} from '@/lib/billing/config';
 import {getWorkspaceBilling} from '@/lib/billing/limits';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
 
-import {createBillingPortalSessionAction, createCheckoutSessionAction, deleteAccountAction} from './actions';
+import {createBillingPortalSessionAction, createCheckoutSessionAction, deleteAccountAction, updateAccountSettingsAction} from './actions';
 
 type SettingsPageProps = {
   searchParams: Promise<{
     checkout?: string;
     error?: string;
+    saved?: string;
   }>;
 };
 
@@ -21,6 +22,7 @@ const errorMessages: Record<string, string> = {
   checkout_failed: 'Impossible de creer la session Stripe. Reessayez dans un instant.',
   delete_confirmation: 'Saisissez SUPPRIMER pour confirmer la suppression du compte.',
   delete_failed: 'Impossible de supprimer le compte. Reessayez dans un instant.',
+  settings_failed: 'Impossible d enregistrer les parametres du compte.',
   stripe_price_missing: 'Les Price IDs Stripe ne sont pas configures.'
 };
 
@@ -28,8 +30,9 @@ export default async function SettingsPage({searchParams}: SettingsPageProps) {
   const t = await getTranslations('settings');
   const locale = await getLocale();
   const params = await searchParams;
-  const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
+  const {profile, supabase, workspaceId} = await getCurrentUserWorkspace(locale);
   const billing = await getWorkspaceBilling(supabase, workspaceId);
+  const {data: workspace} = await supabase.from('workspaces').select('country_code, tax_regime').eq('id', workspaceId).single();
   const paid = hasPaidAccess(billing);
   const statusLabel = paid ? (billing?.plan === 'lifetime' ? 'Lifetime' : 'Pro actif') : 'Gratuit';
 
@@ -55,27 +58,43 @@ export default async function SettingsPage({searchParams}: SettingsPageProps) {
         </div>
       ) : null}
 
+      {params.saved === 'settings' ? (
+        <div className="mb-6 rounded-md border border-[#b8d8c5] bg-[#f0fbf3] p-4 text-sm leading-6 text-[#215d35]">
+          Parametres enregistres.
+        </div>
+      ) : null}
+
       <section className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="grid gap-6">
-          <section className="rounded-lg border border-[var(--line)] bg-white p-5">
+          <form action={updateAccountSettingsAction} className="rounded-lg border border-[var(--line)] bg-white p-5">
+            <input name="current_locale" type="hidden" value={locale} />
             <h2 className="text-lg font-semibold">Compte</h2>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <div className="mt-5 grid gap-4 sm:grid-cols-3">
               <label className="grid gap-2 text-sm font-medium">
                 {t('country')}
-                <select className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" defaultValue="FR">
+                <select className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" defaultValue={workspace?.country_code ?? profile.country_code ?? 'FR'} name="country_code">
                   <option value="FR">France</option>
                 </select>
               </label>
               <label className="grid gap-2 text-sm font-medium">
                 {t('locale')}
-                <select className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" defaultValue={locale}>
+                <select className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" defaultValue={profile.locale ?? locale} name="locale">
                   <option value="fr">Francais</option>
                   <option value="en">English</option>
                   <option value="zh">Chinese</option>
                 </select>
               </label>
+              <label className="grid gap-2 text-sm font-medium">
+                Regime fiscal
+                <select className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" defaultValue={workspace?.tax_regime ?? 'LMNP'} name="tax_regime">
+                  <option value="LMNP">LMNP</option>
+                </select>
+              </label>
             </div>
-          </section>
+            <button className="focus-ring mt-5 min-h-11 rounded-md bg-[var(--accent)] px-5 text-sm font-semibold text-white" type="submit">
+              Enregistrer
+            </button>
+          </form>
 
           <section className="rounded-lg border border-[var(--line)] bg-white p-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">

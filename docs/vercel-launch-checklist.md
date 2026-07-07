@@ -13,6 +13,7 @@ STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY=
 NEXT_PUBLIC_STRIPE_PRICE_ID_LIFETIME=
+NEXT_PUBLIC_SUPPORT_EMAIL=support@your-domain.example
 ```
 
 Use the deployed URL for previews if you test Stripe Checkout on a preview deployment.
@@ -53,6 +54,9 @@ Use the deployed URL for previews if you test Stripe Checkout on a preview deplo
 - Confirm a paid user can download the CSV and ZIP tax preparation package.
 - Confirm password reset email opens `/reset-password` and updates the password.
 - Confirm account deletion cancels an active Stripe subscription before deleting the user.
+- Confirm the cookie notice appears for a fresh browser profile and links to `/privacy`.
+- Replace `NEXT_PUBLIC_SUPPORT_EMAIL` with the real support address before inviting users.
+- Localize Supabase Auth email templates for signup confirmation and password reset.
 
 ## Build
 

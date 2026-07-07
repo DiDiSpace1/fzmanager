@@ -1,6 +1,8 @@
 import Link from 'next/link';
 
 export default function PrivacyPage() {
+  const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'support@fzmanager.app';
+
   return (
     <main className="min-h-screen bg-[#f7f6f2] px-5 py-8">
       <article className="mx-auto max-w-3xl rounded-lg border border-[var(--line)] bg-white p-6">
@@ -25,7 +27,9 @@ export default function PrivacyPage() {
           </section>
           <section>
             <h2 className="text-lg font-semibold text-[var(--foreground)]">Contact</h2>
-            <p className="mt-2">Remplacez cette adresse avant lancement: privacy@example.com.</p>
+            <p className="mt-2">
+              Pour toute demande liee aux donnees personnelles, contactez <a className="font-semibold text-[var(--accent)]" href={`mailto:${supportEmail}`}>{supportEmail}</a>.
+            </p>
           </section>
         </div>
         <Link className="focus-ring mt-8 inline-flex min-h-11 items-center rounded-md border border-[var(--line)] px-4 text-sm font-semibold hover:bg-[#f2f0ea]" href="/">
