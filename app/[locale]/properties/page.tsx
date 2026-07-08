@@ -138,7 +138,7 @@ export default async function PropertiesPage({searchParams}: PropertiesPageProps
             Retour
           </Link>
         ) : (
-          <Link className="focus-ring inline-flex min-h-11 items-center justify-center rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white" href="/properties?new=1">
+          <Link className="focus-ring inline-flex min-h-11 items-center justify-center rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white" href="/properties?new=1" style={{color: '#ffffff'}}>
             + {t('newProperty')}
           </Link>
         )}
