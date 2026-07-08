@@ -15,6 +15,10 @@ function value(formData: FormData, key: string) {
   return typeof raw === 'string' ? raw.trim() : '';
 }
 
+function values(formData: FormData, key: string) {
+  return formData.getAll(key).map((entry) => (typeof entry === 'string' ? entry.trim() : ''));
+}
+
 function moneyValue(formData: FormData, key: string) {
   const raw = value(formData, key).replace(',', '.');
   const parsed = Number.parseFloat(raw);
@@ -154,16 +158,20 @@ export async function updatePropertyAction(formData: FormData) {
   }
 
   const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
+  const occupancyStatus = value(formData, 'occupancy_status') || 'vacant';
+  const chargesAmount = moneyValue(formData, 'charges_estimate');
+  const monthlyRent = moneyValue(formData, 'monthly_rent_estimate');
+  const depositAmount = moneyValue(formData, 'deposit_estimate');
   const {error} = await supabase
     .from('properties')
     .update({
       address_line1: value(formData, 'address_line1') || null,
-      charges_estimate: moneyValue(formData, 'charges_estimate') || null,
+      charges_estimate: chargesAmount || null,
       city: value(formData, 'city') || null,
-      deposit_estimate: moneyValue(formData, 'deposit_estimate') || null,
-      monthly_rent_estimate: moneyValue(formData, 'monthly_rent_estimate') || null,
+      deposit_estimate: depositAmount || null,
+      monthly_rent_estimate: monthlyRent || null,
       name,
-      occupancy_status: value(formData, 'occupancy_status') || 'vacant',
+      occupancy_status: occupancyStatus,
       postal_code: value(formData, 'postal_code') || null,
       property_type: value(formData, 'property_type') || 'apartment',
       rental_mode: rentalMode,
@@ -176,9 +184,114 @@ export async function updatePropertyAction(formData: FormData) {
     redirect(`${localizedPath(locale, `/properties/${propertyId}`)}?error=update_failed`);
   }
 
+  if (occupancyStatus === 'rented') {
+    const tenantIds = values(formData, 'assignment_tenant_id');
+    const startDates = values(formData, 'assignment_start_date');
+    const endDates = values(formData, 'assignment_end_date');
+    const {data: existingLeases} = await supabase
+      .from('leases')
+      .select('tenant_id')
+      .eq('property_id', propertyId)
+      .eq('workspace_id', workspaceId)
+      .eq('status', 'active');
+    const existingTenantIds = new Set((existingLeases ?? []).map((lease: {tenant_id: string}) => lease.tenant_id));
+
+    for (let index = 0; index < tenantIds.length; index += 1) {
+      const tenantId = tenantIds[index];
+      const startDate = startDates[index];
+
+      if (!tenantId || !startDate || existingTenantIds.has(tenantId)) {
+        continue;
+      }
+
+      const {data: lease, error: leaseError} = await supabase
+        .from('leases')
+        .insert({
+          charges_amount: chargesAmount,
+          deposit_amount: depositAmount,
+          end_date: endDates[index] || null,
+          monthly_rent: monthlyRent,
+          property_id: propertyId,
+          start_date: startDate,
+          status: 'active',
+          tenant_id: tenantId,
+          unit_id: null,
+          workspace_id: workspaceId
+        })
+        .select('id')
+        .single();
+
+      if (leaseError || !lease) {
+        redirect(`${localizedPath(locale, `/properties/${propertyId}/edit`)}?error=lease_failed`);
+      }
+
+      const rentCharges = buildRentChargesForLease({
+        chargesAmount,
+        endDate: endDates[index] || null,
+        leaseId: lease.id,
+        monthlyRent,
+        startDate,
+        workspaceId
+      });
+
+      if (rentCharges.length) {
+        const {error: chargeError} = await supabase.from('rent_charges').insert(rentCharges);
+
+        if (chargeError) {
+          redirect(`${localizedPath(locale, `/properties/${propertyId}/edit`)}?error=charges_failed`);
+        }
+      }
+    }
+  }
+
   revalidatePath(localizedPath(locale, '/properties'));
   revalidatePath(localizedPath(locale, `/properties/${propertyId}`));
+  revalidatePath(localizedPath(locale, `/properties/${propertyId}/edit`));
+  revalidatePath(localizedPath(locale, '/tenants'));
   redirect(localizedPath(locale, `/properties/${propertyId}`));
+}
+
+export async function terminateLeaseAction(formData: FormData) {
+  const locale = value(formData, 'locale') || 'fr';
+  const propertyId = value(formData, 'property_id');
+  const leaseId = value(formData, 'lease_id');
+  const endDate = value(formData, 'end_date');
+
+  if (!propertyId || !leaseId || !endDate) {
+    redirect(`${localizedPath(locale, `/properties/${propertyId}/edit`)}?error=missing_termination`);
+  }
+
+  const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
+  const {error} = await supabase
+    .from('leases')
+    .update({
+      end_date: endDate,
+      status: 'ended'
+    })
+    .eq('id', leaseId)
+    .eq('property_id', propertyId)
+    .eq('workspace_id', workspaceId);
+
+  if (error) {
+    redirect(`${localizedPath(locale, `/properties/${propertyId}/edit`)}?error=termination_failed`);
+  }
+
+  const {count} = await supabase
+    .from('leases')
+    .select('*', {count: 'exact', head: true})
+    .eq('property_id', propertyId)
+    .eq('workspace_id', workspaceId)
+    .eq('status', 'active');
+
+  if ((count ?? 0) === 0) {
+    await supabase.from('properties').update({occupancy_status: 'vacant'}).eq('id', propertyId).eq('workspace_id', workspaceId);
+  }
+
+  revalidatePath(localizedPath(locale, '/properties'));
+  revalidatePath(localizedPath(locale, `/properties/${propertyId}`));
+  revalidatePath(localizedPath(locale, `/properties/${propertyId}/edit`));
+  revalidatePath(localizedPath(locale, '/tenants'));
+  redirect(localizedPath(locale, `/properties/${propertyId}/edit`));
 }
 
 export async function deletePropertyAction(formData: FormData) {
