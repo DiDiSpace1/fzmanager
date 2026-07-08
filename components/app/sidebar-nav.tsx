@@ -35,7 +35,7 @@ export function SidebarNav({
     <>
       <nav className="mt-8 grid gap-1">
         {items.map((item) => {
-          const active = pathname === item.href || pathname.endsWith(item.href);
+          const active = pathname === item.href || pathname.endsWith(item.href) || pathname.includes(`${item.href}/`);
 
           return (
             <Link
