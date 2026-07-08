@@ -1,24 +1,19 @@
 import Link from 'next/link';
 import {getTranslations} from 'next-intl/server';
 
-import {requestPasswordResetAction, signInAction, signUpAction} from './actions';
+import {AuthFrame, AuthSubmitButton, AuthTextInput} from '@/components/auth/auth-frame';
+import {localizedPath} from '@/lib/navigation';
 
-const authErrorKeys = ['invalid_credentials', 'signup_failed'] as const;
-const registeredKeys = ['check_email', 'password_updated', 'reset_sent'] as const;
-const registeredMessages: Record<(typeof registeredKeys)[number], string> = {
-  check_email: '',
-  password_updated: 'Mot de passe mis a jour. Vous pouvez vous connecter.',
-  reset_sent: 'Si ce compte existe, un email de reinitialisation vient d etre envoye.'
-};
-const signupReasonMessages: Record<string, string> = {
-  database_error: 'La creation du compte a echoue pendant la preparation de votre espace. Contactez le support si cela se reproduit.',
-  email_address_invalid: 'Cette adresse email n est pas acceptee.',
-  email_exists: 'Un compte existe deja pour cet email. Essayez de vous connecter ou de reinitialiser le mot de passe.',
-  over_email_send_rate_limit: 'Trop d emails ont ete envoyes recemment. Attendez quelques minutes puis reessayez.',
-  signup_disabled: 'Les nouvelles inscriptions sont desactivees dans Supabase.',
-  user_already_exists: 'Un compte existe deja pour cet email. Essayez de vous connecter ou de reinitialiser le mot de passe.',
-  weak_password: 'Le mot de passe ne respecte pas la politique de securite.'
-};
+import {signInAction} from './actions';
+
+const errorMessages = {
+  invalid_credentials: 'invalid_credentials'
+} as const;
+
+const registeredMessages = {
+  check_email: 'check_email',
+  password_updated: 'password_updated'
+} as const;
 
 type LoginPageProps = {
   params: Promise<{
@@ -26,93 +21,88 @@ type LoginPageProps = {
   }>;
   searchParams: Promise<{
     error?: string;
-    reason?: string;
     registered?: string;
   }>;
 };
 
 export default async function LoginPage({params, searchParams}: LoginPageProps) {
   const {locale} = await params;
-  const {error, reason, registered} = await searchParams;
+  const {error, registered} = await searchParams;
   const t = await getTranslations('auth');
-  const common = await getTranslations('common');
-  const authError = authErrorKeys.find((key) => key === error);
-  const registeredStatus = registeredKeys.find((key) => key === registered);
+  const authError = error && error in errorMessages ? errorMessages[error as keyof typeof errorMessages] : null;
+  const registeredStatus =
+    registered && registered in registeredMessages ? registeredMessages[registered as keyof typeof registeredMessages] : null;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f7f6f2] px-5 py-10">
-      <section className="w-full max-w-md rounded-lg border border-[var(--line)] bg-white p-6 shadow-sm">
-        <Link href="/" className="text-sm font-semibold text-[var(--accent)]">
-          {common('appName')}
+    <AuthFrame
+      footerText={t('footerText')}
+      legal={t('legal')}
+      locale={locale}
+      privacy={t('privacy')}
+      tagline={t('brandTagline')}
+      terms={t('terms')}
+    >
+      <form action={signInAction} className="grid gap-4">
+        <input name="locale" type="hidden" value={locale} />
+        <div>
+          <h1 className="text-2xl font-semibold leading-8 tracking-[-0.01em]">{t('loginTitle')}</h1>
+          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{t('loginSubtitle')}</p>
+        </div>
+
+        {authError ? <Notice tone="error">{t(`errors.${authError}`)}</Notice> : null}
+        {registeredStatus ? <Notice>{t(`registered.${registeredStatus}`)}</Notice> : null}
+
+        <AuthTextInput autoComplete="email" label={t('email')} name="email" placeholder={t('emailPlaceholder')} type="email" />
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-sm font-medium">{t('password')}</span>
+            <Link className="text-sm font-semibold text-[var(--accent)] hover:underline" href={localizedPath(locale, '/forgot-password')}>
+              {t('forgotPassword')}
+            </Link>
+          </div>
+          <input
+            autoComplete="current-password"
+            className="focus-ring w-full rounded-md border border-[var(--line)] bg-white px-3 py-3 text-sm placeholder:text-[var(--outline)]"
+            minLength={6}
+            name="password"
+            placeholder="********"
+            required
+            type="password"
+          />
+        </div>
+
+        <AuthSubmitButton>{t('signIn')}</AuthSubmitButton>
+      </form>
+
+      <div className="relative py-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-[var(--line-soft)]" />
+        </div>
+        <div className="relative flex justify-center">
+          <span className="bg-white px-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--muted)]">{t('or')}</span>
+        </div>
+      </div>
+
+      <p className="text-center text-sm text-[var(--muted)]">
+        {t('newHere')}{' '}
+        <Link className="font-bold text-[var(--accent)] hover:underline" href={localizedPath(locale, '/signup')}>
+          {t('signUp')}
         </Link>
-        <h1 className="mt-6 text-3xl font-semibold">{t('title')}</h1>
-        <p className="mt-2 leading-7 text-[var(--muted)]">{t('subtitle')}</p>
+      </p>
+    </AuthFrame>
+  );
+}
 
-        {authError ? (
-          <p className="mt-4 rounded-md border border-[#f0d6b6] bg-[#fff8ec] p-3 text-sm text-[#7a4a11]">
-            {t(`errors.${authError}`)}
-            {authError === 'signup_failed' && reason ? (
-              <span className="mt-2 block">{signupReasonMessages[reason] ?? `Detail technique: ${reason}`}</span>
-            ) : null}
-          </p>
-        ) : null}
-
-        {registeredStatus ? (
-          <p className="mt-4 rounded-md border border-[#b8ded5] bg-[#edf8f4] p-3 text-sm text-[var(--accent-strong)]">
-            {registeredStatus === 'check_email' ? t(`registered.${registeredStatus}`) : registeredMessages[registeredStatus]}
-          </p>
-        ) : null}
-
-        <form action={signInAction} className="mt-6 grid gap-4">
-          <input name="locale" type="hidden" value={locale} />
-          <label className="grid gap-2 text-sm font-medium">
-            {t('email')}
-            <input className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" name="email" required type="email" placeholder="vous@example.com" />
-          </label>
-          <label className="grid gap-2 text-sm font-medium">
-            {t('password')}
-            <input className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" minLength={6} name="password" required type="password" placeholder="********" />
-          </label>
-          <button className="focus-ring mt-2 min-h-12 rounded-md bg-[var(--accent)] px-5 text-sm font-semibold text-white" type="submit">
-            {t('signIn')}
-          </button>
-        </form>
-
-        <form action={requestPasswordResetAction} className="mt-4 grid gap-3 rounded-md border border-[var(--line)] bg-[#fbfaf7] p-4">
-          <input name="locale" type="hidden" value={locale} />
-          <p className="text-sm font-semibold">Mot de passe oublie</p>
-          <label className="grid gap-2 text-sm font-medium">
-            {t('email')}
-            <input className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" name="email" required type="email" placeholder="vous@example.com" />
-          </label>
-          <button className="focus-ring min-h-11 rounded-md border border-[var(--line)] bg-white px-4 text-sm font-semibold" type="submit">
-            Envoyer le lien
-          </button>
-        </form>
-
-        <div className="my-6 border-t border-[var(--line)]" />
-
-        <form action={signUpAction} className="grid gap-4">
-          <input name="locale" type="hidden" value={locale} />
-          <label className="grid gap-2 text-sm font-medium">
-            {t('email')}
-            <input className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" name="email" required type="email" placeholder="vous@example.com" />
-          </label>
-          <label className="grid gap-2 text-sm font-medium">
-            {t('password')}
-            <input className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" minLength={6} name="password" required type="password" placeholder="********" />
-          </label>
-          <label className="grid gap-2 text-sm font-medium">
-            {t('country')}
-            <select className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" defaultValue="FR" name="country">
-              <option value="FR">{t('countryFrance')}</option>
-            </select>
-          </label>
-          <button className="focus-ring mt-2 min-h-12 rounded-md border border-[var(--line)] bg-white px-5 text-sm font-semibold" type="submit">
-            {t('signUp')}
-          </button>
-        </form>
-      </section>
-    </main>
+function Notice({children, tone = 'success'}: {children: React.ReactNode; tone?: 'error' | 'success'}) {
+  return (
+    <p
+      className={
+        tone === 'error'
+          ? 'rounded-md border border-[#ffdad6] bg-[#fff7f6] p-3 text-sm text-[#93000a]'
+          : 'rounded-md border border-[#b8ded5] bg-[#edf8f4] p-3 text-sm text-[var(--accent-strong)]'
+      }
+    >
+      {children}
+    </p>
   );
 }

@@ -65,7 +65,7 @@ export async function signUpAction(formData: FormData) {
       status: error.status
     });
     const reason = encodeURIComponent(error.code ?? error.message);
-    redirect(`${localizedPath(locale, '/login')}?error=signup_failed&reason=${reason}`);
+    redirect(`${localizedPath(locale, '/signup')}?error=signup_failed&reason=${reason}`);
   }
 
   if (!data.session) {
@@ -86,5 +86,5 @@ export async function requestPasswordResetAction(formData: FormData) {
     redirectTo
   });
 
-  redirect(`${localizedPath(locale, '/login')}?registered=reset_sent`);
+  redirect(`${localizedPath(locale, '/forgot-password')}?registered=reset_sent`);
 }

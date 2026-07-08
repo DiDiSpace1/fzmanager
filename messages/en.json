@@ -98,19 +98,39 @@
   "auth": {
     "title": "Login",
     "subtitle": "Use your email and password to access your rental workspace.",
+    "brandTagline": "Simplify your rental management",
+    "loginTitle": "Login",
+    "loginSubtitle": "Use your email and password to access your rental workspace.",
+    "signupTitle": "Create your account",
+    "signupSubtitle": "Start organizing your rentals, documents and tax exports.",
+    "forgotTitle": "Forgot password",
+    "forgotSubtitle": "Enter your email and we will send you a reset link.",
     "email": "Email",
+    "emailPlaceholder": "name@example.com",
     "password": "Password",
+    "forgotPassword": "Forgot password?",
     "country": "Country",
     "countryFrance": "France",
     "submit": "Continue",
     "signIn": "Sign in",
     "signUp": "Create account",
+    "alreadyAccount": "Already have an account?",
+    "newHere": "New to HabitatLog?",
+    "or": "Or",
+    "sendResetLink": "Send reset link",
+    "backToLogin": "Back to login",
+    "footerText": "2026 HabitatLog - Simplified Rental Management",
+    "legal": "Legal notice",
+    "privacy": "Privacy",
+    "terms": "Terms",
     "errors": {
       "invalid_credentials": "Email or password is incorrect.",
       "signup_failed": "Could not create the account. Check the email and password."
     },
     "registered": {
-      "check_email": "Registration submitted. Check your email to confirm the account."
+      "check_email": "Registration submitted. Check your email to confirm the account.",
+      "password_updated": "Password updated. You can now sign in.",
+      "reset_sent": "If this account exists, a reset email has just been sent."
     }
   },
   "dashboard": {

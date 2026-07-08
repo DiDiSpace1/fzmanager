@@ -98,19 +98,39 @@
   "auth": {
     "title": "登录",
     "subtitle": "使用邮箱和密码进入你的出租资料工作台。",
+    "brandTagline": "简化你的出租管理",
+    "loginTitle": "登录",
+    "loginSubtitle": "使用邮箱和密码进入你的出租资料工作台。",
+    "signupTitle": "创建账户",
+    "signupSubtitle": "开始整理你的出租、文件和税务导出。",
+    "forgotTitle": "忘记密码",
+    "forgotSubtitle": "输入邮箱，我们会发送重置密码链接。",
     "email": "邮箱",
+    "emailPlaceholder": "name@example.com",
     "password": "密码",
+    "forgotPassword": "忘记密码？",
     "country": "国家",
     "countryFrance": "法国",
     "submit": "继续",
     "signIn": "登录",
     "signUp": "创建账户",
+    "alreadyAccount": "已经有账户？",
+    "newHere": "第一次使用 HabitatLog？",
+    "or": "或",
+    "sendResetLink": "发送重置链接",
+    "backToLogin": "返回登录",
+    "footerText": "2026 HabitatLog - 简化出租管理",
+    "legal": "法律声明",
+    "privacy": "隐私政策",
+    "terms": "服务条款",
     "errors": {
       "invalid_credentials": "邮箱或密码不正确。",
       "signup_failed": "无法创建账户，请检查邮箱和密码后重试。"
     },
     "registered": {
-      "check_email": "注册已提交，请检查邮箱并完成确认。"
+      "check_email": "注册已提交，请检查邮箱并完成确认。",
+      "password_updated": "密码已更新，现在可以登录。",
+      "reset_sent": "如果该账户存在，重置密码邮件已经发送。"
     }
   },
   "dashboard": {

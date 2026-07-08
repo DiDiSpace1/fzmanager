@@ -98,19 +98,39 @@
   "auth": {
     "title": "Connexion",
     "subtitle": "Utilisez votre email et votre mot de passe pour accéder à votre espace locatif.",
+    "brandTagline": "Simplifiez votre gestion locative",
+    "loginTitle": "Connexion",
+    "loginSubtitle": "Utilisez votre email et votre mot de passe pour accéder à votre espace locatif.",
+    "signupTitle": "Créer un compte",
+    "signupSubtitle": "Commencez à organiser vos locations, documents et exports fiscaux.",
+    "forgotTitle": "Mot de passe oublié",
+    "forgotSubtitle": "Saisissez votre email et nous vous enverrons un lien de réinitialisation.",
     "email": "Email",
+    "emailPlaceholder": "nom@exemple.fr",
     "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
     "country": "Pays",
     "countryFrance": "France",
     "submit": "Continuer",
     "signIn": "Se connecter",
     "signUp": "Créer un compte",
+    "alreadyAccount": "Vous avez déjà un compte ?",
+    "newHere": "Nouveau sur HabitatLog ?",
+    "or": "Ou",
+    "sendResetLink": "Envoyer le lien",
+    "backToLogin": "Retour à la connexion",
+    "footerText": "2026 HabitatLog - Gestion locative simplifiée",
+    "legal": "Mentions légales",
+    "privacy": "Confidentialité",
+    "terms": "CGU",
     "errors": {
       "invalid_credentials": "Email ou mot de passe incorrect.",
       "signup_failed": "Inscription impossible. Vérifiez l'email et le mot de passe."
     },
     "registered": {
-      "check_email": "Inscription envoyée. Vérifiez votre email pour confirmer le compte."
+      "check_email": "Inscription envoyée. Vérifiez votre email pour confirmer le compte.",
+      "password_updated": "Mot de passe mis à jour. Vous pouvez vous connecter.",
+      "reset_sent": "Si ce compte existe, un email de réinitialisation vient d'être envoyé."
     }
   },
   "dashboard": {
