@@ -50,17 +50,42 @@
     "annualRevenue": "年度收入",
     "charges": "费用",
     "taxes": "税费",
-    "trustedTitle": "已被法国数百位房东使用",
-    "pricingTitle": "简单价格，让管理更安心",
-    "pricingCopy": "没有复杂订阅，只保留必要功能。",
+    "pricingTitle": "适合不同规模房东的简单价格",
+    "pricingCopy": "先免费开始，再按你的房源规模选择方案。",
     "popular": "热门",
-    "singleOffer": "单一方案",
-    "priceFeatureUnits": "包含最多 5 套房源",
-    "priceFeatureReceipts": "不限量收据",
-    "priceFeatureTax": "完整税务模块",
-    "priceFeatureSupport": "优先支持",
-    "trialCta": "免费试用 30 天",
-    "pricingFootnote": "无承诺，无需银行卡。",
+    "startCta": "开始",
+    "pricing": {
+      "free": {
+        "name": "Free",
+        "price": "EUR 0",
+        "units": "1 个房源",
+        "description": "适合试用或只管理一个房间的用户。"
+      },
+      "solo": {
+        "name": "Solo",
+        "price": "EUR 49/年",
+        "units": "1-5 个房源",
+        "description": "适合小房东、LMNP 和合租房东。"
+      },
+      "plus": {
+        "name": "Plus",
+        "price": "EUR 89/年",
+        "units": "6-10 个房源",
+        "description": "适合多房间或多套房的小房东。"
+      },
+      "portfolio": {
+        "name": "Portfolio",
+        "price": "EUR 149/年",
+        "units": "11-20 个房源",
+        "description": "适合半职业房东和小型投资者。"
+      },
+      "custom": {
+        "name": "Custom",
+        "price": "联系我们",
+        "units": "20+ 个单元",
+        "description": "适合大户或有特殊需求的房东。"
+      }
+    },
     "finalTitle": "准备简化你的出租管理了吗？",
     "finalCopy": "和更多房东一样，用清晰流程替代复杂操作。",
     "createAccount": "创建账户",

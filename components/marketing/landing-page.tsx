@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import {useLocale, useTranslations} from 'next-intl';
 
+const PRICING_PLANS = ['free', 'solo', 'plus', 'portfolio', 'custom'] as const;
+
 export function LandingPage() {
   const locale = useLocale();
   const t = useTranslations('landing');
@@ -41,7 +43,7 @@ export function LandingPage() {
               </Link>
             </div>
             <Link
-              className="focus-ring rounded-md bg-[var(--accent)] px-6 py-2 text-base font-semibold text-white transition-opacity hover:opacity-90"
+              className="focus-ring rounded-md bg-[var(--accent)] px-6 py-2 text-base font-semibold !text-white transition-opacity hover:opacity-90"
               href={localized('/login')}
             >
               {t('navCta')}
@@ -71,11 +73,11 @@ export function LandingPage() {
             <p className="mb-8 max-w-md text-base leading-6 text-[var(--muted)]">{t('heroCopy')}</p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link
-                className="focus-ring flex items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-8 py-4 text-base font-semibold text-white transition-opacity hover:opacity-90"
+                className="focus-ring flex items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-8 py-4 text-base font-semibold !text-white transition-opacity hover:opacity-90"
                 href={localized('/login')}
               >
                 {t('primaryCta')}
-                <span aria-hidden="true">→</span>
+                <span aria-hidden="true">-&gt;</span>
               </Link>
               <Link
                 className="focus-ring rounded-lg border border-[var(--line-soft)] px-8 py-4 text-center text-base font-semibold text-[var(--foreground)] transition-colors hover:bg-[var(--panel-muted)]"
@@ -90,7 +92,7 @@ export function LandingPage() {
             <div className="ui-card relative z-10 rotate-1 rounded-xl bg-white p-6">
               <div className="mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent)] text-white">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent)] !text-white">
                     <span aria-hidden="true" className="text-lg font-bold">
                       B
                     </span>
@@ -105,7 +107,7 @@ export function LandingPage() {
                 </span>
               </div>
               <div className="space-y-4">
-                <MockupLine label={t('mockupMonthlyRent')} value="1 250 €" />
+                <MockupLine label={t('mockupMonthlyRent')} value="1 250 EUR" />
                 <MockupLine accent label={t('mockupLastRent')} value={t('mockupLastRentValue')} />
                 <div className="pt-2">
                   <div className="h-2 overflow-hidden rounded-full bg-[var(--line-soft)]">
@@ -119,13 +121,12 @@ export function LandingPage() {
             <div className="ui-card absolute -bottom-10 -left-10 z-20 hidden w-64 rounded-lg border border-[rgb(0_104_95_/_20%)] bg-white p-4 shadow-lg md:block">
               <div className="mb-2 flex items-center gap-2">
                 <span className="text-lg text-[var(--accent)]" aria-hidden="true">
-                  ▣
+                  DOC
                 </span>
                 <span className="text-xs font-medium">{t('receiptGenerated')}</span>
               </div>
               <p className="text-sm leading-5 text-[var(--muted)]">{t('receiptCopy')}</p>
               <button className="mt-3 flex items-center gap-1 text-xs font-semibold text-[var(--accent)]">
-                <span aria-hidden="true">↓</span>
                 {t('downloadPdf')}
               </button>
             </div>
@@ -145,14 +146,14 @@ export function LandingPage() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
             <div className="ui-card overflow-hidden rounded-xl p-8 md:col-span-7">
               <div className="mb-6">
-                <Symbol>▦</Symbol>
+                <Symbol>BIENS</Symbol>
                 <h3 className="mb-2 text-xl font-semibold leading-7">{t('featureProperties')}</h3>
                 <p className="text-sm leading-5 text-[var(--muted)]">{t('featurePropertiesCopy')}</p>
               </div>
               <div className="mt-8 grid grid-cols-2 gap-4 opacity-70 transition-opacity hover:opacity-100">
                 <PropertyTile
                   image="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=500&q=80"
-                  title="Studio République"
+                  title="Studio Republique"
                 />
                 <PropertyTile
                   image="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=500&q=80"
@@ -161,8 +162,8 @@ export function LandingPage() {
               </div>
             </div>
 
-            <div className="ui-card rounded-xl border-none bg-[#008378] p-8 text-white md:col-span-5">
-              <Symbol light>▤</Symbol>
+            <div className="ui-card rounded-xl border-none bg-[#008378] p-8 !text-white md:col-span-5">
+              <Symbol light>LOYERS</Symbol>
               <h3 className="mb-2 text-xl font-semibold leading-7">{t('featureRent')}</h3>
               <p className="mb-8 text-sm leading-5 text-white/90">{t('featureRentCopy')}</p>
               <div className="space-y-3">
@@ -172,21 +173,21 @@ export function LandingPage() {
             </div>
 
             <div className="ui-card rounded-xl p-8 md:col-span-5">
-              <Symbol>▧</Symbol>
+              <Symbol>DOCS</Symbol>
               <h3 className="mb-2 text-xl font-semibold leading-7">{t('featureReceipts')}</h3>
               <p className="mb-6 text-sm leading-5 text-[var(--muted)]">{t('featureReceiptsCopy')}</p>
               <div className="space-y-2 border-l-2 border-[var(--accent)] pl-4">
                 <p className="text-[11px] font-semibold leading-4 text-[var(--muted)]">{t('recentFiles')}</p>
                 <p className="text-[13px] leading-[18px]">Quittance_Oct_2023.pdf</p>
                 <p className="text-[13px] leading-[18px]">Bail_Location_V2.pdf</p>
-                <p className="text-[13px] leading-[18px]">Etat_des_lieux_Entrée.pdf</p>
+                <p className="text-[13px] leading-[18px]">Etat_des_lieux_Entree.pdf</p>
               </div>
             </div>
 
             <div className="ui-card relative overflow-hidden rounded-xl bg-white p-8 md:col-span-7">
               <div className="flex flex-col items-start gap-8 md:flex-row">
                 <div className="flex-1">
-                  <Symbol>▣</Symbol>
+                  <Symbol>TAX</Symbol>
                   <h3 className="mb-2 text-xl font-semibold leading-7">{t('featureTax')}</h3>
                   <p className="text-sm leading-5 text-[var(--muted)]">{t('featureTaxCopy')}</p>
                   <Link
@@ -194,17 +195,17 @@ export function LandingPage() {
                     href={localized('/tax')}
                   >
                     {t('simulateTax')}
-                    <span aria-hidden="true">↗</span>
+                    <span aria-hidden="true">-&gt;</span>
                   </Link>
                 </div>
                 <div className="flex w-full flex-col gap-3 rounded border border-[var(--line-soft)] bg-[var(--panel-muted)] p-4 md:w-48">
                   <div className="border-b border-[var(--line-soft)] pb-2 text-center">
                     <p className="text-[11px] font-semibold leading-4 text-[var(--muted)]">{t('annualRevenue')}</p>
-                    <p className="text-xl font-semibold leading-7 text-[var(--accent)]">42 800 €</p>
+                    <p className="text-xl font-semibold leading-7 text-[var(--accent)]">42 800 EUR</p>
                   </div>
                   <div className="space-y-1">
-                    <MiniAmount label={t('charges')} value="3 200 €" />
-                    <MiniAmount label={t('taxes')} value="1 450 €" />
+                    <MiniAmount label={t('charges')} value="3 200 EUR" />
+                    <MiniAmount label={t('taxes')} value="1 450 EUR" />
                   </div>
                 </div>
               </div>
@@ -213,64 +214,38 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="border-t border-[var(--line-soft)] py-16">
-        <div className="mx-auto max-w-7xl px-4 text-center md:px-8">
-          <p className="mb-8 text-xs font-medium uppercase tracking-[0.2em] text-[var(--muted)]">{t('trustedTitle')}</p>
-          <div className="flex flex-wrap justify-center gap-12 opacity-50 grayscale md:gap-24">
-            <span className="text-2xl font-bold">ImmoTrust</span>
-            <span className="text-2xl font-bold">RentExpert</span>
-            <span className="text-2xl font-bold">BailleurFacile</span>
-            <span className="text-2xl font-bold">InvestDirect</span>
-          </div>
-        </div>
-      </section>
-
       <section className="bg-[var(--panel-muted)] px-4 py-24 md:px-8" id="pricing">
         <div className="mx-auto max-w-7xl text-center">
           <h2 className="mb-4 text-[30px] font-semibold leading-[38px] tracking-[-0.02em]">{t('pricingTitle')}</h2>
-          <p className="mb-12 text-base leading-6 text-[var(--muted)]">{t('pricingCopy')}</p>
-          <div className="ui-card relative mx-auto max-w-sm overflow-hidden rounded-2xl border-2 border-[var(--accent)] bg-white p-10">
-            <div className="absolute right-0 top-0 rounded-bl-lg bg-[var(--accent)] px-4 py-1 text-[11px] font-bold uppercase text-white">
-              {t('popular')}
-            </div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-[0.02em] text-[var(--accent)]">{t('singleOffer')}</p>
-            <div className="mb-6 flex items-center justify-center gap-1">
-              <span className="text-4xl font-semibold">14€</span>
-              <span className="text-[var(--muted)]">/mois</span>
-            </div>
-            <ul className="mb-8 space-y-4 text-left">
-              {[t('priceFeatureUnits'), t('priceFeatureReceipts'), t('priceFeatureTax'), t('priceFeatureSupport')].map(
-                (item) => (
-                  <li className="flex items-center gap-3 text-sm leading-5" key={item}>
-                    <span className="text-[var(--accent)]" aria-hidden="true">
-                      ✓
-                    </span>
-                    {item}
-                  </li>
-                )
-              )}
-            </ul>
-            <Link
-              className="focus-ring block w-full rounded-lg bg-[var(--accent)] py-4 text-base font-bold text-white transition-opacity hover:opacity-90"
-              href={localized('/login')}
-            >
-              {t('trialCta')}
-            </Link>
-            <p className="mt-4 text-[11px] italic leading-4 text-[var(--muted)]">{t('pricingFootnote')}</p>
+          <p className="mx-auto mb-12 max-w-2xl text-base leading-6 text-[var(--muted)]">{t('pricingCopy')}</p>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            {PRICING_PLANS.map((plan) => (
+              <PricingCard
+                cta={plan === 'custom' ? t('contactCta') : t('startCta')}
+                description={t(`pricing.${plan}.description`)}
+                featured={plan === 'solo'}
+                href={plan === 'custom' ? 'mailto:contact@habitatlog.com' : localized('/login')}
+                key={plan}
+                name={t(`pricing.${plan}.name`)}
+                popularLabel={t('popular')}
+                price={t(`pricing.${plan}.price`)}
+                units={t(`pricing.${plan}.units`)}
+              />
+            ))}
           </div>
         </div>
       </section>
 
       <section className="px-4 py-24 md:px-8">
-        <div className="mx-auto max-w-4xl rounded-3xl bg-[#2c3130] p-8 text-center text-[#edf2f0] md:p-12">
+        <div className="mx-auto max-w-4xl rounded-3xl bg-[#2c3130] p-8 text-center !text-[#edf2f0] md:p-12">
           <h2 className="mb-6 text-[30px] font-semibold leading-[38px] tracking-[-0.02em]">{t('finalTitle')}</h2>
           <p className="mx-auto mb-10 max-w-xl text-base leading-6 opacity-80">{t('finalCopy')}</p>
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
-            <Link className="rounded-lg bg-[var(--accent)] px-10 py-4 font-bold text-white" href={localized('/login')}>
+            <Link className="rounded-lg bg-[var(--accent)] px-10 py-4 font-bold !text-white" href={localized('/login')}>
               {t('createAccount')}
             </Link>
             <a
-              className="rounded-lg bg-white/10 px-10 py-4 font-bold text-white transition-colors hover:bg-white/20"
+              className="rounded-lg bg-white/10 px-10 py-4 font-bold !text-white transition-colors hover:bg-white/20"
               href="mailto:contact@habitatlog.com"
             >
               {t('contactCta')}
@@ -283,7 +258,7 @@ export function LandingPage() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-8 py-8 md:flex-row">
           <div className="flex flex-col items-center gap-1 md:items-start">
             <span className="text-base font-bold text-[var(--foreground)]">{common('appName')}</span>
-            <p className="text-[13px] leading-[18px] text-[var(--muted)]">© 2026 HabitatLog - {t('footerTagline')}</p>
+            <p className="text-[13px] leading-[18px] text-[var(--muted)]">2026 HabitatLog - {t('footerTagline')}</p>
           </div>
           <div className="flex flex-wrap justify-center gap-6">
             <Link className="text-[11px] font-semibold leading-4 text-[var(--muted)] hover:text-[var(--accent)]" href={localized('/terms')}>
@@ -317,7 +292,7 @@ function MockupLine({accent = false, label, value}: {accent?: boolean; label: st
 }
 
 function Symbol({children, light = false}: {children: React.ReactNode; light?: boolean}) {
-  return <span className={light ? 'mb-4 block text-3xl text-white' : 'mb-4 block text-3xl text-[var(--accent)]'}>{children}</span>;
+  return <span className={light ? 'mb-4 block text-xs font-bold tracking-[0.12em] !text-white' : 'mb-4 block text-xs font-bold tracking-[0.12em] text-[var(--accent)]'}>{children}</span>;
 }
 
 function PropertyTile({image, title}: {image: string; title: string}) {
@@ -335,7 +310,7 @@ function RentStatus({name, overdue = false, status}: {name: string; overdue?: bo
   return (
     <div className="flex items-center justify-between rounded bg-white/10 p-3">
       <span className="text-xs font-medium">{name}</span>
-      <span className={overdue ? 'rounded bg-[#ba1a1a] px-2 py-1 text-[10px] font-bold uppercase text-white' : 'rounded bg-white/20 px-2 py-1 text-[10px] font-bold uppercase'}>
+      <span className={overdue ? 'rounded bg-[#ba1a1a] px-2 py-1 text-[10px] font-bold uppercase !text-white' : 'rounded bg-white/20 px-2 py-1 text-[10px] font-bold uppercase !text-white'}>
         {status}
       </span>
     </div>
@@ -351,14 +326,64 @@ function MiniAmount({label, value}: {label: string; value: string}) {
   );
 }
 
+function PricingCard({
+  cta,
+  description,
+  featured,
+  href,
+  name,
+  popularLabel,
+  price,
+  units
+}: {
+  cta: string;
+  description: string;
+  featured: boolean;
+  href: string;
+  name: string;
+  popularLabel: string;
+  price: string;
+  units: string;
+}) {
+  return (
+    <div
+      className={
+        featured
+          ? 'ui-card relative rounded-xl border-2 border-[var(--accent)] bg-white p-5 text-left'
+          : 'ui-card rounded-xl bg-white p-5 text-left'
+      }
+    >
+      {featured ? (
+        <span className="absolute right-4 top-4 rounded bg-[var(--accent)] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.08em] !text-white">
+          {popularLabel}
+        </span>
+      ) : null}
+      <h3 className="text-base font-semibold">{name}</h3>
+      <p className="mt-5 text-2xl font-semibold tabular-nums">{price}</p>
+      <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--accent)]">{units}</p>
+      <p className="mt-4 min-h-16 text-sm leading-6 text-[var(--muted)]">{description}</p>
+      <Link
+        className={
+          featured
+            ? 'focus-ring mt-6 inline-flex min-h-10 w-full items-center justify-center rounded-md bg-[var(--accent)] px-4 text-sm font-semibold !text-white transition-opacity hover:opacity-90'
+            : 'focus-ring mt-6 inline-flex min-h-10 w-full items-center justify-center rounded-md border border-[var(--line)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition-colors hover:bg-[var(--panel-muted)]'
+        }
+        href={href}
+      >
+        {cta}
+      </Link>
+    </div>
+  );
+}
+
 function languageClass(active: boolean) {
   return active
-    ? 'rounded bg-[var(--accent)] px-2.5 py-1 text-white'
+    ? 'rounded bg-[var(--accent)] px-2.5 py-1 !text-white'
     : 'rounded px-2.5 py-1 hover:bg-[var(--panel-muted)] hover:text-[var(--foreground)]';
 }
 
 function mobileLanguageClass(active: boolean) {
   return active
-    ? 'rounded bg-[var(--accent)] px-2 py-1 text-xs font-semibold text-white'
+    ? 'rounded bg-[var(--accent)] px-2 py-1 text-xs font-semibold !text-white'
     : 'rounded border border-[var(--line-soft)] bg-white px-2 py-1 text-xs font-semibold text-[var(--muted)]';
 }

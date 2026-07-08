@@ -50,17 +50,42 @@
     "annualRevenue": "REVENUS ANNUELS",
     "charges": "Charges",
     "taxes": "Taxes",
-    "trustedTitle": "Utilisé par des centaines de propriétaires en France",
-    "pricingTitle": "Un tarif simple pour votre tranquillité",
-    "pricingCopy": "Pas d'abonnement complexe. Juste l'essentiel.",
+    "pricingTitle": "Un tarif simple pour chaque portefeuille",
+    "pricingCopy": "Commencez gratuitement, puis choisissez l'offre adaptée à votre parc locatif.",
     "popular": "Populaire",
-    "singleOffer": "Offre unique",
-    "priceFeatureUnits": "Jusqu'à 5 biens inclus",
-    "priceFeatureReceipts": "Quittances illimitées",
-    "priceFeatureTax": "Module fiscal complet",
-    "priceFeatureSupport": "Support prioritaire",
-    "trialCta": "Essai gratuit de 30 jours",
-    "pricingFootnote": "Sans engagement, pas de carte requise.",
+    "startCta": "Commencer",
+    "pricing": {
+      "free": {
+        "name": "Free",
+        "price": "0 EUR",
+        "units": "1 bien",
+        "description": "Pour tester HabitatLog ou suivre une seule chambre."
+      },
+      "solo": {
+        "name": "Solo",
+        "price": "49 EUR/an",
+        "units": "1-5 biens",
+        "description": "Pour les petits bailleurs, LMNP et propriétaires en colocation."
+      },
+      "plus": {
+        "name": "Plus",
+        "price": "89 EUR/an",
+        "units": "6-10 biens",
+        "description": "Pour les bailleurs avec plusieurs chambres ou plusieurs biens."
+      },
+      "portfolio": {
+        "name": "Portfolio",
+        "price": "149 EUR/an",
+        "units": "11-20 biens",
+        "description": "Pour les bailleurs semi-professionnels et petits investisseurs."
+      },
+      "custom": {
+        "name": "Custom",
+        "price": "Contact",
+        "units": "20+ lots",
+        "description": "Pour les grands portefeuilles ou les besoins spécifiques."
+      }
+    },
     "finalTitle": "Prêt à simplifier votre gestion ?",
     "finalCopy": "Rejoignez les propriétaires qui ont choisi la clarté plutôt que la complexité.",
     "createAccount": "Créer mon compte",

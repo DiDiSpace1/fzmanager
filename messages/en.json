@@ -50,17 +50,42 @@
     "annualRevenue": "ANNUAL REVENUE",
     "charges": "Expenses",
     "taxes": "Taxes",
-    "trustedTitle": "Used by hundreds of landlords in France",
-    "pricingTitle": "Simple pricing for peace of mind",
-    "pricingCopy": "No complex subscription. Just the essentials.",
+    "pricingTitle": "Simple pricing for every portfolio",
+    "pricingCopy": "Start free, then choose the plan that matches your rental size.",
     "popular": "Popular",
-    "singleOffer": "Single offer",
-    "priceFeatureUnits": "Up to 5 properties included",
-    "priceFeatureReceipts": "Unlimited receipts",
-    "priceFeatureTax": "Complete tax module",
-    "priceFeatureSupport": "Priority support",
-    "trialCta": "30-day free trial",
-    "pricingFootnote": "No commitment, no card required.",
+    "startCta": "Start",
+    "pricing": {
+      "free": {
+        "name": "Free",
+        "price": "EUR 0",
+        "units": "1 property",
+        "description": "For trials or users managing one room."
+      },
+      "solo": {
+        "name": "Solo",
+        "price": "EUR 49/year",
+        "units": "1-5 properties",
+        "description": "For small landlords, LMNP owners and shared-flat landlords."
+      },
+      "plus": {
+        "name": "Plus",
+        "price": "EUR 89/year",
+        "units": "6-10 properties",
+        "description": "For owners with multiple rooms or several small properties."
+      },
+      "portfolio": {
+        "name": "Portfolio",
+        "price": "EUR 149/year",
+        "units": "11-20 properties",
+        "description": "For semi-professional landlords and small investors."
+      },
+      "custom": {
+        "name": "Custom",
+        "price": "Contact us",
+        "units": "20+ units",
+        "description": "For large portfolios or special requirements."
+      }
+    },
     "finalTitle": "Ready to simplify your management?",
     "finalCopy": "Join landlords who choose clarity over complexity.",
     "createAccount": "Create my account",
