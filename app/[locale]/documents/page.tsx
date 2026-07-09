@@ -5,6 +5,7 @@ import {AppShell} from '@/components/app/app-shell';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
 
 import {createExpenseAction, deleteDocumentAction, uploadDocumentAction} from './actions';
+import {UploadDocumentModal} from './upload-document-modal';
 
 type PropertyOption = {
   id: string;
@@ -181,14 +182,6 @@ function SearchIcon() {
   );
 }
 
-function UploadIcon() {
-  return (
-    <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
-      <path d="M12 15V4m0 0 4 4m-4-4-4 4M5 15v4h14v-4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
-    </svg>
-  );
-}
-
 function ReceiptIcon() {
   return (
     <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
@@ -309,10 +302,7 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
             <ReceiptIcon />
             Generer une quittance
           </Link>
-          <a className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white shadow-sm" href="#upload-document" style={{color: '#ffffff'}}>
-            <UploadIcon />
-            Uploader
-          </a>
+          <UploadDocumentModal locale={locale} properties={properties ?? []} tenants={tenants ?? []} />
         </div>
       </div>
 
@@ -346,9 +336,7 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
             <option value="invoice">Facture</option>
             <option value="lease">Bail</option>
             <option value="rent_receipt">Quittance</option>
-            <option value="insurance">Assurance</option>
             <option value="tax">Fiscal</option>
-            <option value="other">Autre</option>
           </select>
         </label>
         <label>
@@ -466,7 +454,8 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
         )}
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1fr_380px]">
+      {false ? (
+      <section className="hidden">
         <div className="grid gap-6">
           <section className="hidden">
             <div className="border-b border-[var(--line)] p-5">
@@ -511,7 +500,7 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
             </div>
             {expenses?.length ? (
               <div className="divide-y divide-[var(--line)]">
-                {expenses.map((expense) => (
+                {(expenses ?? []).map((expense) => (
                   <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between" key={expense.id}>
                     <div>
                       <p className="font-medium">{expense.vendor || expense.tax_categories?.label || 'Depense'}</p>
@@ -662,6 +651,7 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
           </form>
         </div>
       </section>
+      ) : null}
     </AppShell>
   );
 }

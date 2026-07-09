@@ -23,12 +23,24 @@ function safeFileName(name: string) {
   return name.replace(/[^a-zA-Z0-9.\-_]+/g, '-').replace(/-+/g, '-').slice(0, 120);
 }
 
+const ALLOWED_DOCUMENT_TYPES = new Set(['lease', 'rent_receipt', 'invoice', 'tax']);
+const MAX_DOCUMENT_SIZE_BYTES = 10 * 1024 * 1024;
+
 export async function uploadDocumentAction(formData: FormData) {
   const locale = value(formData, 'locale') || 'fr';
   const file = formData.get('file');
+  const documentType = value(formData, 'document_type');
 
   if (!(file instanceof File) || file.size === 0) {
     redirect(`${localizedPath(locale, '/documents')}?error=file_missing`);
+  }
+
+  if (file.size > MAX_DOCUMENT_SIZE_BYTES) {
+    redirect(`${localizedPath(locale, '/documents')}?error=file_too_large`);
+  }
+
+  if (!ALLOWED_DOCUMENT_TYPES.has(documentType)) {
+    redirect(`${localizedPath(locale, '/documents')}?error=document_type`);
   }
 
   const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
@@ -51,7 +63,7 @@ export async function uploadDocumentAction(formData: FormData) {
   }
 
   const {error} = await supabase.from('documents').insert({
-    document_type: value(formData, 'document_type') || 'other',
+    document_type: documentType,
     file_name: file.name,
     file_path: filePath,
     id: documentId,
