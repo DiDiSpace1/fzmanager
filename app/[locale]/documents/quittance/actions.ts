@@ -19,23 +19,17 @@ type GenerateQuittanceResult =
       ok: false;
     };
 
-type LeaseForReceipt = {
+type PropertyForReceipt = {
+  address_line1: string | null;
+  city: string | null;
   id: string;
-  property_id: string;
-  tenant_id: string;
-  unit_id: string | null;
-  properties: {
-    address_line1: string | null;
-    city: string | null;
-    name: string;
-    postal_code: string | null;
-  } | null;
-  tenants: {
-    full_name: string;
-  } | null;
-  units: {
-    name: string;
-  } | null;
+  name: string;
+  postal_code: string | null;
+};
+
+type TenantForReceipt = {
+  full_name: string;
+  id: string;
 };
 
 function value(formData: FormData, key: string) {
@@ -88,16 +82,17 @@ function paymentLabel(method: string) {
 async function buildQuittancePdf(input: {
   amount: number;
   charges: number;
-  lease: LeaseForReceipt;
   ownerName: string;
   paidAt: string;
   paymentMethod: string;
   periodMonth: string;
+  property: PropertyForReceipt;
+  tenant: TenantForReceipt | null;
 }) {
   const doc = new PDFDocument({margin: 56, size: 'A4'});
   const chunks: Buffer[] = [];
   const total = input.amount + input.charges;
-  const propertyLines = [input.lease.properties?.name, input.lease.units?.name, input.lease.properties?.address_line1, [input.lease.properties?.postal_code, input.lease.properties?.city].filter(Boolean).join(' ')]
+  const propertyLines = [input.property.name, input.property.address_line1, [input.property.postal_code, input.property.city].filter(Boolean).join(' ')]
     .filter(Boolean)
     .join('\n');
 
@@ -113,7 +108,7 @@ async function buildQuittancePdf(input: {
   doc.moveDown();
 
   doc.fillColor('#171d1c').fontSize(12).text('Locataire');
-  doc.fontSize(11).fillColor('#3d4947').text(input.lease.tenants?.full_name ?? '-');
+  doc.fontSize(11).fillColor('#3d4947').text(input.tenant?.full_name ?? '-');
   doc.moveDown();
 
   doc.fillColor('#171d1c').fontSize(12).text('Bien loue');
@@ -131,7 +126,7 @@ async function buildQuittancePdf(input: {
   doc.moveDown(1.5);
 
   doc.fillColor('#171d1c').fontSize(11).text(
-    `Je soussigne ${input.ownerName || 'le proprietaire'} reconnais avoir recu de ${input.lease.tenants?.full_name ?? 'le locataire'} la somme de ${formatMoney(total)} au titre du loyer et des charges pour la periode ${formatMonth(input.periodMonth)}.`
+    `Je soussigne ${input.ownerName || 'le proprietaire'} reconnais avoir recu de ${input.tenant?.full_name ?? 'le locataire'} la somme de ${formatMoney(total)} au titre du loyer et des charges pour la periode ${formatMonth(input.periodMonth)}.`
   );
   doc.moveDown(2);
   doc.text(`Fait le ${new Date().toLocaleDateString('fr-FR')}`);
@@ -149,15 +144,16 @@ async function buildQuittancePdf(input: {
 
 export async function generateQuittanceAction(formData: FormData): Promise<GenerateQuittanceResult> {
   const locale = value(formData, 'locale') || 'fr';
-  const leaseId = value(formData, 'lease_id');
   const ownerName = value(formData, 'owner_name');
+  const propertyId = value(formData, 'property_id');
+  const tenantId = value(formData, 'tenant_id');
   const periodMonth = value(formData, 'period_month');
   const paidAt = value(formData, 'paid_at');
   const paymentMethod = value(formData, 'payment_method') || 'bank_transfer';
   const amount = moneyValue(formData, 'amount');
   const charges = moneyValue(formData, 'charges');
 
-  if (!leaseId || !ownerName || !/^\d{4}-\d{2}$/.test(periodMonth) || !paidAt || amount <= 0 || charges < 0) {
+  if (!propertyId || !ownerName || !/^\d{4}-\d{2}$/.test(periodMonth) || !paidAt || amount <= 0 || charges < 0) {
     return {error: 'Veuillez completer les informations de quittance.', ok: false};
   }
 
@@ -168,21 +164,33 @@ export async function generateQuittanceAction(formData: FormData): Promise<Gener
     return {error: 'Votre plan ne permet pas de creer plus de documents.', ok: false};
   }
 
-  const {data: lease, error: leaseError} = await supabase
-    .from('leases')
-    .select('id, property_id, tenant_id, unit_id, properties(name, address_line1, postal_code, city), units(name), tenants(full_name)')
-    .eq('id', leaseId)
+  const {data: property, error: propertyError} = await supabase
+    .from('properties')
+    .select('id, name, address_line1, postal_code, city')
+    .eq('id', propertyId)
     .eq('workspace_id', workspaceId)
     .single()
-    .returns<LeaseForReceipt>();
+    .returns<PropertyForReceipt>();
 
-  if (leaseError || !lease) {
-    return {error: 'Bail introuvable pour cet espace.', ok: false};
+  if (propertyError || !property) {
+    return {error: 'Bien introuvable pour cet espace.', ok: false};
   }
 
-  const pdf = await buildQuittancePdf({amount, charges, lease, ownerName, paidAt, paymentMethod, periodMonth});
+  let tenant: TenantForReceipt | null = null;
+
+  if (tenantId) {
+    const {data: tenantData, error: tenantError} = await supabase.from('tenants').select('id, full_name').eq('id', tenantId).eq('workspace_id', workspaceId).single().returns<TenantForReceipt>();
+
+    if (tenantError || !tenantData) {
+      return {error: 'Locataire introuvable pour cet espace.', ok: false};
+    }
+
+    tenant = tenantData;
+  }
+
+  const pdf = await buildQuittancePdf({amount, charges, ownerName, paidAt, paymentMethod, periodMonth, property, tenant});
   const documentId = randomUUID();
-  const fileName = safeFileName(`Quittance_${periodMonth}_${lease.tenants?.full_name ?? 'locataire'}.pdf`);
+  const fileName = safeFileName(`Quittance_${periodMonth}_${tenant?.full_name ?? property.name}.pdf`);
   const year = new Date().getUTCFullYear();
   const filePath = `workspace/${workspaceId}/documents/${year}/${documentId}-${fileName}`;
   const {error: uploadError} = await supabase.storage.from('documents').upload(filePath, new Blob([new Uint8Array(pdf)], {type: 'application/pdf'}), {
@@ -203,9 +211,9 @@ export async function generateQuittanceAction(formData: FormData): Promise<Gener
     id: documentId,
     mime_type: 'application/pdf',
     period_month: monthStart(periodMonth),
-    property_id: lease.property_id,
-    tenant_id: lease.tenant_id,
-    unit_id: lease.unit_id,
+    property_id: property.id,
+    tenant_id: tenant?.id ?? null,
+    unit_id: null,
     size_bytes: pdf.byteLength,
     workspace_id: workspaceId
   });

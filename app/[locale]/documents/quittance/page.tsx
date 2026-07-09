@@ -3,18 +3,23 @@ import {getLocale} from 'next-intl/server';
 import {AppShell} from '@/components/app/app-shell';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
 
-import {QuittanceForm, type QuittanceLeaseOption, type RecentReceipt} from './quittance-form';
+import {QuittanceForm, type QuittancePropertyOption, type QuittanceTenantOption, type RecentReceipt} from './quittance-form';
 
 export default async function QuittancePage() {
   const locale = await getLocale();
   const {profile, supabase, workspaceId} = await getCurrentUserWorkspace(locale);
-  const {data: leases} = await supabase
-    .from('leases')
-    .select('id, monthly_rent, charges_amount, properties(name), units(name), tenants(full_name)')
+  const {data: properties} = await supabase
+    .from('properties')
+    .select('id, name, address_line1, postal_code, city, monthly_rent_estimate, charges_estimate')
     .eq('workspace_id', workspaceId)
-    .eq('status', 'active')
-    .order('created_at', {ascending: false})
-    .returns<QuittanceLeaseOption[]>();
+    .order('name', {ascending: true})
+    .returns<QuittancePropertyOption[]>();
+  const {data: tenants} = await supabase
+    .from('tenants')
+    .select('id, full_name')
+    .eq('workspace_id', workspaceId)
+    .order('full_name', {ascending: true})
+    .returns<QuittanceTenantOption[]>();
   const {data: receipts} = await supabase
     .from('documents')
     .select('id, file_name, file_path, period_month, tenants(full_name)')
@@ -41,7 +46,7 @@ export default async function QuittancePage() {
 
   return (
     <AppShell>
-      <QuittanceForm leases={leases ?? []} locale={locale} ownerName={profile.email ?? ''} recentReceipts={recentReceipts} />
+      <QuittanceForm locale={locale} ownerName={profile.email ?? ''} properties={properties ?? []} recentReceipts={recentReceipts} tenants={tenants ?? []} />
     </AppShell>
   );
 }

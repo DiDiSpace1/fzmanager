@@ -5,19 +5,19 @@ import {useMemo, useState, useTransition} from 'react';
 
 import {generateQuittanceAction} from './actions';
 
-export type QuittanceLeaseOption = {
-  charges_amount: number;
+export type QuittancePropertyOption = {
+  address_line1: string | null;
+  charges_estimate: number | null;
+  city: string | null;
   id: string;
-  monthly_rent: number;
-  properties: {
-    name: string;
-  } | null;
-  tenants: {
-    full_name: string;
-  } | null;
-  units: {
-    name: string;
-  } | null;
+  monthly_rent_estimate: number | null;
+  name: string;
+  postal_code: string | null;
+};
+
+export type QuittanceTenantOption = {
+  full_name: string;
+  id: string;
 };
 
 export type RecentReceipt = {
@@ -33,11 +33,12 @@ export type RecentReceipt = {
 type FormState = {
   amount: string;
   charges: string;
-  leaseId: string;
   ownerName: string;
   paidAt: string;
   paymentMethod: string;
   periodMonth: string;
+  propertyId: string;
+  tenantId: string;
 };
 
 function currentMonth() {
@@ -68,7 +69,15 @@ function money(value: string) {
   return `${parsed.toLocaleString('fr-FR', {maximumFractionDigits: 2, minimumFractionDigits: 2})} EUR`;
 }
 
-function ReceiptPreview({lease, state}: {lease: QuittanceLeaseOption | null; state: FormState}) {
+function propertyAddress(property: QuittancePropertyOption | null) {
+  if (!property) {
+    return '-';
+  }
+
+  return [property.name, property.address_line1, [property.postal_code, property.city].filter(Boolean).join(' ')].filter(Boolean).join(' - ');
+}
+
+function ReceiptPreview({property, state, tenant}: {property: QuittancePropertyOption | null; state: FormState; tenant: QuittanceTenantOption | null}) {
   const total = Number.parseFloat(state.amount.replace(',', '.')) + Number.parseFloat((state.charges || '0').replace(',', '.'));
 
   return (
@@ -82,11 +91,11 @@ function ReceiptPreview({lease, state}: {lease: QuittanceLeaseOption | null; sta
         </div>
         <div>
           <p className="font-semibold uppercase tracking-wide text-[var(--muted)]">Locataire</p>
-          <p className="mt-1 text-sm text-[#171d1c]">{lease?.tenants?.full_name ?? '-'}</p>
+          <p className="mt-1 text-sm text-[#171d1c]">{tenant?.full_name ?? '-'}</p>
         </div>
         <div>
           <p className="font-semibold uppercase tracking-wide text-[var(--muted)]">Bien</p>
-          <p className="mt-1 text-sm text-[#171d1c]">{[lease?.properties?.name, lease?.units?.name].filter(Boolean).join(' - ') || '-'}</p>
+          <p className="mt-1 text-sm text-[#171d1c]">{propertyAddress(property)}</p>
         </div>
       </div>
       <div className="mt-7 border-t border-[var(--line-soft)] pt-5 text-sm">
@@ -108,41 +117,56 @@ function ReceiptPreview({lease, state}: {lease: QuittanceLeaseOption | null; sta
   );
 }
 
-export function QuittanceForm({leases, locale, ownerName, recentReceipts}: {leases: QuittanceLeaseOption[]; locale: string; ownerName: string; recentReceipts: RecentReceipt[]}) {
-  const initialLease = leases[0] ?? null;
+export function QuittanceForm({
+  locale,
+  ownerName,
+  properties,
+  recentReceipts,
+  tenants
+}: {
+  locale: string;
+  ownerName: string;
+  properties: QuittancePropertyOption[];
+  recentReceipts: RecentReceipt[];
+  tenants: QuittanceTenantOption[];
+}) {
+  const initialProperty = properties[0] ?? null;
   const [state, setState] = useState<FormState>({
-    amount: initialLease ? String(Number(initialLease.monthly_rent)) : '',
-    charges: initialLease ? String(Number(initialLease.charges_amount)) : '',
-    leaseId: initialLease?.id ?? '',
+    amount: initialProperty?.monthly_rent_estimate ? String(Number(initialProperty.monthly_rent_estimate)) : '',
+    charges: initialProperty?.charges_estimate ? String(Number(initialProperty.charges_estimate)) : '',
     ownerName,
     paidAt: today(),
     paymentMethod: 'bank_transfer',
-    periodMonth: currentMonth()
+    periodMonth: currentMonth(),
+    propertyId: initialProperty?.id ?? '',
+    tenantId: ''
   });
   const [showPreview, setShowPreview] = useState(false);
   const [previewLarge, setPreviewLarge] = useState(false);
   const [message, setMessage] = useState('');
   const [isPending, startTransition] = useTransition();
-  const selectedLease = useMemo(() => leases.find((lease) => lease.id === state.leaseId) ?? null, [leases, state.leaseId]);
+  const selectedProperty = useMemo(() => properties.find((property) => property.id === state.propertyId) ?? null, [properties, state.propertyId]);
+  const selectedTenant = useMemo(() => tenants.find((tenant) => tenant.id === state.tenantId) ?? null, [tenants, state.tenantId]);
 
   function update(next: Partial<FormState>) {
     setState((current) => ({...current, ...next}));
   }
 
-  function onLeaseChange(leaseId: string) {
-    const lease = leases.find((item) => item.id === leaseId);
+  function onPropertyChange(propertyId: string) {
+    const property = properties.find((item) => item.id === propertyId);
     update({
-      amount: lease ? String(Number(lease.monthly_rent)) : '',
-      charges: lease ? String(Number(lease.charges_amount)) : '',
-      leaseId
+      amount: property?.monthly_rent_estimate ? String(Number(property.monthly_rent_estimate)) : state.amount,
+      charges: property?.charges_estimate ? String(Number(property.charges_estimate)) : state.charges,
+      propertyId
     });
   }
 
   function generatePdf() {
     const formData = new FormData();
     formData.set('locale', locale);
-    formData.set('lease_id', state.leaseId);
     formData.set('owner_name', state.ownerName);
+    formData.set('property_id', state.propertyId);
+    formData.set('tenant_id', state.tenantId);
     formData.set('period_month', state.periodMonth);
     formData.set('paid_at', state.paidAt);
     formData.set('payment_method', state.paymentMethod);
@@ -183,7 +207,7 @@ export function QuittanceForm({leases, locale, ownerName, recentReceipts}: {leas
           <button className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--line)] bg-white px-5 text-sm font-semibold text-[#171d1c] shadow-sm hover:bg-[#f0f5f2]" onClick={() => setShowPreview(true)} type="button">
             Apercu
           </button>
-          <button className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white shadow-sm disabled:opacity-60" disabled={isPending || !leases.length} onClick={generatePdf} style={{color: '#ffffff'}} type="button">
+          <button className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white shadow-sm disabled:opacity-60" disabled={isPending || !properties.length} onClick={generatePdf} style={{color: '#ffffff'}} type="button">
             {isPending ? 'Generation...' : 'Generer la quittance'}
           </button>
         </div>
@@ -206,12 +230,12 @@ export function QuittanceForm({leases, locale, ownerName, recentReceipts}: {leas
               <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => update({ownerName: event.target.value})} value={state.ownerName} />
             </label>
             <label className="grid gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-              Bail
-              <select className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => onLeaseChange(event.target.value)} value={state.leaseId}>
-                {leases.length ? null : <option value="">Aucun bail actif</option>}
-                {leases.map((lease) => (
-                  <option key={lease.id} value={lease.id}>
-                    {[lease.properties?.name, lease.units?.name, lease.tenants?.full_name].filter(Boolean).join(' - ')}
+              Bien
+              <select className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => onPropertyChange(event.target.value)} value={state.propertyId}>
+                {properties.length ? null : <option value="">Aucun bien enregistre</option>}
+                {properties.map((property) => (
+                  <option key={property.id} value={property.id}>
+                    {propertyAddress(property)}
                   </option>
                 ))}
               </select>
@@ -233,6 +257,17 @@ export function QuittanceForm({leases, locale, ownerName, recentReceipts}: {leas
               <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => update({paidAt: event.target.value})} type="date" value={state.paidAt} />
             </label>
             <label className="grid gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)] md:col-span-2">
+              Locataire (optionnel)
+              <select className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => update({tenantId: event.target.value})} value={state.tenantId}>
+                <option value="">Aucun locataire specifique</option>
+                {tenants.map((tenant) => (
+                  <option key={tenant.id} value={tenant.id}>
+                    {tenant.full_name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)] md:col-span-2">
               Mode de paiement
               <select className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => update({paymentMethod: event.target.value})} value={state.paymentMethod}>
                 <option value="bank_transfer">Virement bancaire</option>
@@ -250,7 +285,7 @@ export function QuittanceForm({leases, locale, ownerName, recentReceipts}: {leas
         <aside className="grid gap-5">
           <button className="rounded-xl border border-[var(--line-soft)] bg-white p-5 text-left shadow-sm" onClick={() => showPreview && setPreviewLarge(true)} type="button">
             {showPreview ? (
-              <ReceiptPreview lease={selectedLease} state={state} />
+              <ReceiptPreview property={selectedProperty} state={state} tenant={selectedTenant} />
             ) : (
               <div className="grid min-h-[320px] place-items-center rounded-lg bg-[#f8fbfa] text-center">
                 <div>
@@ -286,7 +321,7 @@ export function QuittanceForm({leases, locale, ownerName, recentReceipts}: {leas
       {previewLarge ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/55 p-4" onClick={() => setPreviewLarge(false)} role="dialog" aria-modal="true">
           <div className="w-full max-w-xl" onClick={(event) => event.stopPropagation()}>
-            <ReceiptPreview lease={selectedLease} state={state} />
+            <ReceiptPreview property={selectedProperty} state={state} tenant={selectedTenant} />
           </div>
         </div>
       ) : null}
