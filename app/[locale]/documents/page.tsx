@@ -4,18 +4,12 @@ import {getLocale, getTranslations} from 'next-intl/server';
 import {AppShell} from '@/components/app/app-shell';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
 
-import {createExpenseAction, deleteDocumentAction, uploadDocumentAction} from './actions';
+import {deleteDocumentAction} from './actions';
 import {UploadDocumentModal} from './upload-document-modal';
 
 type PropertyOption = {
   id: string;
   name: string;
-};
-
-type UnitOption = {
-  id: string;
-  name: string;
-  property_id: string;
 };
 
 type TenantOption = {
@@ -47,26 +41,6 @@ type DocumentWithUrl = DocumentRow & {
   viewUrl: string | null;
 };
 
-type ExpenseRow = {
-  id: string;
-  amount: number;
-  currency: string;
-  expense_date: string;
-  receipt_status: string;
-  vendor: string | null;
-  tax_categories: {
-    label: string;
-  } | null;
-  properties: {
-    name: string;
-  } | null;
-};
-
-type TaxCategory = {
-  id: string;
-  label: string;
-};
-
 type DocumentsPageProps = {
   searchParams: Promise<{
     error?: string;
@@ -76,6 +50,20 @@ type DocumentsPageProps = {
     year?: string;
   }>;
 };
+
+const DOCUMENT_TYPES = [
+  {className: 'bg-[#d9fbf4] text-[#00685f]', label: 'Baux', value: 'lease'},
+  {className: 'bg-[#dde1ff] text-[#3755c3]', label: 'Quittances', value: 'rent_receipt'},
+  {className: 'bg-[#ffdbce] text-[#924628]', label: 'Factures', value: 'invoice'},
+  {className: 'bg-[#dee4e1] text-[#3d4947]', label: 'Impots', value: 'tax'}
+];
+
+const FOLDER_TYPES = [
+  {iconClassName: 'bg-[#89f5e7] text-[#00685f]', label: 'Baux', value: 'lease'},
+  {iconClassName: 'bg-[#dde1ff] text-[#3755c3]', label: 'Quittances', value: 'rent_receipt'},
+  {iconClassName: 'bg-[#ffdbce] text-[#924628]', label: 'Factures Travaux', value: 'invoice'},
+  {iconClassName: 'bg-[#dee4e1] text-[#3d4947]', label: 'Impots', value: 'tax'}
+];
 
 function formatBytes(bytes: number | null) {
   if (!bytes) {
@@ -103,22 +91,6 @@ function yearRange(value: string | undefined) {
   };
 }
 
-const DOCUMENT_TYPES = [
-  {className: 'bg-[#d9fbf4] text-[#00685f]', label: 'Baux', value: 'lease'},
-  {className: 'bg-[#dde1ff] text-[#3755c3]', label: 'Quittances', value: 'rent_receipt'},
-  {className: 'bg-[#ffdbce] text-[#924628]', label: 'Factures', value: 'invoice'},
-  {className: 'bg-[#dee4e1] text-[#3d4947]', label: 'Impots', value: 'tax'},
-  {className: 'bg-[#f0f5f2] text-[#3d4947]', label: 'Assurances', value: 'insurance'},
-  {className: 'bg-[#f0f5f2] text-[#3d4947]', label: 'Autres', value: 'other'}
-];
-
-const FOLDER_TYPES = [
-  {iconClassName: 'bg-[#89f5e7] text-[#00685f]', label: 'Baux', value: 'lease'},
-  {iconClassName: 'bg-[#dde1ff] text-[#3755c3]', label: 'Quittances', value: 'rent_receipt'},
-  {iconClassName: 'bg-[#ffdbce] text-[#924628]', label: 'Factures Travaux', value: 'invoice'},
-  {iconClassName: 'bg-[#dee4e1] text-[#3d4947]', label: 'Impots', value: 'tax'}
-];
-
 function typeMeta(type: string) {
   return DOCUMENT_TYPES.find((item) => item.value === type) ?? DOCUMENT_TYPES[DOCUMENT_TYPES.length - 1];
 }
@@ -127,7 +99,7 @@ function formatDate(value: string, locale: string) {
   return new Intl.DateTimeFormat(locale, {day: '2-digit', month: 'short', year: 'numeric'}).format(new Date(value));
 }
 
-function filterHref(params: {propertyId: string; query: string; type: string; year?: number}, type: string) {
+function filterHref(params: {propertyId: string; query: string; year?: number}, type: string) {
   const next = new URLSearchParams();
 
   if (params.query) {
@@ -200,24 +172,8 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
   const selectedType = params.type ?? '';
   const selectedYear = yearRange(params.year);
   const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
-  const {data: properties} = await supabase
-    .from('properties')
-    .select('id, name')
-    .eq('workspace_id', workspaceId)
-    .order('name', {ascending: true})
-    .returns<PropertyOption[]>();
-  const {data: units} = await supabase
-    .from('units')
-    .select('id, name, property_id')
-    .eq('workspace_id', workspaceId)
-    .order('name', {ascending: true})
-    .returns<UnitOption[]>();
-  const {data: tenants} = await supabase
-    .from('tenants')
-    .select('id, full_name')
-    .eq('workspace_id', workspaceId)
-    .order('full_name', {ascending: true})
-    .returns<TenantOption[]>();
+  const {data: properties} = await supabase.from('properties').select('id, name').eq('workspace_id', workspaceId).order('name', {ascending: true}).returns<PropertyOption[]>();
+  const {data: tenants} = await supabase.from('tenants').select('id, full_name').eq('workspace_id', workspaceId).order('full_name', {ascending: true}).returns<TenantOption[]>();
   let documentQuery = supabase
     .from('documents')
     .select('id, document_type, file_name, file_path, mime_type, size_bytes, created_at, properties(name), units(name), tenants(full_name)')
@@ -241,33 +197,6 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
   }
 
   const {data: documents, error: documentsError} = await documentQuery.limit(50).returns<DocumentRow[]>();
-  let expenseQuery = supabase
-    .from('expenses')
-    .select('id, amount, currency, expense_date, receipt_status, vendor, tax_categories(label), properties(name)')
-    .eq('workspace_id', workspaceId)
-    .order('expense_date', {ascending: false});
-
-  if (selectedPropertyId) {
-    expenseQuery = expenseQuery.eq('property_id', selectedPropertyId);
-  }
-
-  if (selectedYear) {
-    expenseQuery = expenseQuery.gte('expense_date', selectedYear.start).lt('expense_date', selectedYear.end);
-  }
-
-  if (query) {
-    expenseQuery = expenseQuery.ilike('vendor', `%${query}%`);
-  }
-
-  const {data: expenses, error: expensesError} = await expenseQuery.limit(50).returns<ExpenseRow[]>();
-  const {data: categories} = await supabase
-    .from('tax_categories')
-    .select('id, label')
-    .eq('country_code', 'FR')
-    .eq('tax_regime', 'LMNP')
-    .eq('active', true)
-    .order('sort_order', {ascending: true})
-    .returns<TaxCategory[]>();
   const documentsWithUrls: DocumentWithUrl[] = await Promise.all(
     (documents ?? []).map(async (document) => {
       const [{data: viewData}, {data: downloadData}] = await Promise.all([
@@ -298,7 +227,7 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
           <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{t('subtitle')}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Link className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--line)] bg-white px-4 text-sm font-semibold text-[#171d1c] shadow-sm hover:bg-[#f0f5f2]" href="/tax">
+          <Link className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--line)] bg-white px-4 text-sm font-semibold text-[#171d1c] shadow-sm hover:bg-[#f0f5f2]" href="/documents/quittance">
             <ReceiptIcon />
             Generer une quittance
           </Link>
@@ -306,9 +235,9 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
         </div>
       </div>
 
-      {documentsError || expensesError ? (
+      {documentsError ? (
         <div className="mb-6 rounded-md border border-[#f0d6b6] bg-[#fff8ec] p-4 text-sm leading-6 text-[#7a4a11]">
-          Impossible de charger les documents ou depenses. Lancez la migration Supabase de la phase documents.
+          Impossible de charger les documents. Lancez la migration Supabase de la phase documents.
         </div>
       ) : null}
 
@@ -362,7 +291,7 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
               'focus-ring rounded-xl border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:bg-[#f8fbfa]',
               selectedType === folder.value ? 'border-[var(--accent)]' : 'border-[var(--line-soft)]'
             ].join(' ')}
-            href={filterHref({propertyId: selectedPropertyId, query, type: selectedType, year: selectedYear?.year}, folder.value)}
+            href={filterHref({propertyId: selectedPropertyId, query, year: selectedYear?.year}, folder.value)}
             key={folder.value}
           >
             <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-lg ${folder.iconClassName}`}>
@@ -419,9 +348,7 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
                       <td className="px-5 py-4 text-sm tabular-nums text-[var(--muted)]">{formatBytes(document.size_bytes)}</td>
                       <td className="px-5 py-4 text-right">
                         <details className="relative inline-block">
-                          <summary className="focus-ring flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-md text-xl text-[var(--muted)] hover:bg-[#eaefed]">
-                            ...
-                          </summary>
+                          <summary className="focus-ring flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-md text-xl text-[var(--muted)] hover:bg-[#eaefed]">...</summary>
                           <div className="absolute right-full top-0 z-20 mr-2 w-40 rounded-lg border border-[var(--line-soft)] bg-white p-1 text-left text-sm shadow-lg">
                             {document.viewUrl ? (
                               <a className="block rounded-md px-3 py-2 hover:bg-[#f0f5f2]" href={document.viewUrl} rel="noreferrer" target="_blank">
@@ -453,205 +380,6 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
           <div className="p-8 text-center text-sm text-[var(--muted)]">Aucun document pour le moment.</div>
         )}
       </section>
-
-      {false ? (
-      <section className="hidden">
-        <div className="grid gap-6">
-          <section className="hidden">
-            <div className="border-b border-[var(--line)] p-5">
-              <h2 className="text-lg font-semibold">Documents recents</h2>
-            </div>
-            {documentsWithUrls.length ? (
-              <div className="divide-y divide-[var(--line)]">
-                {documentsWithUrls.map((document) => (
-                  <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between" key={document.id}>
-                    <div>
-                      <p className="font-medium">{document.file_name}</p>
-                      <p className="mt-1 text-sm text-[var(--muted)]">
-                        {[document.document_type, document.properties?.name, document.units?.name, document.tenants?.full_name, formatBytes(document.size_bytes)].filter(Boolean).join(' · ')}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-[#f2f0ea] px-3 py-1 text-xs font-semibold text-[var(--muted)]">{document.mime_type ?? 'file'}</span>
-                      {document.downloadUrl ? (
-                        <a className="focus-ring rounded-md border border-[var(--line)] px-3 py-2 text-xs font-semibold hover:bg-[#f2f0ea]" href={document.downloadUrl}>
-                          Telecharger
-                        </a>
-                      ) : null}
-                      <form action={deleteDocumentAction}>
-                        <input name="locale" type="hidden" value={locale} />
-                        <input name="document_id" type="hidden" value={document.id} />
-                        <button className="focus-ring rounded-md border border-[#efd0ca] px-3 py-2 text-xs font-semibold text-[#9d2f1f] hover:bg-[#fff4f1]" type="submit">
-                          Supprimer
-                        </button>
-                      </form>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-8 text-center text-sm text-[var(--muted)]">Aucun document pour le moment.</div>
-            )}
-          </section>
-
-          <section className="rounded-xl border border-[var(--line-soft)] bg-white">
-            <div className="border-b border-[var(--line)] p-5">
-              <h2 className="text-lg font-semibold">Depenses recentes</h2>
-            </div>
-            {expenses?.length ? (
-              <div className="divide-y divide-[var(--line)]">
-                {(expenses ?? []).map((expense) => (
-                  <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between" key={expense.id}>
-                    <div>
-                      <p className="font-medium">{expense.vendor || expense.tax_categories?.label || 'Depense'}</p>
-                      <p className="mt-1 text-sm text-[var(--muted)]">
-                        {[expense.expense_date, expense.properties?.name, expense.receipt_status].filter(Boolean).join(' · ')}
-                      </p>
-                    </div>
-                    <p className="text-sm font-semibold">
-                      {Number(expense.amount).toFixed(2)} {expense.currency}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-8 text-center text-sm text-[var(--muted)]">Aucune depense pour le moment.</div>
-            )}
-          </section>
-        </div>
-
-        <div className="grid gap-6">
-          <form action={uploadDocumentAction} className="rounded-xl border border-[var(--line-soft)] bg-white p-5" id="upload-document">
-            <input name="locale" type="hidden" value={locale} />
-            <h2 className="text-lg font-semibold">Televerser un document</h2>
-            <div className="mt-5 grid gap-4">
-              <input accept=".pdf,image/png,image/jpeg" className="focus-ring rounded-md border border-[var(--line)] px-3 py-3 text-sm" name="file" required type="file" />
-              <label className="grid gap-2 text-sm font-medium">
-                Type
-                <select className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" name="document_type" defaultValue="invoice">
-                  <option value="invoice">Facture</option>
-                  <option value="lease">Bail</option>
-                  <option value="rent_receipt">Quittance</option>
-                  <option value="insurance">Assurance</option>
-                  <option value="tax">Fiscal</option>
-                  <option value="other">Autre</option>
-                </select>
-              </label>
-              <label className="grid gap-2 text-sm font-medium">
-                Bien
-                <select className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" name="property_id">
-                  <option value="">Non precise</option>
-                  {(properties ?? []).map((property) => (
-                    <option key={property.id} value={property.id}>
-                      {property.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="grid gap-2 text-sm font-medium">
-                Unite
-                <select className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" name="unit_id">
-                  <option value="">Non precise</option>
-                  {(units ?? []).map((unit) => (
-                    <option key={unit.id} value={unit.id}>
-                      {unit.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="grid gap-2 text-sm font-medium">
-                Locataire
-                <select className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" name="tenant_id">
-                  <option value="">Non precise</option>
-                  {(tenants ?? []).map((tenant) => (
-                    <option key={tenant.id} value={tenant.id}>
-                      {tenant.full_name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="grid gap-2 text-sm font-medium">
-                Mois
-                <input className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" name="period_month" type="date" />
-              </label>
-              <button className="focus-ring min-h-11 rounded-md bg-[var(--accent)] px-5 text-sm font-semibold text-white" type="submit">
-                Televerser
-              </button>
-            </div>
-          </form>
-
-          <form action={createExpenseAction} className="rounded-xl border border-[var(--line-soft)] bg-white p-5">
-            <input name="locale" type="hidden" value={locale} />
-            <h2 className="text-lg font-semibold">Ajouter une depense</h2>
-            <div className="mt-5 grid gap-4">
-              <label className="grid gap-2 text-sm font-medium">
-                Date
-                <input className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" name="expense_date" required type="date" />
-              </label>
-              <label className="grid gap-2 text-sm font-medium">
-                Montant
-                <input className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" min="0" name="amount" required step="0.01" type="number" />
-              </label>
-              <label className="grid gap-2 text-sm font-medium">
-                Fournisseur
-                <input className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" name="vendor" placeholder="Plombier, assurance..." />
-              </label>
-              <label className="grid gap-2 text-sm font-medium">
-                Categorie
-                <select className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" name="tax_category_id">
-                  <option value="">A classer</option>
-                  {(categories ?? []).map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="grid gap-2 text-sm font-medium">
-                Bien
-                <select className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" name="property_id">
-                  <option value="">Non precise</option>
-                  {(properties ?? []).map((property) => (
-                    <option key={property.id} value={property.id}>
-                      {property.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="grid gap-2 text-sm font-medium">
-                Unite
-                <select className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" name="unit_id">
-                  <option value="">Non precise</option>
-                  {(units ?? []).map((unit) => (
-                    <option key={unit.id} value={unit.id}>
-                      {unit.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="grid gap-2 text-sm font-medium">
-                Justificatif
-                <select className="focus-ring rounded-md border border-[var(--line)] px-3 py-3" name="document_id">
-                  <option value="">Aucun document lie</option>
-                  {documentsWithUrls.map((document) => (
-                    <option key={document.id} value={document.id}>
-                      {document.file_name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="grid gap-2 text-sm font-medium">
-                Description
-                <textarea className="focus-ring min-h-20 rounded-md border border-[var(--line)] px-3 py-3" name="description" />
-              </label>
-              <button className="focus-ring min-h-11 rounded-md bg-[var(--accent)] px-5 text-sm font-semibold text-white" type="submit">
-                Ajouter
-              </button>
-            </div>
-          </form>
-        </div>
-      </section>
-      ) : null}
     </AppShell>
   );
 }
