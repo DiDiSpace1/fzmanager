@@ -6,6 +6,7 @@ import {getCurrentUserWorkspace} from '@/lib/workspace';
 
 import {createTenantAction, deleteTenantAction, updateRentStatusAction} from './actions';
 import {DeleteTenantButton} from './delete-tenant-button';
+import {TenantActionDetails} from './tenant-action-details';
 
 type TenantRow = {
   id: string;
@@ -136,6 +137,19 @@ function hasOverdueRent(tenant: TenantRow, month: string) {
   );
 }
 
+function earliestOverdueMonth(tenants: TenantRow[], month: string) {
+  const currentPeriod = monthStart(month);
+  const overdueMonths = tenants.flatMap((tenant) =>
+    tenant.leases.flatMap((lease) =>
+      lease.rent_charges
+        .filter((rentCharge) => rentCharge.period_month <= currentPeriod && ['partial', 'unpaid'].includes(rentCharge.status))
+        .map((rentCharge) => rentCharge.period_month.slice(0, 7))
+    )
+  );
+
+  return overdueMonths.sort()[0] ?? month;
+}
+
 function leaseExpiresSoon(tenant: TenantRow, month: string) {
   const lease = activeLease(tenant, month);
 
@@ -194,6 +208,7 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
   const unassignedRows = allRows.filter((tenant) => !activeLease(tenant, selectedMonth));
   const expiringRows = allRows.filter((tenant) => leaseExpiresSoon(tenant, selectedMonth));
   const overdueRows = allRows.filter((tenant) => hasOverdueRent(tenant, selectedMonth));
+  const overdueMonth = earliestOverdueMonth(allRows, selectedMonth);
   const rows =
     selectedView === 'all'
       ? allRows
@@ -259,7 +274,7 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
               />
               <SummaryCard
                 active={selectedView === 'overdue'}
-                href={viewHref('overdue', selectedMonth, queryText)}
+                href={viewHref('overdue', overdueMonth, queryText)}
                 label="Retards"
                 note="Paiements a suivre"
                 tone="danger"
@@ -346,12 +361,8 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
                           <td className="px-5 py-4">
                             <span className={`inline-flex rounded px-2.5 py-1 text-xs font-semibold ${status.className}`}>{status.label}</span>
                           </td>
-                          <td className="relative z-20 px-5 py-4 text-right">
-                            <details className="relative inline-block open:z-[9999]">
-                              <summary className="focus-ring flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-md text-xl text-[var(--muted)] hover:bg-[#eaefed]">
-                                ...
-                              </summary>
-                              <div className="absolute right-full top-0 z-[9999] mr-2 w-48 rounded-lg border border-[var(--line-soft)] bg-white p-1 text-left text-sm shadow-xl">
+                          <td className="px-5 py-4 text-right">
+                            <TenantActionDetails>
                                 <Link className="block rounded-md px-3 py-2 hover:bg-[#f0f5f2]" href={`/tenants/${tenant.id}`}>
                                   Voir
                                 </Link>
@@ -362,7 +373,7 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
                                   <details className="group rounded-md">
                                     <summary className="flex cursor-pointer list-none items-center justify-between rounded-md px-3 py-2 hover:bg-[#f0f5f2]">
                                       Changer statut
-                                      <span className="text-xs text-[var(--muted)]">›</span>
+                                      <span className="text-xs text-[var(--muted)]">&gt;</span>
                                     </summary>
                                     <div className="mt-1 grid gap-1 border-t border-[var(--line-soft)] pt-1">
                                       <form action={updateRentStatusAction}>
@@ -381,7 +392,7 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
                                         <input name="status" type="hidden" value="partial" />
                                         <label className="grid gap-1 text-xs font-semibold text-[#7a4a11]">
                                           Paye partiel
-                                          <input className="focus-ring min-h-9 rounded-md border border-[var(--line)] px-2 text-sm font-normal text-[#171d1c]" min="0" name="paid_amount" placeholder="Montant" step="0.01" type="number" />
+                                          <input className="focus-ring min-h-9 w-full rounded-md border border-[var(--line)] px-2 text-sm font-normal text-[#171d1c]" min="0" name="paid_amount" placeholder="Montant" step="0.01" type="number" />
                                         </label>
                                         <button className="mt-2 text-xs font-semibold text-[#b45309]" type="submit">
                                           Valider
@@ -404,8 +415,7 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
                                   <input name="tenant_id" type="hidden" value={tenant.id} />
                                   <DeleteTenantButton />
                                 </form>
-                              </div>
-                            </details>
+                            </TenantActionDetails>
                           </td>
                         </tr>
                       );
