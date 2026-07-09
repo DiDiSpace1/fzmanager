@@ -59,6 +59,10 @@ function formatMoney(amount: number) {
   return `${amount.toLocaleString('fr-FR', {maximumFractionDigits: 2, minimumFractionDigits: 2})} EUR`;
 }
 
+function pdfText(text: string | null | undefined) {
+  return (text || '-').replace(/[^\x09\x0A\x0D\x20-\x7E\u00A0-\u00FF]/g, '?');
+}
+
 function paymentLabel(method: string) {
   if (method === 'cash') {
     return 'Especes';
@@ -104,15 +108,15 @@ async function buildQuittancePdf(input: {
   doc.moveDown(2);
 
   doc.fillColor('#171d1c').fontSize(12).text('Proprietaire', {continued: false});
-  doc.fontSize(11).fillColor('#3d4947').text(input.ownerName || '-');
+  doc.fontSize(11).fillColor('#3d4947').text(pdfText(input.ownerName));
   doc.moveDown();
 
   doc.fillColor('#171d1c').fontSize(12).text('Locataire');
-  doc.fontSize(11).fillColor('#3d4947').text(input.tenant?.full_name ?? '-');
+  doc.fontSize(11).fillColor('#3d4947').text(pdfText(input.tenant?.full_name));
   doc.moveDown();
 
   doc.fillColor('#171d1c').fontSize(12).text('Bien loue');
-  doc.fontSize(11).fillColor('#3d4947').text(propertyLines || '-');
+  doc.fontSize(11).fillColor('#3d4947').text(pdfText(propertyLines));
   doc.moveDown(1.5);
 
   doc.fillColor('#171d1c').fontSize(13).text('Detail du paiement');
@@ -126,7 +130,7 @@ async function buildQuittancePdf(input: {
   doc.moveDown(1.5);
 
   doc.fillColor('#171d1c').fontSize(11).text(
-    `Je soussigne ${input.ownerName || 'le proprietaire'} reconnais avoir recu de ${input.tenant?.full_name ?? 'le locataire'} la somme de ${formatMoney(total)} au titre du loyer et des charges pour la periode ${formatMonth(input.periodMonth)}.`
+    pdfText(`Je soussigne ${input.ownerName || 'le proprietaire'} reconnais avoir recu de ${input.tenant?.full_name ?? 'le locataire'} la somme de ${formatMoney(total)} au titre du loyer et des charges pour la periode ${formatMonth(input.periodMonth)}.`)
   );
   doc.moveDown(2);
   doc.text(`Fait le ${new Date().toLocaleDateString('fr-FR')}`);
@@ -188,7 +192,13 @@ export async function generateQuittanceAction(formData: FormData): Promise<Gener
     tenant = tenantData;
   }
 
-  const pdf = await buildQuittancePdf({amount, charges, ownerName, paidAt, paymentMethod, periodMonth, property, tenant});
+  let pdf: Buffer;
+
+  try {
+    pdf = await buildQuittancePdf({amount, charges, ownerName, paidAt, paymentMethod, periodMonth, property, tenant});
+  } catch {
+    return {error: 'Impossible de generer le PDF avec ces informations.', ok: false};
+  }
   const documentId = randomUUID();
   const fileName = safeFileName(`Quittance_${periodMonth}_${tenant?.full_name ?? property.name}.pdf`);
   const year = new Date().getUTCFullYear();

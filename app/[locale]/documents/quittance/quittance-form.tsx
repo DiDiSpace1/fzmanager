@@ -225,13 +225,13 @@ export function QuittanceForm({
           </div>
 
           <div className="mt-6 grid gap-4 border-t border-[var(--line-soft)] pt-6 md:grid-cols-2">
-            <label className="grid gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+            <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
               Proprietaire
-              <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => update({ownerName: event.target.value})} value={state.ownerName} />
+              <input className="focus-ring min-h-11 w-full min-w-0 truncate rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => update({ownerName: event.target.value})} value={state.ownerName} />
             </label>
-            <label className="grid gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+            <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
               Bien
-              <select className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => onPropertyChange(event.target.value)} value={state.propertyId}>
+              <select className="focus-ring min-h-11 w-full min-w-0 truncate rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => onPropertyChange(event.target.value)} value={state.propertyId}>
                 {properties.length ? null : <option value="">Aucun bien enregistre</option>}
                 {properties.map((property) => (
                   <option key={property.id} value={property.id}>
@@ -240,25 +240,25 @@ export function QuittanceForm({
                 ))}
               </select>
             </label>
-            <label className="grid gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+            <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
               Montant du loyer
-              <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" min="0" onChange={(event) => update({amount: event.target.value})} step="0.01" type="number" value={state.amount} />
+              <input className="focus-ring min-h-11 w-full min-w-0 truncate rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" min="0" onChange={(event) => update({amount: event.target.value})} step="0.01" type="number" value={state.amount} />
             </label>
-            <label className="grid gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+            <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
               Charges (optionnel)
-              <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" min="0" onChange={(event) => update({charges: event.target.value})} step="0.01" type="number" value={state.charges} />
+              <input className="focus-ring min-h-11 w-full min-w-0 truncate rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" min="0" onChange={(event) => update({charges: event.target.value})} step="0.01" type="number" value={state.charges} />
             </label>
-            <label className="grid gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+            <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
               Periode pour la quittance
-              <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => update({periodMonth: event.target.value})} type="month" value={state.periodMonth} />
+              <input className="focus-ring min-h-11 w-full min-w-0 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => update({periodMonth: event.target.value})} type="month" value={state.periodMonth} />
             </label>
-            <label className="grid gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+            <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
               Date du paiement
-              <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => update({paidAt: event.target.value})} type="date" value={state.paidAt} />
+              <input className="focus-ring min-h-11 w-full min-w-0 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => update({paidAt: event.target.value})} type="date" value={state.paidAt} />
             </label>
-            <label className="grid gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)] md:col-span-2">
+            <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)] md:col-span-2">
               Locataire (optionnel)
-              <select className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => update({tenantId: event.target.value})} value={state.tenantId}>
+              <select className="focus-ring min-h-11 w-full min-w-0 truncate rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => update({tenantId: event.target.value})} value={state.tenantId}>
                 <option value="">Aucun locataire specifique</option>
                 {tenants.map((tenant) => (
                   <option key={tenant.id} value={tenant.id}>
@@ -267,9 +267,9 @@ export function QuittanceForm({
                 ))}
               </select>
             </label>
-            <label className="grid gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)] md:col-span-2">
+            <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)] md:col-span-2">
               Mode de paiement
-              <select className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => update({paymentMethod: event.target.value})} value={state.paymentMethod}>
+              <select className="focus-ring min-h-11 w-full min-w-0 truncate rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => update({paymentMethod: event.target.value})} value={state.paymentMethod}>
                 <option value="bank_transfer">Virement bancaire</option>
                 <option value="cash">Especes</option>
                 <option value="cheque">Cheque</option>
