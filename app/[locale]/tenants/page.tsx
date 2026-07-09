@@ -346,12 +346,12 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
                           <td className="px-5 py-4">
                             <span className={`inline-flex rounded px-2.5 py-1 text-xs font-semibold ${status.className}`}>{status.label}</span>
                           </td>
-                          <td className="px-5 py-4 text-right">
-                            <details className="relative inline-block">
+                          <td className="relative z-20 px-5 py-4 text-right">
+                            <details className="relative inline-block open:z-[9999]">
                               <summary className="focus-ring flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-md text-xl text-[var(--muted)] hover:bg-[#eaefed]">
                                 ...
                               </summary>
-                              <div className="absolute bottom-0 right-full z-50 mr-2 w-48 rounded-lg border border-[var(--line-soft)] bg-white p-1 text-left text-sm shadow-xl">
+                              <div className="absolute right-full top-0 z-[9999] mr-2 w-48 rounded-lg border border-[var(--line-soft)] bg-white p-1 text-left text-sm shadow-xl">
                                 <Link className="block rounded-md px-3 py-2 hover:bg-[#f0f5f2]" href={`/tenants/${tenant.id}`}>
                                   Voir
                                 </Link>
