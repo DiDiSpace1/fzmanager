@@ -34,13 +34,13 @@ Notes:
 
 This table is a draft product plan. Edit this section when deciding the final business model.
 
-| Tier | Intended customer | Price | Properties | Tenants | Documents | Photos per property | Notes |
-| --- | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Free | Trial / very small landlord | EUR 0 | 1 | 3 | 10 | 0 | Keep enough value to test the workflow. |
-| Solo | Small landlord | EUR 49/year | 1-5 | TBD | TBD | 5 | Current `subscription` fallback behaves closest to this tier. |
-| Plus | Growing portfolio | EUR 89/year | 6-10 | TBD | TBD | 10 | Planned tier; not fully enforced in code yet. |
-| Portfolio | Larger landlord | EUR 149/year | 11-20 | TBD | TBD | 20 | Current `lifetime` fallback behaves closest to this tier for photos. |
-| Custom | 20+ units / special needs | Contact us | Custom | Custom | Custom | Custom | Requires manual sales/support flow. |
+| Tier | Intended customer | Price | Properties | Tenants | Documents | Storage limit | Max file size | Photos per property | Notes |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| Free | Trial / very small landlord | EUR 0 | 1 | 3 | 10 | 50 MB | 5 MB | 0 | Keep enough value to test the workflow. |
+| Solo | Small landlord | EUR 39/year | 5 | 20 | 150 | 500 MB | 10 MB | 5 | This tier mainly removes tenant/document friction and opens photo features; the difference is not only property count. |
+| Plus | Growing portfolio | EUR 69/year | 10 | 40 | 400 | 1.5 GB | 15 MB | 10 | For landlords with a growing set of units and more document volume. |
+| Portfolio | Larger landlord | EUR 99/year | 20 | 80 | 1000 | 4 GB | 15 MB | 20 | For larger private portfolios that need higher storage and document limits. |
+| Custom | 20+ units / special needs | Contact us | Custom | Custom | Custom | Custom | Custom | Custom | Requires manual sales/support flow. |
 
 ## Feature Matrix
 
@@ -48,12 +48,12 @@ Use this table to decide which features are included in each tier.
 
 | Feature | Free | Solo | Plus | Portfolio | Custom |
 | --- | --- | --- | --- | --- | --- |
-| Property management | Limited | Included | Included | Included | Included |
-| Tenant management | Limited | Included | Included | Included | Included |
+| Property management | 1 property | Up to 5 properties | Up to 10 properties | Up to 20 properties | Custom |
+| Tenant management | Up to 3 tenants | Up to 20 tenants | Up to 40 tenants | Up to 80 tenants | Custom |
 | Lease tracking | Included | Included | Included | Included | Included |
 | Rent charge tracking | Included | Included | Included | Included | Included |
 | Rent payment status | Included | Included | Included | Included | Included |
-| Document upload | Limited | Included | Included | Included | Included |
+| Document upload | 10 docs / 50 MB storage / 5 MB per file | 150 docs / 500 MB storage / 10 MB per file | 400 docs / 1.5 GB storage / 15 MB per file | 1000 docs / 4 GB storage / 15 MB per file | Custom |
 | Quittance generation | TBD | TBD | TBD | TBD | TBD |
 | Tax export package | Included | Included | Included | Included | Included |
 | Property photos | Not included | Included | Included | Included | Included |
@@ -83,4 +83,3 @@ When applying edits from this document to the app:
 4. Update Stripe checkout plan keys, metadata, and env vars if tier keys change.
 5. Add a Supabase migration if the database needs new plan fields.
 6. Run `pnpm typecheck`, `pnpm lint`, `pnpm build`, and `pnpm smoke:prod`.
-
