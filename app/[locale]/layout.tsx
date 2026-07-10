@@ -45,6 +45,11 @@ export default async function LocaleLayout({children, params}: LocaleLayoutProps
 
   return (
     <html lang={locale}>
+      <head>
+        <link href="https://fonts.googleapis.com" rel="preconnect" />
+        <link crossOrigin="anonymous" href="https://fonts.gstatic.com" rel="preconnect" />
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0&display=optional" rel="stylesheet" />
+      </head>
       <body>
         <NextIntlClientProvider messages={messages}>
           {children}
