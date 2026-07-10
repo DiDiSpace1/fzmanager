@@ -4,6 +4,8 @@ import {getLocale} from 'next-intl/server';
 import {AppShell} from '@/components/app/app-shell';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
 
+import {RevenueExpenseChart} from './revenue-expense-chart';
+
 type DashboardProperty = {
   address_line1: string | null;
   city: string | null;
@@ -39,11 +41,47 @@ type RentCharge = {
   } | null;
 };
 
+type ChartRentCharge = {
+  period_month: string;
+  status: string;
+  total_due: number;
+};
+
+type ChartExpense = {
+  amount: number;
+  expense_date: string;
+};
+
 const defaultApartmentPhoto = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=900&q=80';
+const monthLabels = ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aout', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function currentMonthStart() {
   const now = new Date();
   return new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)).toISOString().slice(0, 10);
+}
+
+function addMonths(date: Date, offset: number) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + offset, 1));
+}
+
+function monthKey(date: Date) {
+  return date.toISOString().slice(0, 7);
+}
+
+function buildRecentMonths() {
+  const now = new Date();
+  const currentMonth = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1));
+
+  return Array.from({length: 6}, (_, index) => {
+    const date = addMonths(currentMonth, index - 6);
+
+    return {
+      end: addMonths(date, 1).toISOString().slice(0, 10),
+      key: monthKey(date),
+      label: monthLabels[date.getUTCMonth()],
+      start: date.toISOString().slice(0, 10)
+    };
+  });
 }
 
 function formatMoney(value: number) {
@@ -54,19 +92,13 @@ function formatAddress(property: Pick<DashboardProperty, 'address_line1' | 'post
   return [property.address_line1, property.postal_code, property.city].filter(Boolean).join(', ') || 'Adresse a completer';
 }
 
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join('');
-}
-
 export default async function DashboardPage() {
   const locale = await getLocale();
   const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
   const month = currentMonthStart();
+  const chartMonths = buildRecentMonths();
+  const chartStart = chartMonths[0]?.start ?? month;
+  const chartEnd = chartMonths[chartMonths.length - 1]?.end ?? month;
   const {data: properties} = await supabase
     .from('properties')
     .select('id, name, address_line1, postal_code, city, property_photos(file_path, is_cover), leases(status, monthly_rent, charges_amount, tenants(full_name))')
@@ -81,9 +113,40 @@ export default async function DashboardPage() {
     .order('created_at', {ascending: false})
     .limit(5)
     .returns<RentCharge[]>();
+  const {data: chartRentCharges} = await supabase
+    .from('rent_charges')
+    .select('period_month, total_due, status')
+    .eq('workspace_id', workspaceId)
+    .gte('period_month', chartStart)
+    .lt('period_month', chartEnd)
+    .returns<ChartRentCharge[]>();
+  const {data: chartExpenses} = await supabase
+    .from('expenses')
+    .select('expense_date, amount')
+    .eq('workspace_id', workspaceId)
+    .gte('expense_date', chartStart)
+    .lt('expense_date', chartEnd)
+    .returns<ChartExpense[]>();
 
   const rows = properties ?? [];
   const charges = rentCharges ?? [];
+  const revenueByMonth = new Map<string, number>();
+  const expenseByMonth = new Map<string, number>();
+  (chartRentCharges ?? [])
+    .filter((charge) => charge.status !== 'waived')
+    .forEach((charge) => {
+      const key = charge.period_month.slice(0, 7);
+      revenueByMonth.set(key, (revenueByMonth.get(key) ?? 0) + Number(charge.total_due ?? 0));
+    });
+  (chartExpenses ?? []).forEach((expense) => {
+    const key = expense.expense_date.slice(0, 7);
+    expenseByMonth.set(key, (expenseByMonth.get(key) ?? 0) + Number(expense.amount ?? 0));
+  });
+  const chartPoints = chartMonths.map((chartMonth) => ({
+    expense: expenseByMonth.get(chartMonth.key) ?? 0,
+    label: chartMonth.label,
+    revenue: revenueByMonth.get(chartMonth.key) ?? 0
+  }));
   const activeLeaseCount = rows.reduce((sum, property) => sum + property.leases.filter((lease) => lease.status === 'active').length, 0);
   const activeRentTotal = rows.reduce(
     (sum, property) =>
@@ -139,57 +202,7 @@ export default async function DashboardPage() {
 
       <section className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="grid gap-6">
-          <section className="overflow-hidden rounded-xl border border-[var(--line-soft)] bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-[var(--line-soft)] bg-[#f0f5f2] px-5 py-4">
-              <h2 className="text-base font-semibold">Paiements du mois</h2>
-              <Link className="text-sm font-semibold text-[var(--accent)]" href="/tenants?view=overdue">
-                Voir tout
-              </Link>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[680px] border-collapse text-left">
-                <thead className="bg-[#f0f5f2] text-[11px] font-semibold uppercase text-[var(--muted)]">
-                  <tr>
-                    <th className="px-5 py-3">Locataire</th>
-                    <th className="px-5 py-3">Bien</th>
-                    <th className="px-5 py-3">Periode</th>
-                    <th className="px-5 py-3">Montant</th>
-                    <th className="px-5 py-3">Statut</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--line-soft)]">
-                  {charges.length ? (
-                    charges.map((charge) => {
-                      const tenantName = charge.leases?.tenants?.full_name ?? 'Locataire';
-
-                      return (
-                        <tr className="transition hover:bg-[#f0f5f2]" key={charge.id}>
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-3">
-                              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#dee4e1] text-xs font-bold">{initials(tenantName) || 'LO'}</span>
-                              <span className="text-sm font-medium">{tenantName}</span>
-                            </div>
-                          </td>
-                          <td className="px-5 py-4 text-sm">{charge.leases?.properties?.name ?? '-'}</td>
-                          <td className="px-5 py-4 text-sm tabular-nums">{charge.period_month.slice(0, 7)}</td>
-                          <td className="px-5 py-4 text-sm font-semibold tabular-nums">{formatMoney(Number(charge.total_due ?? 0))}</td>
-                          <td className="px-5 py-4">
-                            <StatusBadge status={charge.status} />
-                          </td>
-                        </tr>
-                      );
-                    })
-                  ) : (
-                    <tr>
-                      <td className="px-5 py-8 text-center text-sm text-[var(--muted)]" colSpan={5}>
-                        Aucun paiement pour ce mois.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </section>
+          <RevenueExpenseChart points={chartPoints} />
 
           <section>
             <div className="mb-4 flex items-center justify-between">
@@ -241,17 +254,6 @@ export default async function DashboardPage() {
               <QuickAction href="/tax" label="Preparer le fiscal" note="Verifier les revenus et depenses" />
             </div>
           </section>
-
-          <section className="relative overflow-hidden rounded-xl bg-[var(--accent)] p-5 text-white shadow-sm">
-            <h2 className="text-base font-semibold">Preparation fiscale</h2>
-            <p className="mt-2 text-sm leading-6 text-white/85">Gardez vos loyers et justificatifs prets pour votre declaration.</p>
-            <div className="mt-5 h-2 rounded-full bg-white/20">
-              <div className="h-full w-3/4 rounded-full bg-white" />
-            </div>
-            <Link className="focus-ring mt-5 inline-flex min-h-10 w-full items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-[var(--accent)]" href="/tax">
-              Continuer
-            </Link>
-          </section>
         </aside>
       </section>
     </AppShell>
@@ -274,15 +276,6 @@ function MetricCard({accent, label, value}: {accent: 'blue' | 'red' | 'teal'; la
       <p className="mt-2 text-2xl font-semibold tabular-nums">{value}</p>
     </div>
   );
-}
-
-function StatusBadge({status}: {status: string}) {
-  const paid = status === 'paid';
-  const partial = status === 'partial';
-  const className = paid ? 'bg-[#ecfdf5] text-[#047857]' : partial ? 'bg-[#fff8ec] text-[#9a5a00]' : 'bg-[#ffdad6] text-[#ba1a1a]';
-  const label = paid ? 'Encaisse' : partial ? 'Partiel' : 'A suivre';
-
-  return <span className={`rounded px-2 py-1 text-[11px] font-bold uppercase ${className}`}>{label}</span>;
 }
 
 function QuickAction({href, label, note}: {href: string; label: string; note: string}) {
