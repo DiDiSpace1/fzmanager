@@ -10,6 +10,7 @@ type NavItem = {
 };
 
 const iconPaths: Record<string, string[]> = {
+  bail: ['M6 3h9l3 3v15H6z', 'M14 3v4h4', 'M9 11h6', 'M9 15h6', 'M9 19h3'],
   dashboard: ['M4 4h6v6H4z', 'M14 4h6v6h-6z', 'M4 14h6v6H4z', 'M14 14h6v6h-6z'],
   documents: ['M6 3h9l3 3v15H6z', 'M14 3v4h4', 'M9 12h6', 'M9 16h6'],
   properties: ['M4 10h16v10H4z', 'M7 7h10v3H7z', 'M8 14h2', 'M12 14h2', 'M16 14h2', 'M8 17h2', 'M12 17h2', 'M16 17h2'],

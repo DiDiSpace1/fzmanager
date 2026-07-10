@@ -260,7 +260,9 @@ export async function terminateLeaseAction(formData: FormData) {
   const endDate = value(formData, 'end_date');
 
   const returnTo = value(formData, 'return_to');
-  const returnPath = (returnTo === 'tenant_management' ? `/properties/${propertyId}/tenants` : `/properties/${propertyId}/edit`) as `/${string}`;
+  const returnPath = (
+    returnTo === 'bail' ? `/bail?property_id=${propertyId}` : returnTo === 'tenant_management' ? `/properties/${propertyId}/tenants` : `/properties/${propertyId}/edit`
+  ) as `/${string}`;
 
   if (!propertyId || !leaseId || !endDate) {
     redirect(`${localizedPath(locale, returnPath)}?error=missing_termination`);
@@ -303,6 +305,7 @@ export async function terminateLeaseAction(formData: FormData) {
 export async function assignPropertyTenantsAction(formData: FormData) {
   const locale = value(formData, 'locale') || 'fr';
   const propertyId = value(formData, 'property_id');
+  const returnTo = value(formData, 'return_to');
   const tenantIds = values(formData, 'assignment_tenant_id');
   const startDates = values(formData, 'assignment_start_date');
   const endDates = values(formData, 'assignment_end_date');
@@ -380,7 +383,7 @@ export async function assignPropertyTenantsAction(formData: FormData) {
   revalidatePath(localizedPath(locale, `/properties/${propertyId}/edit`));
   revalidatePath(localizedPath(locale, `/properties/${propertyId}/tenants`));
   revalidatePath(localizedPath(locale, '/tenants'));
-  redirect(localizedPath(locale, `/properties/${propertyId}/tenants`));
+  redirect(localizedPath(locale, returnTo === 'bail' ? `/bail?property_id=${propertyId}` : `/properties/${propertyId}/tenants`));
 }
 
 export async function deletePropertyAction(formData: FormData) {

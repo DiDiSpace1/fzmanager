@@ -12,6 +12,7 @@ const navItems = [
   {href: '/dashboard', key: 'dashboard'},
   {href: '/properties', key: 'properties'},
   {href: '/tenants', key: 'tenants'},
+  {href: '/bail', key: 'bail'},
   {href: '/documents', key: 'documents'},
   {href: '/tax', key: 'tax'},
   {href: '/settings', key: 'settings'}
