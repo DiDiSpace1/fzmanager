@@ -12,6 +12,9 @@ type EditPropertyPageProps = {
   params: Promise<{
     id: string;
   }>;
+  searchParams: Promise<{
+    error?: string;
+  }>;
 };
 
 type EditableProperty = {
@@ -36,8 +39,9 @@ type EditableProperty = {
   }[];
 };
 
-export default async function EditPropertyPage({params}: EditPropertyPageProps) {
+export default async function EditPropertyPage({params, searchParams}: EditPropertyPageProps) {
   const {id} = await params;
+  const query = await searchParams;
   const locale = await getLocale();
   const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
   const {data: property, error} = await supabase
@@ -75,6 +79,24 @@ export default async function EditPropertyPage({params}: EditPropertyPageProps) 
       <form action={updatePropertyAction} className="mt-8 grid gap-5" encType="multipart/form-data">
         <input name="locale" type="hidden" value={locale} />
         <input name="property_id" type="hidden" value={property.id} />
+
+        {query.error === 'photo_limit' ? (
+          <div className="rounded-lg border border-[#f0d6b6] bg-[#fff8ec] p-4 text-sm leading-6 text-[#7a4a11]">
+            Votre forfait autorise {photoLimit} photo(s) pour ce bien.
+          </div>
+        ) : null}
+
+        {query.error === 'photo_size' ? (
+          <div className="rounded-lg border border-[#f0d6b6] bg-[#fff8ec] p-4 text-sm leading-6 text-[#7a4a11]">
+            La photo est trop lourde pour votre forfait. Choisissez une image plus legere ou reduisez sa taille avant l&apos;envoi.
+          </div>
+        ) : null}
+
+        {query.error === 'photo_failed' || query.error === 'photo_delete_failed' ? (
+          <div className="rounded-lg border border-[#f0d6b6] bg-[#fff8ec] p-4 text-sm leading-6 text-[#7a4a11]">
+            Impossible de modifier les photos pour le moment. Verifiez les droits Storage Supabase puis reessayez.
+          </div>
+        ) : null}
 
         <SectionCard icon="pin" title="1. Informations Generales">
           <label className="grid gap-2 text-xs font-semibold text-[#33413f]">

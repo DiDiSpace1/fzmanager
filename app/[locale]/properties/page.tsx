@@ -163,6 +163,12 @@ export default async function PropertiesPage({searchParams}: PropertiesPageProps
         </div>
       ) : null}
 
+      {params.error === 'photo_size' ? (
+        <div className="mt-6 rounded-lg border border-[#f0d6b6] bg-[#fff8ec] p-4 text-sm leading-6 text-[#7a4a11]">
+          La photo est trop lourde pour votre forfait. Choisissez une image plus legere ou reduisez sa taille avant l&apos;envoi.
+        </div>
+      ) : null}
+
       {params.error === 'delete_failed' ? (
         <div className="mt-6 rounded-lg border border-[#f0d6b6] bg-[#fff8ec] p-4 text-sm leading-6 text-[#7a4a11]">
           Suppression impossible. Verifiez que la policy Supabase de suppression des biens est appliquee.

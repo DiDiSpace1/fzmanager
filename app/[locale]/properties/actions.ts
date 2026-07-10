@@ -5,7 +5,7 @@ import {redirect} from 'next/navigation';
 import type {SupabaseClient} from '@supabase/supabase-js';
 
 import {localizedPath} from '@/lib/navigation';
-import {getPropertyPhotoLimit} from '@/lib/billing/config';
+import {getPlanLimits, getPropertyPhotoLimit} from '@/lib/billing/config';
 import {canCreateResource} from '@/lib/billing/limits';
 import {buildRentChargesForLease} from '@/lib/rent/charges';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
@@ -33,6 +33,10 @@ function numericValue(formData: FormData, key: string) {
 
 function imageFiles(formData: FormData) {
   return formData.getAll('photos').filter((entry): entry is File => entry instanceof File && entry.size > 0 && entry.type.startsWith('image/'));
+}
+
+function hasOversizedFile(files: File[], maxSizeBytes: number) {
+  return files.some((file) => file.size > maxSizeBytes);
 }
 
 function moneyValues(formData: FormData, key: string) {
@@ -105,9 +109,14 @@ export async function createPropertyAction(formData: FormData) {
   }
 
   const photoLimit = getPropertyPhotoLimit(planGate.billing?.plan);
+  const planLimits = getPlanLimits(planGate.billing?.plan);
 
   if (photos.length > photoLimit) {
     redirect(`${localizedPath(locale, '/properties')}?error=photo_limit`);
+  }
+
+  if (hasOversizedFile(photos, planLimits.maxDocumentSizeBytes)) {
+    redirect(`${localizedPath(locale, '/properties')}?new=1&error=photo_size`);
   }
 
   const {data: property, error} = await supabase
@@ -172,6 +181,7 @@ export async function updatePropertyAction(formData: FormData) {
   if (photos.length) {
     const {data: billing} = await supabase.from('workspace_billing').select('plan').eq('workspace_id', workspaceId).maybeSingle();
     const photoLimit = getPropertyPhotoLimit(billing?.plan);
+    const planLimits = getPlanLimits(billing?.plan);
     const {count} = await supabase
       .from('property_photos')
       .select('*', {count: 'exact', head: true})
@@ -181,6 +191,10 @@ export async function updatePropertyAction(formData: FormData) {
 
     if (existingPhotoCount + photos.length > photoLimit) {
       redirect(`${localizedPath(locale, `/properties/${propertyId}/edit`)}?error=photo_limit`);
+    }
+
+    if (hasOversizedFile(photos, planLimits.maxDocumentSizeBytes)) {
+      redirect(`${localizedPath(locale, `/properties/${propertyId}/edit`)}?error=photo_size`);
     }
   }
 
