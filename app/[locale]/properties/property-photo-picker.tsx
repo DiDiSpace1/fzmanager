@@ -7,6 +7,7 @@ type PropertyPhotoPickerProps = {
   existingCount?: number;
   maxFiles: number;
   maxSizeBytes: number;
+  onFilesChange?: (files: File[]) => void;
 };
 
 function formatSize(bytes: number) {
@@ -21,7 +22,7 @@ function fileKey(file: File) {
   return `${file.name}-${file.size}-${file.lastModified}`;
 }
 
-export function PropertyPhotoPicker({disabled = false, existingCount = 0, maxFiles, maxSizeBytes}: PropertyPhotoPickerProps) {
+export function PropertyPhotoPicker({disabled = false, existingCount = 0, maxFiles, maxSizeBytes, onFilesChange}: PropertyPhotoPickerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState('');
@@ -39,6 +40,7 @@ export function PropertyPhotoPicker({disabled = false, existingCount = 0, maxFil
   function setNextFiles(nextFiles: File[]) {
     setFiles(nextFiles);
     syncInput(nextFiles);
+    onFilesChange?.(nextFiles);
   }
 
   return (

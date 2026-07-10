@@ -165,6 +165,64 @@ export async function createPropertyAction(formData: FormData) {
   redirect(localizedPath(locale, `/properties/${property.id}`));
 }
 
+export async function createPropertyDraftAction(formData: FormData) {
+  const locale = value(formData, 'locale') || 'fr';
+  const name = value(formData, 'name');
+  const rentalMode = value(formData, 'rental_mode') || 'shared_rooms';
+
+  if (!name) {
+    return {error: 'missing_name' as const};
+  }
+
+  const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
+  const planGate = await canCreateResource(supabase, workspaceId, 'properties');
+
+  if (!planGate.allowed) {
+    return {error: 'plan_limit' as const};
+  }
+
+  const {data: property, error} = await supabase
+    .from('properties')
+    .insert({
+      address_line1: value(formData, 'address_line1') || null,
+      city: value(formData, 'city') || null,
+      country_code: 'FR',
+      charges_estimate: null,
+      deposit_estimate: null,
+      monthly_rent_estimate: null,
+      name,
+      occupancy_status: 'vacant',
+      postal_code: value(formData, 'postal_code') || null,
+      property_type: value(formData, 'property_type') || 'apartment',
+      rental_mode: rentalMode,
+      surface_area: numericValue(formData, 'surface_area'),
+      tax_regime: 'LMNP',
+      workspace_id: workspaceId
+    })
+    .select('id')
+    .single();
+
+  if (error || !property) {
+    return {error: 'create_failed' as const};
+  }
+
+  if (rentalMode === 'entire_place') {
+    await supabase.from('units').insert({
+      name: 'Logement entier',
+      property_id: property.id,
+      unit_type: 'apartment',
+      workspace_id: workspaceId
+    });
+  }
+
+  revalidatePath(localizedPath(locale, '/properties'));
+
+  return {
+    propertyId: property.id as string,
+    workspaceId
+  };
+}
+
 export async function updatePropertyAction(formData: FormData) {
   const locale = value(formData, 'locale') || 'fr';
   const propertyId = value(formData, 'property_id');

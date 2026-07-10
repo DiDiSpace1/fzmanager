@@ -6,9 +6,8 @@ import {getPlanLimits, getPropertyPhotoLimit} from '@/lib/billing/config';
 import {getWorkspaceBilling} from '@/lib/billing/limits';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
 
-import {createPropertyAction} from './actions';
+import {CreatePropertyForm} from './create-property-form';
 import {PropertyActionsMenu} from './property-actions-menu';
-import {PropertyPhotoPicker} from './property-photo-picker';
 
 type PropertyRow = {
   id: string;
@@ -178,7 +177,7 @@ export default async function PropertiesPage({searchParams}: PropertiesPageProps
       ) : null}
 
       {showCreate ? (
-        <CreatePropertyView locale={locale} maxPhotoSizeBytes={planLimits.maxDocumentSizeBytes} photoLimit={photoLimit} />
+        <CreatePropertyForm locale={locale} maxPhotoSizeBytes={planLimits.maxDocumentSizeBytes} photoLimit={photoLimit} />
       ) : (
         <>
           <section className="mt-8 grid gap-4 md:grid-cols-3">
@@ -286,102 +285,5 @@ function SummaryCard({label, note, value}: {label: string; note: string; value: 
       <p className="mt-3 text-2xl font-semibold tabular-nums">{value}</p>
       <p className="mt-1 text-sm text-[var(--muted)]">{note}</p>
     </div>
-  );
-}
-
-function CreatePropertyView({locale, maxPhotoSizeBytes, photoLimit}: {locale: string; maxPhotoSizeBytes: number; photoLimit: number}) {
-  return (
-    <form action={createPropertyAction} className="mt-8 grid gap-5" encType="multipart/form-data">
-      <input name="locale" type="hidden" value={locale} />
-      <SectionCard icon="pin" title={`1. Informations Generales`}>
-        <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-          Nom du bien
-          <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="name" placeholder="Appartement Lyon" required />
-        </label>
-        <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-          Adresse complete
-          <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="address_line1" placeholder="12 rue de la Paix" />
-        </label>
-        <div className="grid gap-4 md:grid-cols-2">
-          <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-            Code postal
-            <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="postal_code" placeholder="75002" />
-          </label>
-          <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-            Ville
-            <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="city" placeholder="Paris" />
-          </label>
-        </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-            Type de bien
-            <select className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="property_type" defaultValue="studio">
-              <option value="studio">Studio</option>
-              <option value="t1">T1</option>
-              <option value="t2">T2</option>
-              <option value="t3">T3</option>
-              <option value="room">Chambre</option>
-              <option value="house">Maison</option>
-              <option value="apartment">Appartement</option>
-              <option value="other">Autre</option>
-            </select>
-          </label>
-          <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-            Mode de location
-            <select className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="rental_mode" defaultValue="shared_rooms">
-              <option value="shared_rooms">colocation</option>
-              <option value="entire_place">entier</option>
-              <option value="mixed">mixte</option>
-            </select>
-          </label>
-          <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-            Surface habitable (m2)
-            <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" min="0" name="surface_area" placeholder="35" step="0.01" type="number" />
-          </label>
-        </div>
-      </SectionCard>
-
-      <SectionCard icon="camera" title="2. Photos & Documents">
-        <div className="rounded-lg border border-dashed border-[var(--line)] bg-[#fbfdfc] p-6 text-center">
-          <p className="text-sm font-semibold">Photos du bien</p>
-          <p className="mt-1 text-sm text-[var(--muted)]">{photoLimit === 0 ? 'Les photos ne sont pas incluses dans le plan Free.' : `${photoLimit} photo(s) maximum par bien.`}</p>
-          <PropertyPhotoPicker disabled={photoLimit === 0} maxFiles={photoLimit} maxSizeBytes={maxPhotoSizeBytes} />
-        </div>
-      </SectionCard>
-
-      <div className="flex justify-end gap-3">
-        <Link className="focus-ring inline-flex min-h-11 items-center rounded-md border border-[var(--line)] px-5 text-sm font-semibold" href="/properties">
-          Annuler
-        </Link>
-        <button className="focus-ring min-h-11 rounded-md bg-[var(--accent)] px-5 text-sm font-semibold text-white" type="submit">
-          Creer le bien
-        </button>
-      </div>
-    </form>
-  );
-}
-
-function SectionCard({children, icon, title}: {children: React.ReactNode; icon: string; title: string}) {
-  return (
-    <section className="rounded-lg border border-[var(--line-soft)] bg-white p-5 shadow-sm">
-      <h2 className="mb-5 flex items-center gap-3 text-base font-semibold">
-        <SmallIcon name={icon} />
-        {title}
-      </h2>
-      <div className="grid gap-4">{children}</div>
-    </section>
-  );
-}
-
-function SmallIcon({name}: {name: string}) {
-  const path =
-    name === 'camera'
-      ? 'M5 7h3l1.5-2h5L16 7h3v12H5z M12 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'
-      : 'M12 21s7-5.1 7-11a7 7 0 0 0-14 0c0 5.9 7 11 7 11z M12 10h.01';
-
-  return (
-    <svg aria-hidden="true" className="h-5 w-5 shrink-0 text-[var(--accent)]" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
-      <path d={path} />
-    </svg>
   );
 }
