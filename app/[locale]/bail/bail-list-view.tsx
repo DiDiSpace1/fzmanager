@@ -61,7 +61,7 @@ function statusBadge(status: string) {
     };
   }
 
-  if (status === 'terminated') {
+  if (status === 'ended') {
     return {
       className: 'bg-[#eef2ff] text-[#3755c3]',
       label: 'Termine'
@@ -113,7 +113,7 @@ export async function BailListView({query = ''}: BailListViewProps) {
             const badge = statusBadge(lease.status);
 
             return (
-              <Link className="block rounded-xl border border-[var(--line-soft)] bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" href={lease.properties?.id ? `/bail?property_id=${lease.properties.id}` : '/bail/new'} key={lease.id}>
+              <Link className="block rounded-xl border border-[var(--line-soft)] bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" href={`/bail/${lease.id}`} key={lease.id}>
                 <div className="flex items-start justify-between gap-3">
                   <h2 className="min-w-0 truncate text-xl font-semibold text-[#17211f]">{lease.properties?.name ?? 'Bail sans bien'}</h2>
                   <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${badge.className}`}>{badge.label}</span>

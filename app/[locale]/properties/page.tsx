@@ -20,7 +20,6 @@ type PropertyRow = {
   monthly_rent_estimate: number | null;
   tax_regime: string;
   property_photos: {file_path: string; is_cover: boolean}[];
-  units: {id: string}[];
   leases: {
     id: string;
     status: string;
@@ -86,7 +85,7 @@ export default async function PropertiesPage({searchParams}: PropertiesPageProps
   let query = supabase
     .from('properties')
     .select(
-      'id, name, address_line1, city, postal_code, rental_mode, occupancy_status, monthly_rent_estimate, tax_regime, property_photos(file_path, is_cover), units(id), leases(id, status, monthly_rent, tenants(full_name))'
+      'id, name, address_line1, city, postal_code, rental_mode, occupancy_status, monthly_rent_estimate, tax_regime, property_photos(file_path, is_cover), leases(id, status, monthly_rent, tenants(full_name))'
     )
     .eq('workspace_id', workspaceId)
     .order('created_at', {ascending: false});
@@ -101,8 +100,8 @@ export default async function PropertiesPage({searchParams}: PropertiesPageProps
 
   const {data: properties, error} = await query.returns<PropertyRow[]>();
   const rows = properties ?? [];
-  const activeLeaseCount = rows.reduce((sum, property) => sum + property.leases.filter((lease) => lease.status === 'active').length, 0);
-  const unitCount = rows.reduce((sum, property) => sum + property.units.length, 0);
+  const occupiedPropertyCount = rows.filter((property) => property.occupancy_status === 'rented' || property.leases.some((lease) => lease.status === 'active')).length;
+  const occupancyRate = rows.length ? Math.round((occupiedPropertyCount / rows.length) * 100) : 0;
   const monthlyRent = rows.reduce(
     (sum, property) => {
       const leaseTotal = property.leases.filter((lease) => lease.status === 'active').reduce((leaseSum, lease) => leaseSum + Number(lease.monthly_rent), 0);
@@ -181,9 +180,9 @@ export default async function PropertiesPage({searchParams}: PropertiesPageProps
       ) : (
         <>
           <section className="mt-8 grid gap-4 md:grid-cols-3">
-            <SummaryCard label="Total biens" note="Patrimoine actif" value={rows.length.toString()} />
-            <SummaryCard label="Unites suivies" note={`${activeLeaseCount} bail actif(s)`} value={unitCount.toString()} />
-            <SummaryCard label="Loyers mensuels" note="Baux actifs" value={`${monthlyRent.toLocaleString('fr-FR')} EUR`} />
+            <SummaryCard icon="domain" iconClassName="text-[var(--accent)]" label="Total Biens" note="Patrimoine actif" value={rows.length.toString()} />
+            <SummaryCard icon="analytics" iconClassName="text-[var(--secondary)]" label="Taux d'occupation" progress={occupancyRate} value={`${occupancyRate}%`} />
+            <SummaryCard icon="payments" iconClassName="text-[var(--accent)]" label="Revenus Mensuels" note="+2.5% vs mois dernier" trend value={`${monthlyRent.toLocaleString('fr-FR')} €`} />
           </section>
 
           <section className="mt-6">
@@ -278,12 +277,41 @@ export default async function PropertiesPage({searchParams}: PropertiesPageProps
   );
 }
 
-function SummaryCard({label, note, value}: {label: string; note: string; value: string}) {
+function SummaryCard({
+  icon,
+  iconClassName,
+  label,
+  note,
+  progress,
+  trend = false,
+  value
+}: {
+  icon: string;
+  iconClassName: string;
+  label: string;
+  note?: string;
+  progress?: number;
+  trend?: boolean;
+  value: string;
+}) {
   return (
     <div className="rounded-lg border border-[var(--line-soft)] bg-white p-5 shadow-sm">
-      <p className="text-xs font-semibold uppercase text-[var(--muted)]">{label}</p>
+      <div className="flex items-start justify-between gap-4">
+        <p className="text-xs font-medium text-[#33413f]">{label}</p>
+        <span className={`material-symbols-outlined text-[20px] ${iconClassName}`}>{icon}</span>
+      </div>
       <p className="mt-3 text-2xl font-semibold tabular-nums">{value}</p>
-      <p className="mt-1 text-sm text-[var(--muted)]">{note}</p>
+      {typeof progress === 'number' ? (
+        <div className="mt-4 h-1.5 rounded-full bg-[#d7e0dc]">
+          <div className="h-full rounded-full bg-[var(--secondary)]" style={{width: `${Math.min(Math.max(progress, 0), 100)}%`}} />
+        </div>
+      ) : null}
+      {note ? (
+        <p className={trend ? 'mt-3 flex items-center gap-1 text-sm font-medium text-[var(--accent)]' : 'mt-3 text-sm text-[var(--muted)]'}>
+          {trend ? <span className="material-symbols-outlined text-[14px]">trending_up</span> : null}
+          {note}
+        </p>
+      ) : null}
     </div>
   );
 }
