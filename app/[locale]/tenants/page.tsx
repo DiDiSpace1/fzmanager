@@ -180,6 +180,8 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
               <SummaryCard
                 active={selectedView === 'unassigned'}
                 href={viewHref('unassigned', summaryMonth, queryText)}
+                icon="person_edit"
+                iconTone="muted"
                 label="Non assignes"
                 note="A rattacher a un bien"
                 tone="neutral"
@@ -188,6 +190,8 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
               <SummaryCard
                 active={selectedView === 'expiring'}
                 href={viewHref('expiring', summaryMonth, queryText)}
+                icon="notifications_active"
+                iconTone="warning"
                 label="Baux < 3 mois"
                 note="A renouveler bientot"
                 tone="warning"
@@ -196,6 +200,8 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
               <SummaryCard
                 active={selectedView === 'overdue'}
                 href={viewHref('overdue', summaryOverdueMonth, queryText)}
+                icon="warning"
+                iconTone="danger"
                 label="Retards"
                 note="Paiements a suivre"
                 tone="danger"
@@ -203,8 +209,8 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
               />
             </div>
             <div className="grid gap-3 md:grid-cols-2">
-              <SummaryCard active={selectedView === 'all'} href={viewHref('all', summaryMonth, queryText)} label="Tous les locataires" note="Passes, futurs et non assignes" value={allRows.length.toString()} />
-              <SummaryCard active={selectedView === 'active'} href={viewHref('active', summaryMonth, queryText)} label="Baux actifs" note="Assignes et en periode" value={summaryActiveRows.length.toString()} />
+              <SummaryCard active={selectedView === 'all'} href={viewHref('all', summaryMonth, queryText)} icon="person" iconTone="primary" label="Tous les locataires" note="Passes, futurs et non assignes" value={allRows.length.toString()} />
+              <SummaryCard active={selectedView === 'active'} href={viewHref('active', summaryMonth, queryText)} icon="person_check" iconTone="primary" label="Baux actifs" note="Assignes et en periode" value={summaryActiveRows.length.toString()} />
             </div>
           </section>
 
@@ -218,6 +224,8 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
 function SummaryCard({
   active = false,
   href,
+  icon,
+  iconTone = 'primary',
   label,
   note,
   tone = 'neutral',
@@ -225,6 +233,8 @@ function SummaryCard({
 }: {
   active?: boolean;
   href: string;
+  icon: string;
+  iconTone?: 'danger' | 'muted' | 'primary' | 'warning';
   label: string;
   note: string;
   tone?: 'danger' | 'neutral' | 'warning';
@@ -236,12 +246,29 @@ function SummaryCard({
       : tone === 'warning'
         ? 'border-[#fed7aa] text-[#b45309]'
         : 'border-[var(--line-soft)] text-[var(--muted)]';
+  const iconToneClass =
+    iconTone === 'danger'
+      ? 'bg-[#ffdad6] text-[#ba1a1a]'
+      : iconTone === 'warning'
+        ? 'bg-[#fff4db] text-[#9a5a00]'
+        : iconTone === 'muted'
+          ? 'bg-gray-100 text-gray-600'
+          : 'bg-[var(--accent-soft)] text-[var(--accent)]';
 
   return (
     <Link className={['focus-ring rounded-lg border bg-white p-5 shadow-sm transition hover:bg-[#f8fbfa]', toneClass, active ? 'ring-2 ring-[var(--accent)]' : ''].join(' ')} href={href}>
-      <p className="text-xs font-semibold uppercase">{label}</p>
-      <p className="mt-3 text-2xl font-semibold tabular-nums">{value}</p>
-      <p className="mt-1 text-sm text-[var(--muted)]">{note}</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase">{label}</p>
+          <p className="mt-3 text-2xl font-semibold tabular-nums text-[#171d1c]">{value}</p>
+          <p className="mt-1 text-sm text-[var(--muted)]">{note}</p>
+        </div>
+        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${iconToneClass}`}>
+          <span className="material-symbols-outlined" data-icon={icon}>
+            {icon}
+          </span>
+        </div>
+      </div>
     </Link>
   );
 }
