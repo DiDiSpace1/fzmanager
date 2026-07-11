@@ -194,10 +194,10 @@ export default async function DashboardPage() {
       </div>
 
       <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard accent="teal" label="Loyers mensuels" value={formatMoney(activeRentTotal)} />
-        <MetricCard accent="blue" label="Encaisses ce mois" value={formatMoney(paidTotal)} />
-        <MetricCard accent="red" label="Impayes" value={formatMoney(unpaidTotal)} />
-        <MetricCard accent="teal" label="Baux actifs" value={activeLeaseCount.toString()} />
+        <MetricCard icon="payments" tone="primary" label="Loyers encaissés" value={formatMoney(activeRentTotal)} />
+        <MetricCard icon="hourglass_empty" tone="secondary" label="En attente" value={formatMoney(paidTotal)} />
+        <MetricCard icon="warning" tone="error" label="Impayes" value={formatMoney(unpaidTotal)} />
+        <MetricCard icon="home_work" tone="primary" label="Locations actives" value={activeLeaseCount.toString()} />
       </section>
 
       <section className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px]">
@@ -260,20 +260,21 @@ export default async function DashboardPage() {
   );
 }
 
-function MetricCard({accent, label, value}: {accent: 'blue' | 'red' | 'teal'; label: string; value: string}) {
-  const accents = {
-    blue: 'bg-[#eef2ff] text-[#3755c3]',
-    red: 'bg-[#ffdad6] text-[#ba1a1a]',
-    teal: 'bg-[#e1faf5] text-[var(--accent)]'
+function MetricCard({icon, label, tone, value}: {icon: string; label: string; tone: 'error' | 'primary' | 'secondary'; value: string}) {
+  const tones = {
+    error: 'bg-[#ffdad6]/60 text-[#ba1a1a]',
+    primary: 'bg-[var(--accent-soft)] text-[var(--accent)]',
+    secondary: 'bg-[#eef2ff] text-[var(--secondary)]'
   };
+  const valueClass = tone === 'error' ? 'text-[#ba1a1a]' : 'text-[#171d1c]';
 
   return (
     <div className="rounded-xl border border-[var(--line-soft)] bg-white p-5 shadow-sm">
-      <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-full ${accents[accent]}`}>
-        <span className="h-2.5 w-2.5 rounded-full bg-current" />
+      <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-full ${tones[tone]}`}>
+        <span className="material-symbols-outlined text-[22px]">{icon}</span>
       </div>
-      <p className="text-xs font-semibold uppercase text-[var(--muted)]">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tabular-nums">{value}</p>
+      <p className="mb-1 text-sm font-medium text-[var(--muted)]">{label}</p>
+      <p className={`text-2xl font-semibold tabular-nums ${valueClass}`}>{value}</p>
     </div>
   );
 }
