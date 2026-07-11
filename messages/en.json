@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "HabitatLog",
+    "appName": "Petit Bailleur",
     "cancel": "Cancel",
     "save": "Save",
     "soon": "Soon",
@@ -13,7 +13,7 @@
     "tenants": "Tenants",
     "bail": "Lease",
     "documents": "Documents",
-    "tax": "Tax pack",
+    "tax": "Comptabilité",
     "settings": "Settings"
   },
   "landing": {

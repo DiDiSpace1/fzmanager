@@ -65,10 +65,11 @@ export async function AppShell({children}: {children: React.ReactNode}) {
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <aside className="fixed inset-y-0 left-0 hidden w-[180px] border-r border-[var(--line-soft)] bg-[var(--background)] px-4 py-6 lg:block">
-        <Link href="/dashboard" className="block px-2 text-lg font-bold text-[#12201e]">
+      <aside className="fixed inset-y-0 left-0 hidden w-[226px] border-r border-[var(--line-soft)] bg-[var(--background)] px-4 py-6 lg:block">
+        <Link href="/dashboard" className="block px-2 text-2xl font-bold leading-7 text-[var(--accent)]">
           {common('appName')}
         </Link>
+        <p className="mt-1 px-2 text-sm text-[#3d4947]">Gestion immobilière</p>
         {userEmail ? (
           <div className="mt-2 px-2">
             <p className="truncate text-xs text-[var(--muted)]">{userEmail}</p>
@@ -86,7 +87,7 @@ export async function AppShell({children}: {children: React.ReactNode}) {
           />
         ) : null}
       </aside>
-      <div className="lg:pl-[180px]">
+      <div className="lg:pl-[226px]">
         <header className="sticky top-0 z-10 border-b border-[var(--line-soft)] bg-[var(--background)]/95 px-5 py-4 backdrop-blur lg:hidden">
           <div className="font-semibold">{common('appName')}</div>
           <nav className="mt-3 flex gap-2 overflow-x-auto pb-1">

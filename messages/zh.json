@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "HabitatLog",
+    "appName": "Petit Bailleur",
     "cancel": "取消",
     "save": "保存",
     "soon": "即将推出",
@@ -13,7 +13,7 @@
     "tenants": "租客",
     "bail": "Bail",
     "documents": "文件",
-    "tax": "税务包",
+    "tax": "Comptabilité",
     "settings": "设置"
   },
   "landing": {
