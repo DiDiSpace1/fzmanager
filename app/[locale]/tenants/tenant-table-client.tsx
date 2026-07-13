@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import {useMemo, useState} from 'react';
 
-import {deleteTenantAction, updateRentStatusAction, updateTenantActiveAction} from './actions';
+import {deleteTenantAction, updateTenantActiveAction} from './actions';
 import {DeleteTenantButton} from './delete-tenant-button';
 import {TenantActionDetails} from './tenant-action-details';
 
@@ -281,6 +281,9 @@ export function TenantTableClient({
                         <Link className="block rounded-md px-3 py-2 hover:bg-[#f0f5f2]" href={`/bail/new?tenant_id=${tenant.id}`}>
                           Creer un bail
                         </Link>
+                        <Link className="block rounded-md px-3 py-2 hover:bg-[#f0f5f2]" href={`/transactions?new=transaction&tenant_id=${tenant.id}`}>
+                          Transaction
+                        </Link>
                         <form action={updateTenantActiveAction}>
                           <input name="locale" type="hidden" value={locale} />
                           <input name="tenant_id" type="hidden" value={tenant.id} />
@@ -292,31 +295,6 @@ export function TenantTableClient({
                             {tenant.is_active ? 'Desactiver' : 'Activer'}
                           </button>
                         </form>
-                        {tenant.is_active && lease ? (
-                          <details className="group rounded-md">
-                            <summary className="flex cursor-pointer list-none items-center justify-between rounded-md px-3 py-2 hover:bg-[#f0f5f2]">
-                              Changer statut
-                              <span className="text-xs text-[var(--muted)]">&gt;</span>
-                            </summary>
-                            <div className="mt-1 grid gap-1 border-t border-[var(--line-soft)] pt-1">
-                              <RentStatusForm leaseId={lease.id} locale={locale} month={selectedMonth} query={appliedQuery} status="paid" view={selectedView} />
-                              <form action={updateRentStatusAction} className="rounded-md px-3 py-2 hover:bg-[#fff7ed]">
-                                <input name="locale" type="hidden" value={locale} />
-                                <input name="lease_id" type="hidden" value={lease.id} />
-                                <input name="period_month" type="hidden" value={monthStart(selectedMonth)} />
-                                <input name="status" type="hidden" value="partial" />
-                                <label className="grid gap-1 text-xs font-semibold text-[#7a4a11]">
-                                  Paye partiel
-                                  <input className="focus-ring min-h-9 w-full rounded-md border border-[var(--line)] px-2 text-sm font-normal text-[#171d1c]" min="0" name="paid_amount" placeholder="Montant" step="0.01" type="number" />
-                                </label>
-                                <button className="mt-2 text-xs font-semibold text-[#b45309]" type="submit">
-                                  Valider
-                                </button>
-                              </form>
-                              <RentStatusForm leaseId={lease.id} locale={locale} month={selectedMonth} query={appliedQuery} status="unpaid" view={selectedView} />
-                            </div>
-                          </details>
-                        ) : null}
                         <form action={deleteTenantAction}>
                           <input name="locale" type="hidden" value={locale} />
                           <input name="tenant_id" type="hidden" value={tenant.id} />
@@ -341,21 +319,5 @@ export function TenantTableClient({
         Affichage {rows.length ? `1-${rows.length}` : '0'} sur {rows.length} locataire(s)
       </div>
     </section>
-  );
-}
-
-function RentStatusForm({leaseId, locale, month, query, status, view}: {leaseId: string; locale: string; month: string; query: string; status: 'paid' | 'unpaid'; view: string}) {
-  return (
-    <form action={updateRentStatusAction}>
-      <input name="locale" type="hidden" value={locale} />
-      <input name="lease_id" type="hidden" value={leaseId} />
-      <input name="period_month" type="hidden" value={monthStart(month)} />
-      <input name="status" type="hidden" value={status} />
-      <input name="view" type="hidden" value={view} />
-      <input name="q" type="hidden" value={query} />
-      <button className={status === 'paid' ? 'block w-full rounded-md px-3 py-2 text-left text-[#047857] hover:bg-[#ecfdf5]' : 'block w-full rounded-md px-3 py-2 text-left text-[#ba1a1a] hover:bg-[#fff1f1]'} type="submit">
-        {status === 'paid' ? 'Paye' : 'Non paye'}
-      </button>
-    </form>
   );
 }

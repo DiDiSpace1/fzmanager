@@ -62,20 +62,25 @@ function Icon({children, className = ''}: {children: string; className?: string}
 }
 
 export function TransactionDrawer({
+  initialOpen = false,
+  initialTenantId,
   leases,
   locale,
   properties,
   taxCategories
 }: {
+  initialOpen?: boolean;
+  initialTenantId?: string;
   leases: LeaseOption[];
   locale: string;
   properties: PropertyOption[];
   taxCategories: TaxCategoryOption[];
 }) {
-  const [open, setOpen] = useState(false);
+  const initialLeaseId = initialTenantId ? leases.find((lease) => lease.tenants?.id === initialTenantId)?.id : undefined;
+  const [open, setOpen] = useState(initialOpen);
   const [mode, setMode] = useState<'expense' | 'revenue'>('revenue');
   const [periodMonth, setPeriodMonth] = useState(currentMonth());
-  const [selectedLeaseId, setSelectedLeaseId] = useState(leases[0]?.id ?? '');
+  const [selectedLeaseId, setSelectedLeaseId] = useState(initialLeaseId ?? leases[0]?.id ?? '');
   const selectedLease = useMemo(() => leases.find((lease) => lease.id === selectedLeaseId), [leases, selectedLeaseId]);
   const amountDue = remainingForPeriod(selectedLease, periodMonth);
 

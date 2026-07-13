@@ -106,6 +106,8 @@ type TransactionRow =
 type TransactionsPageProps = {
   searchParams: Promise<{
     error?: string;
+    new?: string;
+    tenant_id?: string;
   }>;
 };
 
@@ -264,7 +266,7 @@ export default async function TransactionsPage({searchParams}: TransactionsPageP
           <h1 className="text-3xl font-semibold tracking-normal text-[#171d1c]">Transactions</h1>
           <p className="mt-2 text-sm leading-6 text-[var(--muted)]">Gerez vos revenus et depenses immobilieres.</p>
         </div>
-        <TransactionDrawer leases={leases ?? []} locale={locale} properties={properties ?? []} taxCategories={taxCategories ?? []} />
+        <TransactionDrawer initialOpen={params.new === 'transaction'} initialTenantId={params.tenant_id} leases={leases ?? []} locale={locale} properties={properties ?? []} taxCategories={taxCategories ?? []} />
       </div>
 
       {params.error ? (
