@@ -167,7 +167,7 @@ export default async function BailDetailPage({params}: BailDetailPageProps) {
         </InfoCard>
       </section>
 
-      <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
+      <section className="mt-6 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)]">
         <InfoCard title="Calendrier & Duree" icon="calendar_month">
           <div className="relative grid gap-8 pl-6">
             <span className="absolute bottom-8 left-[7px] top-3 border-l border-dashed border-[#c7d2ce]" />
@@ -180,14 +180,14 @@ export default async function BailDetailPage({params}: BailDetailPageProps) {
           <div className="grid gap-3">
             {(documents ?? []).length ? (
               (documents ?? []).map((document) => (
-                <div className="flex items-center justify-between gap-3 rounded-lg border border-[var(--line)] p-3" key={document.id}>
-                  <div className="min-w-0">
+                <div className="flex min-w-0 items-center justify-between gap-3 rounded-lg border border-[var(--line)] p-3" key={document.id}>
+                  <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold">{document.file_name}</p>
                     <p className="text-xs text-[var(--muted)]">
                       {documentLabel(document.document_type)} le {formatShortDate(document.created_at)}
                     </p>
                   </div>
-                  <span className="material-symbols-outlined text-base text-[var(--accent)]">download</span>
+                  <span className="material-symbols-outlined shrink-0 text-base text-[var(--accent)]">download</span>
                 </div>
               ))
             ) : (
@@ -206,7 +206,7 @@ export default async function BailDetailPage({params}: BailDetailPageProps) {
 
 function InfoCard({children, icon, title}: {children: ReactNode; icon: string; title: string}) {
   return (
-    <section className="rounded-lg border border-[var(--line-soft)] bg-white p-5 shadow-sm">
+    <section className="min-w-0 rounded-lg border border-[var(--line-soft)] bg-white p-5 shadow-sm">
       <div className="mb-5 flex items-center gap-2 border-b border-[var(--line-soft)] pb-4">
         <span className="material-symbols-outlined text-[18px] text-[var(--accent)]">{icon}</span>
         <h2 className="text-base font-semibold">{title}</h2>

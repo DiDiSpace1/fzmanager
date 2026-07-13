@@ -7,6 +7,7 @@ import {getCurrentUserWorkspace} from '@/lib/workspace';
 
 import {assignPropertyTenantsAction} from '../properties/actions';
 import {LeaseTerminationManager, OccupancyManager} from '../properties/[id]/edit/occupancy-manager';
+import {ExistingLeaseEditor} from './existing-lease-editor';
 import {PropertySelector} from './property-selector';
 
 type BailManagerViewProps = {
@@ -25,7 +26,10 @@ type PropertyForTenantManagement = {
   name: string;
   occupancy_status: string;
   leases: {
+    charges_amount: number | null;
+    deposit_amount: number | null;
     id: string;
+    monthly_rent: number | null;
     end_date: string | null;
     start_date: string;
     status: string;
@@ -51,7 +55,7 @@ export async function BailManagerView({selectedPropertyId, selectedTenantId = ''
   if (propertyId) {
     const {data: property, error} = await supabase
       .from('properties')
-      .select('id, name, occupancy_status, leases(id, status, start_date, end_date, tenants(full_name))')
+      .select('id, name, occupancy_status, leases(id, status, start_date, end_date, monthly_rent, charges_amount, deposit_amount, tenants(full_name))')
       .eq('workspace_id', workspaceId)
       .eq('id', propertyId)
       .single<PropertyForTenantManagement>();
@@ -95,6 +99,7 @@ export async function BailManagerView({selectedPropertyId, selectedTenantId = ''
           </div>
           {selectedProperty ? (
             <>
+              <ExistingLeaseEditor leases={activeLeases} locale={locale} propertyId={selectedProperty.id} />
               <h2 className="mb-5 text-base font-semibold">Ajouter des locataires</h2>
               <OccupancyManager initialStatus={activeLeases.length ? 'rented' : selectedProperty.occupancy_status} initialTenantId={selectedTenantId} tenants={tenants ?? []} />
             </>

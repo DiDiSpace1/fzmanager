@@ -374,6 +374,85 @@ export async function terminateLeaseAction(formData: FormData) {
   redirect(localizedPath(locale, returnPath));
 }
 
+export async function updateLeaseAction(formData: FormData) {
+  const locale = value(formData, 'locale') || 'fr';
+  const propertyId = value(formData, 'property_id');
+  const leaseId = value(formData, 'lease_id');
+  const startDate = value(formData, 'start_date');
+  const endDate = value(formData, 'end_date');
+  const monthlyRent = moneyValue(formData, 'monthly_rent');
+  const chargesAmount = moneyValue(formData, 'charges_amount');
+  const depositAmount = moneyValue(formData, 'deposit_amount');
+  const returnPath = `/bail?property_id=${propertyId}` as `/${string}`;
+  const returnUrl = localizedPath(locale, returnPath);
+  const errorUrl = (code: string) => `${returnUrl}&error=${code}`;
+
+  if (!propertyId || !leaseId || !startDate || monthlyRent <= 0) {
+    redirect(errorUrl('lease_update_missing'));
+  }
+
+  const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
+  const {error} = await supabase
+    .from('leases')
+    .update({
+      charges_amount: chargesAmount,
+      deposit_amount: depositAmount,
+      end_date: endDate || null,
+      monthly_rent: monthlyRent,
+      start_date: startDate
+    })
+    .eq('id', leaseId)
+    .eq('property_id', propertyId)
+    .eq('workspace_id', workspaceId);
+
+  if (error) {
+    redirect(errorUrl('lease_update_failed'));
+  }
+
+  const {data: lockedCharges, error: lockedChargesError} = await supabase
+    .from('rent_charges')
+    .select('period_month')
+    .eq('lease_id', leaseId)
+    .eq('workspace_id', workspaceId)
+    .neq('status', 'unpaid');
+
+  if (lockedChargesError) {
+    redirect(errorUrl('lease_charges_lookup_failed'));
+  }
+
+  const lockedPeriods = new Set((lockedCharges ?? []).map((charge: {period_month: string}) => charge.period_month));
+  const {error: deleteChargesError} = await supabase.from('rent_charges').delete().eq('lease_id', leaseId).eq('workspace_id', workspaceId).eq('status', 'unpaid');
+
+  if (deleteChargesError) {
+    redirect(errorUrl('lease_charges_delete_failed'));
+  }
+
+  const rentCharges = buildRentChargesForLease({
+    chargesAmount,
+    endDate: endDate || null,
+    leaseId,
+    monthlyRent,
+    startDate,
+    workspaceId
+  }).filter((charge) => !lockedPeriods.has(charge.period_month));
+
+  if (rentCharges.length) {
+    const {error: insertChargesError} = await supabase.from('rent_charges').insert(rentCharges);
+
+    if (insertChargesError) {
+      redirect(errorUrl('lease_charges_update_failed'));
+    }
+  }
+
+  revalidatePath(localizedPath(locale, '/bail'));
+  revalidatePath(localizedPath(locale, `/bail/${leaseId}`));
+  revalidatePath(localizedPath(locale, '/properties'));
+  revalidatePath(localizedPath(locale, `/properties/${propertyId}`));
+  revalidatePath(localizedPath(locale, `/properties/${propertyId}/tenants`));
+  revalidatePath(localizedPath(locale, '/tenants'));
+  redirect(returnUrl);
+}
+
 export async function assignPropertyTenantsAction(formData: FormData) {
   const locale = value(formData, 'locale') || 'fr';
   const propertyId = value(formData, 'property_id');
