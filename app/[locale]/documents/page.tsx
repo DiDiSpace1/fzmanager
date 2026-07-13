@@ -53,17 +53,17 @@ type DocumentsPageProps = {
 };
 
 const DOCUMENT_TYPES = [
-  {className: 'bg-[#d9fbf4] text-[#00685f]', label: 'Baux', value: 'lease'},
-  {className: 'bg-[#dde1ff] text-[#3755c3]', label: 'Quittances', value: 'rent_receipt'},
-  {className: 'bg-[#ffdbce] text-[#924628]', label: 'Depense', value: 'invoice'},
-  {className: 'bg-[#dee4e1] text-[#3d4947]', label: 'Impots', value: 'tax'}
+  {className: 'bg-[#d9fbf4] text-[#00685f]', labelKey: 'lease', value: 'lease'},
+  {className: 'bg-[#dde1ff] text-[#3755c3]', labelKey: 'rentReceipt', value: 'rent_receipt'},
+  {className: 'bg-[#ffdbce] text-[#924628]', labelKey: 'invoice', value: 'invoice'},
+  {className: 'bg-[#dee4e1] text-[#3d4947]', labelKey: 'tax', value: 'tax'}
 ];
 
 const FOLDER_TYPES = [
-  {iconClassName: 'bg-[#89f5e7] text-[#00685f]', label: 'Baux', value: 'lease'},
-  {iconClassName: 'bg-[#ffdbce] text-[#924628]', label: 'Depense', value: 'invoice'},
-  {iconClassName: 'bg-[#dde1ff] text-[#3755c3]', label: 'Quittances', value: 'rent_receipt'},
-  {iconClassName: 'bg-[#dee4e1] text-[#3d4947]', label: 'Impots', value: 'tax'}
+  {iconClassName: 'bg-[#89f5e7] text-[#00685f]', labelKey: 'lease', value: 'lease'},
+  {iconClassName: 'bg-[#ffdbce] text-[#924628]', labelKey: 'invoice', value: 'invoice'},
+  {iconClassName: 'bg-[#dde1ff] text-[#3755c3]', labelKey: 'rentReceipt', value: 'rent_receipt'},
+  {iconClassName: 'bg-[#dee4e1] text-[#3d4947]', labelKey: 'tax', value: 'tax'}
 ];
 
 function formatBytes(bytes: number | null) {
@@ -166,6 +166,7 @@ function ReceiptIcon() {
 
 export default async function DocumentsPage({searchParams}: DocumentsPageProps) {
   const t = await getTranslations('documents');
+  const common = await getTranslations('common');
   const locale = await getLocale();
   const params = await searchParams;
   const query = params.q?.trim() ?? '';
@@ -231,7 +232,7 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
         <div className="flex flex-wrap items-center gap-3">
           <Link className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--line)] bg-white px-4 text-sm font-semibold text-[#171d1c] shadow-sm hover:bg-[#f0f5f2]" href="/documents/quittance">
             <ReceiptIcon />
-            Generer une quittance
+            {t('generateReceipt')}
           </Link>
           <UploadDocumentModal locale={locale} properties={properties ?? []} tenants={tenants ?? []} />
         </div>
@@ -239,25 +240,25 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
 
       {documentsError ? (
         <div className="mb-6 rounded-md border border-[#f0d6b6] bg-[#fff8ec] p-4 text-sm leading-6 text-[#7a4a11]">
-          Impossible de charger les documents. Lancez la migration Supabase de la phase documents.
+          {t('errors.loadFailed')}
         </div>
       ) : null}
 
       {params.error === 'plan_limit' ? (
         <div className="mb-6 rounded-md border border-[#f0d6b6] bg-[#fff8ec] p-4 text-sm leading-6 text-[#7a4a11]">
-          Votre forfait ne permet pas de televerser plus de documents. Passez a un forfait superieur depuis les parametres.
+          {t('errors.planLimit')}
         </div>
       ) : null}
 
       {params.error === 'storage_limit' ? (
         <div className="mb-6 rounded-md border border-[#f0d6b6] bg-[#fff8ec] p-4 text-sm leading-6 text-[#7a4a11]">
-          Le stockage documents de votre forfait est atteint.
+          {t('errors.storageLimit')}
         </div>
       ) : null}
 
       {params.error === 'invoice_amount' ? (
         <div className="mb-6 rounded-md border border-[#f0d6b6] bg-[#fff8ec] p-4 text-sm leading-6 text-[#7a4a11]">
-          Ajoutez un montant valide pour enregistrer une facture travaux dans les depenses.
+          {t('errors.invoiceAmount')}
         </div>
       ) : null}
 
@@ -266,26 +267,26 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
           <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]">
             <SearchIcon />
           </span>
-          <input className="focus-ring min-h-11 w-full rounded-lg border border-[var(--line)] bg-white px-3 pl-10 text-sm" defaultValue={query} name="q" placeholder="Rechercher un document..." />
+          <input className="focus-ring min-h-11 w-full rounded-lg border border-[var(--line)] bg-white px-3 pl-10 text-sm" defaultValue={query} name="q" placeholder={t('searchPlaceholder')} />
         </label>
         <label className="min-w-0 flex-[1_1_140px]">
-          <span className="sr-only">Annee</span>
-          <input className="focus-ring min-h-11 w-full rounded-lg border border-[var(--line)] bg-white px-3 text-sm" defaultValue={selectedYear?.year ?? ''} max="2100" min="2000" name="year" placeholder="Annee" type="number" />
+          <span className="sr-only">{t('year')}</span>
+          <input className="focus-ring min-h-11 w-full rounded-lg border border-[var(--line)] bg-white px-3 text-sm" defaultValue={selectedYear?.year ?? ''} max="2100" min="2000" name="year" placeholder={t('year')} type="number" />
         </label>
         <label className="min-w-0 flex-[1_1_170px]">
-          <span className="sr-only">Type</span>
+          <span className="sr-only">{t('type')}</span>
           <select className="focus-ring min-h-11 w-full rounded-lg border border-[var(--line)] bg-white px-3 text-sm" defaultValue={selectedType} name="type">
-            <option value="">Tous</option>
-            <option value="lease">Bail</option>
-            <option value="invoice">Depense</option>
-            <option value="rent_receipt">Quittance</option>
-            <option value="tax">Fiscal</option>
+            <option value="">{common('all')}</option>
+            <option value="lease">{t('types.lease')}</option>
+            <option value="invoice">{t('types.invoice')}</option>
+            <option value="rent_receipt">{t('types.rentReceipt')}</option>
+            <option value="tax">{t('types.tax')}</option>
           </select>
         </label>
         <label className="min-w-0 flex-[1_1_220px]">
-          <span className="sr-only">Bien</span>
+          <span className="sr-only">{t('property')}</span>
           <select className="focus-ring min-h-11 w-full rounded-lg border border-[var(--line)] bg-white px-3 text-sm" defaultValue={selectedPropertyId} name="property_id">
-            <option value="">Tous les biens</option>
+            <option value="">{t('allProperties')}</option>
             {(properties ?? []).map((property) => (
               <option key={property.id} value={property.id}>
                 {property.name}
@@ -294,7 +295,7 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
           </select>
         </label>
         <button className="focus-ring min-h-11 flex-[0_0_auto] rounded-lg border border-[var(--line)] bg-white px-5 text-sm font-semibold text-[#171d1c] hover:bg-[#f0f5f2]" type="submit">
-          Filtrer
+          {common('filter')}
         </button>
       </form>
 
@@ -311,18 +312,18 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
             <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-lg ${folder.iconClassName}`}>
               <FolderIcon />
             </div>
-            <h2 className="text-base font-semibold text-[#171d1c]">{folder.label}</h2>
-            <p className="mt-1 text-xs font-medium text-[var(--muted)]">{folderCounts.get(folder.value) ?? 0} fichiers</p>
+            <h2 className="text-base font-semibold text-[#171d1c]">{t(`types.${folder.labelKey}`)}</h2>
+            <p className="mt-1 text-xs font-medium text-[var(--muted)]">{t('fileCount', {count: folderCounts.get(folder.value) ?? 0})}</p>
           </Link>
         ))}
       </section>
 
       <section className="mb-8 overflow-visible rounded-xl border border-[var(--line-soft)] bg-white shadow-sm">
         <div className="flex items-center justify-between border-b border-[var(--line-soft)] px-5 py-4">
-          <h2 className="text-base font-semibold text-[#171d1c]">Documents recents</h2>
+          <h2 className="text-base font-semibold text-[#171d1c]">{t('recentDocuments')}</h2>
           {selectedType || query || selectedPropertyId || selectedYear ? (
             <Link className="text-xs font-semibold text-[var(--accent)] hover:underline" href="/documents">
-              Tout voir
+              {t('viewAll')}
             </Link>
           ) : null}
         </div>
@@ -331,12 +332,12 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
             <table className="w-full min-w-[820px] border-collapse text-left">
               <thead className="border-b border-[var(--line-soft)] bg-[#f0f5f2] text-[11px] font-semibold uppercase text-[var(--muted)]">
                 <tr>
-                  <th className="px-5 py-3">Nom du fichier</th>
-                  <th className="px-5 py-3">Categorie</th>
-                  <th className="px-5 py-3">Bien</th>
-                  <th className="px-5 py-3">Date</th>
-                  <th className="px-5 py-3">Taille</th>
-                  <th className="px-5 py-3 text-right">Actions</th>
+                  <th className="px-5 py-3">{t('table.fileName')}</th>
+                  <th className="px-5 py-3">{t('table.category')}</th>
+                  <th className="px-5 py-3">{t('property')}</th>
+                  <th className="px-5 py-3">{common('date')}</th>
+                  <th className="px-5 py-3">{t('table.size')}</th>
+                  <th className="px-5 py-3 text-right">{common('actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--line-soft)]">
@@ -355,28 +356,28 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
                         </div>
                       </td>
                       <td className="px-5 py-4">
-                        <span className={`inline-flex rounded px-2 py-1 text-[11px] font-semibold ${meta.className}`}>{meta.label}</span>
+                        <span className={`inline-flex rounded px-2 py-1 text-[11px] font-semibold ${meta.className}`}>{t(`types.${meta.labelKey}`)}</span>
                       </td>
-                      <td className="px-5 py-4 text-sm text-[var(--muted)]">{document.properties?.name ?? 'Global'}</td>
+                      <td className="px-5 py-4 text-sm text-[var(--muted)]">{document.properties?.name ?? t('global')}</td>
                       <td className="px-5 py-4 text-sm tabular-nums text-[var(--muted)]">{formatDate(document.created_at, locale)}</td>
                       <td className="px-5 py-4 text-sm tabular-nums text-[var(--muted)]">{formatBytes(document.size_bytes)}</td>
                       <td className="px-5 py-4 text-right">
                         <DocumentActionDetails>
                           {document.viewUrl ? (
                             <a className="block rounded-md px-3 py-2 hover:bg-[#f0f5f2]" href={document.viewUrl} rel="noreferrer" target="_blank">
-                              Voir
+                              {common('view')}
                             </a>
                           ) : null}
                           {document.downloadUrl ? (
                             <a className="block rounded-md px-3 py-2 hover:bg-[#f0f5f2]" href={document.downloadUrl}>
-                              Telecharger
+                              {common('download')}
                             </a>
                           ) : null}
                           <form action={deleteDocumentAction}>
                             <input name="locale" type="hidden" value={locale} />
                             <input name="document_id" type="hidden" value={document.id} />
                             <button className="block w-full rounded-md px-3 py-2 text-left text-[#ba1a1a] hover:bg-[#fff1f1]" type="submit">
-                              Supprimer
+                              {common('delete')}
                             </button>
                           </form>
                         </DocumentActionDetails>
@@ -388,7 +389,7 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
             </table>
           </div>
         ) : (
-          <div className="p-8 text-center text-sm text-[var(--muted)]">Aucun document pour le moment.</div>
+          <div className="p-8 text-center text-sm text-[var(--muted)]">{t('empty')}</div>
         )}
       </section>
     </AppShell>

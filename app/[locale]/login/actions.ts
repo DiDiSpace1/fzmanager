@@ -1,5 +1,6 @@
 'use server';
 
+import {headers} from 'next/headers';
 import {redirect} from 'next/navigation';
 
 import {localizedPath} from '@/lib/navigation';
@@ -18,6 +19,11 @@ function getRequiredValue(formData: FormData, key: string) {
 function getOptionalValue(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === 'string' ? value.trim() : '';
+}
+
+async function getAppOrigin() {
+  const headerStore = await headers();
+  return headerStore.get('origin') ?? process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
 }
 
 export async function signInAction(formData: FormData) {
@@ -44,7 +50,7 @@ export async function signUpAction(formData: FormData) {
   const countryCode = getRequiredValue(formData, 'country');
   const locale = getRequiredValue(formData, 'locale');
   const supabase = await createSupabaseServerClient();
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+  const appUrl = getAppOrigin();
 
   const {data, error} = await supabase.auth.signUp({
     email,
@@ -79,7 +85,7 @@ export async function requestPasswordResetAction(formData: FormData) {
   const email = getRequiredValue(formData, 'email');
   const locale = getOptionalValue(formData, 'locale') || 'fr';
   const supabase = await createSupabaseServerClient();
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+  const appUrl = getAppOrigin();
   const redirectTo = `${appUrl}${localizedPath(locale, '/reset-password')}`;
 
   await supabase.auth.resetPasswordForEmail(email, {

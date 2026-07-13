@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
-import {getLocale} from 'next-intl/server';
+import {getLocale, getTranslations} from 'next-intl/server';
 
 import {AppShell} from '@/components/app/app-shell';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
@@ -24,6 +24,9 @@ type EditableTenant = {
 export default async function EditTenantPage({params}: EditTenantPageProps) {
   const {id} = await params;
   const locale = await getLocale();
+  const common = await getTranslations('common');
+  const t = await getTranslations('tenants');
+  const form = await getTranslations('tenants.form');
   const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
   const {data: tenant, error} = await supabase
     .from('tenants')
@@ -41,9 +44,9 @@ export default async function EditTenantPage({params}: EditTenantPageProps) {
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           <Link className="text-sm font-semibold text-[var(--accent)]" href={`/tenants/${tenant.id}`}>
-            Retour au locataire
+            {t('detail.backToTenant')}
           </Link>
-          <h1 className="mt-3 text-3xl font-semibold tracking-normal text-[#171d1c]">Modifier le locataire</h1>
+          <h1 className="mt-3 text-3xl font-semibold tracking-normal text-[#171d1c]">{t('editTitle')}</h1>
           <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{tenant.full_name}</p>
         </div>
       </div>
@@ -51,36 +54,36 @@ export default async function EditTenantPage({params}: EditTenantPageProps) {
       <form action={updateTenantAction} className="mt-8 grid gap-5">
         <input name="locale" type="hidden" value={locale} />
         <input name="tenant_id" type="hidden" value={tenant.id} />
-        <SectionCard title="1. Identite du locataire">
+        <SectionCard title={form('identityTitle')}>
           <div className="grid gap-4 md:grid-cols-2">
             <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-              Nom complet
+              {form('fullName')}
               <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" defaultValue={tenant.full_name} name="full_name" required />
             </label>
             <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-              Email
+              {form('email')}
               <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" defaultValue={tenant.email ?? ''} name="email" type="email" />
             </label>
           </div>
         </SectionCard>
-        <SectionCard title="2. Coordonnees">
+        <SectionCard title={form('contactTitle')}>
           <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-            Telephone
+            {form('phone')}
             <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" defaultValue={tenant.phone ?? ''} name="phone" />
           </label>
         </SectionCard>
-        <SectionCard title="3. Notes internes">
+        <SectionCard title={form('notesTitle')}>
           <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-            Notes
+            {form('notes')}
             <textarea className="focus-ring min-h-28 rounded-md border border-[var(--line)] px-3 py-3 text-sm font-normal" defaultValue={tenant.notes ?? ''} name="notes" />
           </label>
         </SectionCard>
         <div className="flex justify-end gap-3">
           <Link className="focus-ring inline-flex min-h-11 items-center rounded-md border border-[var(--line)] px-5 text-sm font-semibold" href={`/tenants/${tenant.id}`}>
-            Annuler
+            {common('cancel')}
           </Link>
           <button className="focus-ring min-h-11 rounded-md bg-[var(--accent)] px-5 text-sm font-semibold text-white" style={{color: '#ffffff'}} type="submit">
-            Enregistrer
+            {common('save')}
           </button>
         </div>
       </form>

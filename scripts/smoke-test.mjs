@@ -20,7 +20,7 @@ function loadEnvFile(filePath) {
 
 loadEnvFile(path.join(process.cwd(), '.env.local'));
 
-const appUrl = (process.env.SMOKE_TEST_APP_URL || process.env.NEXT_PUBLIC_PRODUCTION_APP_URL || 'https://fzmanager.vercel.app').replace(/\/$/, '');
+const appUrl = (process.env.SMOKE_TEST_APP_URL || process.env.NEXT_PUBLIC_PRODUCTION_APP_URL || 'https://loyelio.vercel.app').replace(/\/$/, '');
 const checks = [];
 
 function record(name, ok, details = '') {

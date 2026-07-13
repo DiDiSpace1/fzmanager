@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import {useTranslations} from 'next-intl';
 import {useMemo, useState} from 'react';
 
 import {PropertyActionsMenu} from './property-actions-menu';
@@ -22,21 +23,21 @@ export type PropertyListRow = {
   rental_mode: string;
 };
 
-const modeLabels: Record<string, string> = {
-  entire_place: 'entier',
-  mixed: 'mixte',
-  shared_rooms: 'colocation'
+const modeLabelKeys: Record<string, 'entirePlace' | 'mixed' | 'sharedRooms'> = {
+  entire_place: 'entirePlace',
+  mixed: 'mixed',
+  shared_rooms: 'sharedRooms'
 };
 
 const modeOptions = [
-  {label: 'Tous les modes', value: ''},
-  {label: 'colocation', value: 'shared_rooms'},
-  {label: 'entier', value: 'entire_place'},
-  {label: 'mixte', value: 'mixed'}
+  {labelKey: 'allModes', value: ''},
+  {labelKey: 'sharedRooms', value: 'shared_rooms'},
+  {labelKey: 'entirePlace', value: 'entire_place'},
+  {labelKey: 'mixed', value: 'mixed'}
 ];
 
 function formatAddress(property: Pick<PropertyListRow, 'address_line1' | 'postal_code' | 'city'>) {
-  return [property.address_line1, property.postal_code, property.city].filter(Boolean).join(', ') || 'Adresse a completer';
+  return [property.address_line1, property.postal_code, property.city].filter(Boolean).join(', ');
 }
 
 function statusFor(property: PropertyListRow) {
@@ -45,13 +46,13 @@ function statusFor(property: PropertyListRow) {
   if (activeLeases.length > 0 || property.occupancy_status === 'rented') {
     return {
       className: 'bg-[#ecfdf5] text-[#047857]',
-      label: 'Loue'
+      labelKey: 'rented'
     };
   }
 
   return {
     className: 'bg-[#eef2ff] text-[#3755c3]',
-    label: 'Vacant'
+    labelKey: 'vacant'
   };
 }
 
@@ -75,6 +76,8 @@ export function PropertyListClient({
   locale: string;
   rows: PropertyListRow[];
 }) {
+  const common = useTranslations('common');
+  const t = useTranslations('properties');
   const [queryInput, setQueryInput] = useState(initialQuery);
   const [appliedQuery, setAppliedQuery] = useState(initialQuery);
   const [selectedMode, setSelectedMode] = useState(initialMode);
@@ -125,9 +128,9 @@ export function PropertyListClient({
             applySearch();
           }}
         >
-          <input className="focus-ring min-h-11 w-full rounded-full border border-transparent bg-[#eef2f7] px-4 pr-11 text-sm" onChange={(event) => setQueryInput(event.target.value)} placeholder="Rechercher un bien, une adresse, une ville..." value={queryInput} />
+          <input className="focus-ring min-h-11 w-full rounded-full border border-transparent bg-[#eef2f7] px-4 pr-11 text-sm" onChange={(event) => setQueryInput(event.target.value)} placeholder={t('searchPlaceholder')} value={queryInput} />
           {queryInput ? (
-            <button aria-label="Effacer la recherche" className="focus-ring absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[#33413f] hover:bg-[#dce3eb]" onClick={clearSearch} type="button">
+            <button aria-label={common('clearSearch')} className="focus-ring absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[#33413f] hover:bg-[#dce3eb]" onClick={clearSearch} type="button">
               <span className="material-symbols-outlined text-[22px]">close</span>
             </button>
           ) : null}
@@ -135,7 +138,7 @@ export function PropertyListClient({
         <select className="focus-ring min-h-11 rounded-lg border border-[var(--line)] bg-[#f0f5f2] px-3 text-sm md:w-44" onChange={(event) => changeMode(event.target.value)} value={selectedMode}>
           {modeOptions.map((option) => (
             <option key={option.value || 'all'} value={option.value}>
-              {option.label}
+              {t(`rentalModes.${option.labelKey}`)}
             </option>
           ))}
         </select>
@@ -146,12 +149,12 @@ export function PropertyListClient({
           <table className="w-full min-w-[820px] border-collapse text-left">
             <thead className="border-b border-[var(--line-soft)] bg-[#eaefed] text-[11px] font-semibold uppercase text-[var(--muted)]">
               <tr>
-                <th className="px-5 py-4">Bien & adresse</th>
-                <th className="px-5 py-4">Mode</th>
-                <th className="px-5 py-4">Locataire</th>
-                <th className="px-5 py-4">Loyer HC</th>
-                <th className="px-5 py-4">Statut</th>
-                <th className="px-5 py-4 text-right">Actions</th>
+                <th className="px-5 py-4">{t('table.property')}</th>
+                <th className="px-5 py-4">{t('table.mode')}</th>
+                <th className="px-5 py-4">{t('table.tenant')}</th>
+                <th className="px-5 py-4">{t('table.rent')}</th>
+                <th className="px-5 py-4">{common('status')}</th>
+                <th className="px-5 py-4 text-right">{common('actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--line-soft)]">
@@ -175,15 +178,15 @@ export function PropertyListClient({
                             <Link className="font-semibold hover:text-[var(--accent)]" href={`/properties/${property.id}`}>
                               {property.name}
                             </Link>
-                            <p className="mt-1 text-sm text-[var(--muted)]">{formatAddress(property)}</p>
+                            <p className="mt-1 text-sm text-[var(--muted)]">{formatAddress(property) || t('addressMissing')}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-4 text-sm">{modeLabels[property.rental_mode] ?? property.rental_mode}</td>
+                      <td className="px-5 py-4 text-sm">{modeLabelKeys[property.rental_mode] ? t(`rentalModes.${modeLabelKeys[property.rental_mode]}`) : property.rental_mode}</td>
                       <td className="px-5 py-4 text-sm text-[var(--muted)]">{activeLease?.tenants?.full_name ?? '-'}</td>
                       <td className="px-5 py-4 text-sm tabular-nums">{displayedRent ? `${Number(displayedRent).toFixed(0)} EUR` : '-'}</td>
                       <td className="px-5 py-4">
-                        <span className={`inline-flex rounded px-2.5 py-1 text-xs font-semibold ${status.className}`}>{status.label}</span>
+                        <span className={`inline-flex rounded px-2.5 py-1 text-xs font-semibold ${status.className}`}>{t(`status.${status.labelKey}`)}</span>
                       </td>
                       <td className="px-5 py-4 text-right">
                         <PropertyActionsMenu locale={locale} propertyId={property.id} />
@@ -194,7 +197,7 @@ export function PropertyListClient({
               ) : (
                 <tr>
                   <td className="px-5 py-10 text-center text-sm text-[var(--muted)]" colSpan={6}>
-                    Aucun bien pour le moment.
+                    {t('empty')}
                   </td>
                 </tr>
               )}
@@ -202,7 +205,7 @@ export function PropertyListClient({
           </table>
         </div>
         <div className="border-t border-[var(--line-soft)] px-5 py-4 text-sm text-[var(--muted)]">
-          Affichage {filteredRows.length ? `1-${filteredRows.length}` : '0'} sur {filteredRows.length} bien(s)
+          {t('pagination', {range: filteredRows.length ? `1-${filteredRows.length}` : '0', count: filteredRows.length})}
         </div>
       </div>
     </section>

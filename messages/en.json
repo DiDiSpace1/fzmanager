@@ -5,7 +5,31 @@
     "save": "Save",
     "soon": "Soon",
     "start": "Start",
-    "logout": "Log out"
+    "logout": "Log out",
+    "back": "Back",
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "retry": "Try again",
+    "contact": "Contact",
+    "privacy": "Privacy",
+    "help": "Help",
+    "search": "Search",
+    "clearSearch": "Clear search",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View",
+    "download": "Download",
+    "filter": "Filter",
+    "all": "All",
+    "actions": "Actions",
+    "date": "Date",
+    "amount": "Amount",
+    "status": "Status",
+    "loading": "Loading...",
+    "noData": "No data available",
+    "remove": "Remove",
+    "language": "Language"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -133,6 +157,17 @@
       "check_email": "Registration submitted. Check your email to confirm the account.",
       "password_updated": "Password updated. You can now sign in.",
       "reset_sent": "If this account exists, a reset email has just been sent."
+    },
+    "resetPassword": {
+      "title": "New password",
+      "subtitle": "Choose a new password for your account.",
+      "password": "Password",
+      "errors": {
+        "passwordShort": "The password must contain at least 6 characters.",
+        "sessionFailed": "The reset link has expired or has already been used.",
+        "updateFailed": "Unable to update the password. Request a new reset link.",
+        "default": "The password could not be changed."
+      }
     }
   },
   "dashboard": {
@@ -145,20 +180,242 @@
     "quickActions": "Quick actions",
     "addRent": "Add rent",
     "addExpense": "Add expense",
-    "uploadDocument": "Upload receipt"
+    "uploadDocument": "Upload receipt",
+    "overviewSubtitle": "Quick view of this month?s properties, leases and rent.",
+    "report": "Report",
+    "createdProperties": "Created properties",
+    "viewAll": "View all",
+    "perMonth": "{amount} / month",
+    "none": "None",
+    "noProperties": "No properties created yet.",
+    "checklist": "Checklist",
+    "metrics": {
+      "collectedRent": "Rent collected",
+      "pending": "Pending",
+      "unpaid": "Unpaid",
+      "activeRentals": "Active rentals"
+    },
+    "quick": {
+      "createLease": "Create lease",
+      "createLeaseNote": "Link a tenant to a property",
+      "addDocument": "Add document",
+      "addDocumentNote": "File leases, receipts or tax documents",
+      "prepareTax": "Prepare tax pack",
+      "prepareTaxNote": "Check income and expenses"
+    },
+    "chart": {
+      "title": "Income & expenses",
+      "revenue": "Income",
+      "expenses": "Expenses",
+      "ariaLabel": "Income and expenses for the last six months"
+    }
   },
   "properties": {
     "title": "Properties",
     "subtitle": "Manage properties, rooms and rented units.",
-    "newProperty": "New property"
+    "newProperty": "New property",
+    "backToList": "Back",
+    "searchPlaceholder": "Search a property, address or city...",
+    "addressMissing": "Address to complete",
+    "empty": "No properties yet.",
+    "pagination": "Showing {range} of {count} property/properties",
+    "rentalModes": {
+      "allModes": "All modes",
+      "sharedRooms": "shared rooms",
+      "entirePlace": "entire place",
+      "mixed": "mixed"
+    },
+    "status": {
+      "rented": "Rented",
+      "vacant": "Vacant"
+    },
+    "table": {
+      "property": "Property & address",
+      "mode": "Mode",
+      "tenant": "Tenant",
+      "rent": "Rent excl. charges"
+    },
+    "summary": {
+      "totalProperties": "Total properties",
+      "activePortfolio": "Active portfolio",
+      "occupancyRate": "Occupancy rate",
+      "monthlyRevenue": "Monthly revenue",
+      "monthlyTrend": "{value}% vs last month"
+    },
+    "errors": {
+      "loadFailed": "Unable to load properties. Run the Supabase property and photo migrations before continuing.",
+      "planLimit": "The free plan includes 1 property. Upgrade to Solo from settings to add more properties.",
+      "photoLimit": "Your plan allows {limit} photo(s) per property. Delete files or change plan.",
+      "photoSize": "The photo is too large for your plan. Choose a lighter image or reduce its size before upload.",
+      "deleteFailed": "Deletion failed. Check that the Supabase property deletion policy is applied."
+    },
+    "form": {
+      "generalTitle": "1. General information",
+      "photosTitle": "2. Photos & documents",
+      "name": "Property name",
+      "namePlaceholder": "Lyon apartment",
+      "address": "Full address",
+      "addressPlaceholder": "12 rue de la Paix",
+      "postalCode": "Postal code",
+      "city": "City",
+      "cityPlaceholder": "Paris",
+      "propertyType": "Property type",
+      "rentalMode": "Rental mode",
+      "surfaceArea": "Living area (m2)",
+      "propertyPhotos": "Property photos",
+      "photosNotIncluded": "Photos are not included in the Free plan.",
+      "photoLimit": "{limit} photo(s) maximum per property.",
+      "creating": "Creating...",
+      "create": "Create property",
+      "propertyTypes": {
+        "studio": "Studio",
+        "room": "Room",
+        "house": "House",
+        "apartment": "Apartment",
+        "other": "Other"
+      },
+      "rentalModes": {
+        "sharedRooms": "shared rooms",
+        "entirePlace": "entire place",
+        "mixed": "mixed"
+      },
+      "errors": {
+        "planLimit": "Your plan does not allow creating an additional property.",
+        "createFailed": "Unable to create the property right now.",
+        "photoUploadFailed": "The property was created, but one photo could not be uploaded. You can try again from the Edit page.",
+        "photoArchiveFailed": "The property was created, but one photo could not be archived. You can try again from the Edit page."
+      }
+    },
+    "actions": {
+      "manageTenants": "Manage tenants",
+      "deleteTitle": "Delete this property?",
+      "deleteDescription": "This action will also delete leases, rent charges and data associated with this property."
+    },
+    "photos": {
+      "title": "Photos",
+      "deletePhoto": "Delete photo",
+      "empty": "No photos for this property.",
+      "addPhotos": "Add photos",
+      "uploading": "Uploading...",
+      "uploadFailed": "Unable to upload this photo. Try again with a lighter image.",
+      "archiveFailed": "Photo uploaded, but it could not be archived. Try again.",
+      "remainingLimit": "You can add up to {count} more photo(s).",
+      "fileTooLarge": "{name} exceeds the maximum size of {size}.",
+      "selectionSummary": "{selected}/{max} photo(s) selected. Maximum file size: {size}."
+    }
   },
   "tenants": {
     "title": "Tenants",
-    "subtitle": "Track tenants, leases, deposits and rental periods."
+    "subtitle": "Track tenants, leases, deposits and rental periods.",
+    "backToList": "Back",
+    "addTenant": "Add tenant",
+    "editTitle": "Edit tenant",
+    "searchPlaceholder": "Search a tenant...",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "contactMissing": "Contact to complete",
+    "empty": "No tenants yet.",
+    "pagination": "Showing {range} of {count} tenant(s)",
+    "errors": {
+      "loadFailed": "Unable to load tenants. Check that the Supabase migrations are applied.",
+      "planLimit": "The free plan includes 3 tenants. Upgrade to Solo from settings to continue."
+    },
+    "summary": {
+      "unassigned": "Unassigned",
+      "unassignedNote": "Link to a property",
+      "expiring": "Leases < 3 months",
+      "expiringNote": "Renew soon",
+      "overdue": "Overdue",
+      "overdueNote": "Payments to follow up",
+      "allTenants": "All tenants",
+      "allTenantsNote": "Past, future and unassigned",
+      "activeLeases": "Active leases",
+      "activeLeasesNote": "Assigned and in period"
+    },
+    "table": {
+      "name": "Name",
+      "property": "Occupied property",
+      "startDate": "Move-in date",
+      "endDate": "Lease end"
+    },
+    "paymentStatus": {
+      "noLease": "No lease",
+      "active": "Active",
+      "paid": "Paid",
+      "partial": "Partial",
+      "unpaid": "Unpaid",
+      "disabled": "Disabled"
+    },
+    "actions": {
+      "createLease": "Create lease",
+      "transaction": "Transaction",
+      "deactivate": "Deactivate",
+      "activate": "Activate",
+      "deleteTitle": "Delete this tenant?",
+      "deleteDescription": "Deleting this tenant will also delete historical data linked to leases, rents and documents."
+    },
+    "form": {
+      "identityTitle": "1. Tenant identity",
+      "contactTitle": "2. Contact details",
+      "notesTitle": "3. Internal notes",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "Marie Dupont",
+      "email": "Email",
+      "emailPlaceholder": "marie@example.com",
+      "phone": "Phone",
+      "notes": "Notes",
+      "notesPlaceholder": "Useful information"
+    },
+    "detail": {
+      "backToTenants": "Back to tenants",
+      "backToTenant": "Back to tenant",
+      "contactMissing": "Contact to complete",
+      "noLease": "No lease",
+      "occupiedProperty": "Occupied property",
+      "rent": "Rent",
+      "deposit": "Deposit",
+      "contactDetails": "Contact details",
+      "phone": "Phone",
+      "leases": "Leases",
+      "propertyFallback": "Property",
+      "noLeases": "No lease registered for this tenant.",
+      "recentCharges": "Latest rent charges",
+      "noCharges": "No rent charge generated.",
+      "notes": "Notes",
+      "noNotes": "No notes yet."
+    }
   },
   "documents": {
     "title": "Documents",
-    "subtitle": "File leases, invoices, insurance and supporting documents by property and period."
+    "subtitle": "File leases, invoices, insurance and supporting documents by property and period.",
+    "generateReceipt": "Generate receipt",
+    "searchPlaceholder": "Search a document...",
+    "year": "Year",
+    "type": "Type",
+    "property": "Property",
+    "allProperties": "All properties",
+    "recentDocuments": "Recent documents",
+    "viewAll": "View all",
+    "fileCount": "{count} files",
+    "global": "Global",
+    "empty": "No documents yet.",
+    "types": {
+      "lease": "Lease",
+      "rentReceipt": "Receipt",
+      "invoice": "Expense",
+      "tax": "Tax"
+    },
+    "table": {
+      "fileName": "File name",
+      "category": "Category",
+      "size": "Size"
+    },
+    "errors": {
+      "loadFailed": "Unable to load documents. Run the Supabase documents migration.",
+      "planLimit": "Your plan does not allow uploading more documents. Upgrade from settings.",
+      "storageLimit": "Your document storage limit has been reached.",
+      "invoiceAmount": "Add a valid amount to save a work invoice as an expense."
+    }
   },
   "tax": {
     "title": "Tax pack",
@@ -194,5 +451,48 @@
     "country": "Account country",
     "locale": "Language",
     "billing": "Billing"
+  },
+  "shell": {
+    "tagline": "Rental management"
+  },
+  "cookie": {
+    "notice": "Loyelio only uses cookies required for account functionality. Payment and authentication tools may set their own cookies.",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
+  "errors": {
+    "serverTitle": "The page could not load",
+    "serverCopy": "A server error occurred. You can try again or return to the dashboard.",
+    "reference": "Reference: {digest}",
+    "notFoundTitle": "Page not found",
+    "notFoundCopy": "This page does not exist or you no longer have access to this resource."
+  },
+  "legal": {
+    "privacy": {
+      "updated": "Last updated: July 7, 2026",
+      "title": "Privacy policy",
+      "collectedTitle": "Data collected",
+      "collectedCopy": "Loyelio collects account information, properties, tenants, leases, rents, expenses and documents that you voluntarily add to your workspace.",
+      "usageTitle": "Use",
+      "usageCopy": "This data is used to provide the service, secure your account, generate exports and improve the product experience. Payments are processed by Stripe.",
+      "processorsTitle": "Processors",
+      "processorsCopy": "The service relies on Supabase for authentication, database and storage, Stripe for billing, and Vercel for hosting.",
+      "rightsTitle": "Your rights",
+      "rightsCopy": "You can request access, correction or deletion of your data. Accounting or legal obligations may require limited retention of some information.",
+      "contactCopy": "For any request related to personal data, contact"
+    },
+    "terms": {
+      "updated": "Last updated: July 7, 2026",
+      "title": "Terms of use",
+      "serviceTitle": "Service",
+      "serviceCopy": "Loyelio provides an indicative rental, document and tax tracking workspace for small landlords. The service does not replace an accountant, lawyer or tax advisor.",
+      "accountTitle": "Account",
+      "accountCopy": "You are responsible for the accuracy of the information entered and for keeping your account confidential. You must have the necessary rights to store added documents.",
+      "billingTitle": "Billing",
+      "billingCopy": "Subscriptions and payments are managed by Stripe. Paid access is activated after payment confirmation by Stripe and may be suspended if payment fails or is cancelled.",
+      "availabilityTitle": "Availability",
+      "availabilityCopy": "We make reasonable efforts to keep the service available, without guaranteeing total absence of interruption, error or data loss.",
+      "contactCopy": "For any question about the service, contact"
+    }
   }
 }

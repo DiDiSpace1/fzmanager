@@ -31,6 +31,7 @@ function forfaitLabel(billing: BillingStatus | null) {
 export async function AppShell({children}: {children: React.ReactNode}) {
   const t = await getTranslations('nav');
   const common = await getTranslations('common');
+  const shell = await getTranslations('shell');
   const locale = await getLocale();
   let userEmail: string | null = null;
   let userForfait = 'Free';
@@ -70,7 +71,7 @@ export async function AppShell({children}: {children: React.ReactNode}) {
         <Link href="/dashboard" className="block px-2 text-2xl font-bold leading-7 text-[var(--accent)]">
           {common('appName')}
         </Link>
-        <p className="mt-1 px-2 text-sm text-[#3d4947]">Gestion immobilière</p>
+        <p className="mt-1 px-2 text-sm text-[#3d4947]">{shell('tagline')}</p>
         {userEmail ? (
           <div className="mt-2 px-2">
             <p className="truncate text-xs text-[var(--muted)]">{userEmail}</p>
@@ -81,8 +82,10 @@ export async function AppShell({children}: {children: React.ReactNode}) {
         ) : null}
         {userEmail ? (
           <SidebarNav
-            helpLabel="Aide"
+            helpLabel={common('help')}
             items={navItems.map((item) => ({...item, label: t(item.key)}))}
+            languageLabel={common('language')}
+            locale={locale}
             logoutAction={localizedPath(locale, '/logout')}
             logoutLabel={common('logout')}
           />

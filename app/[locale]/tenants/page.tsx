@@ -150,24 +150,24 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
         </div>
         {showCreate ? (
           <Link className="focus-ring inline-flex min-h-11 items-center justify-center rounded-lg border border-[var(--line)] px-5 text-sm font-semibold text-[#171d1c]" href="/tenants">
-            Retour
+            {t('backToList')}
           </Link>
         ) : (
           <Link className="focus-ring inline-flex min-h-11 items-center justify-center rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white" href="/tenants?new=1" style={{color: '#ffffff'}}>
-            + Ajouter un locataire
+            + {t('addTenant')}
           </Link>
         )}
       </div>
 
       {error ? (
         <div className="mt-6 rounded-lg border border-[#f0d6b6] bg-[#fff8ec] p-4 text-sm leading-6 text-[#7a4a11]">
-          Impossible de charger les locataires. Verifiez que les migrations Supabase sont bien appliquees.
+          {t('errors.loadFailed')}
         </div>
       ) : null}
 
       {params.error === 'plan_limit' ? (
         <div className="mt-6 rounded-lg border border-[#f0d6b6] bg-[#fff8ec] p-4 text-sm leading-6 text-[#7a4a11]">
-          Le plan gratuit inclut 3 locataires. Passez a Solo depuis les parametres pour continuer.
+          {t('errors.planLimit')}
         </div>
       ) : null}
 
@@ -182,8 +182,8 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
                 href={viewHref('unassigned', summaryMonth, queryText)}
                 icon="person_edit"
                 iconTone="muted"
-                label="Non assignes"
-                note="A rattacher a un bien"
+                label={t('summary.unassigned')}
+                note={t('summary.unassignedNote')}
                 tone="neutral"
                 value={summaryUnassignedRows.length.toString()}
               />
@@ -192,8 +192,8 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
                 href={viewHref('expiring', summaryMonth, queryText)}
                 icon="notifications_active"
                 iconTone="warning"
-                label="Baux < 3 mois"
-                note="A renouveler bientot"
+                label={t('summary.expiring')}
+                note={t('summary.expiringNote')}
                 tone="warning"
                 value={summaryExpiringRows.length.toString()}
               />
@@ -202,15 +202,15 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
                 href={viewHref('overdue', summaryOverdueMonth, queryText)}
                 icon="warning"
                 iconTone="danger"
-                label="Retards"
-                note="Paiements a suivre"
+                label={t('summary.overdue')}
+                note={t('summary.overdueNote')}
                 tone="danger"
                 value={summaryOverdueRows.length.toString()}
               />
             </div>
             <div className="grid gap-3 md:grid-cols-2">
-              <SummaryCard active={selectedView === 'all'} href={viewHref('all', summaryMonth, queryText)} icon="person" iconTone="primary" label="Tous les locataires" note="Passes, futurs et non assignes" value={allRows.length.toString()} />
-              <SummaryCard active={selectedView === 'active'} href={viewHref('active', summaryMonth, queryText)} icon="person_check" iconTone="primary" label="Baux actifs" note="Assignes et en periode" value={summaryActiveRows.length.toString()} />
+              <SummaryCard active={selectedView === 'all'} href={viewHref('all', summaryMonth, queryText)} icon="person" iconTone="primary" label={t('summary.allTenants')} note={t('summary.allTenantsNote')} value={allRows.length.toString()} />
+              <SummaryCard active={selectedView === 'active'} href={viewHref('active', summaryMonth, queryText)} icon="person_check" iconTone="primary" label={t('summary.activeLeases')} note={t('summary.activeLeasesNote')} value={summaryActiveRows.length.toString()} />
             </div>
           </section>
 
@@ -273,40 +273,43 @@ function SummaryCard({
   );
 }
 
-function CreateTenantView({locale}: {locale: string}) {
+async function CreateTenantView({locale}: {locale: string}) {
+  const common = await getTranslations('common');
+  const t = await getTranslations('tenants.form');
+
   return (
     <form action={createTenantAction} className="mt-8 grid gap-5">
       <input name="locale" type="hidden" value={locale} />
-      <SectionCard title="1. Identite du locataire">
+      <SectionCard title={t('identityTitle')}>
         <div className="grid gap-4 md:grid-cols-2">
           <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-            Nom complet
-            <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="full_name" placeholder="Marie Dupont" required />
+            {t('fullName')}
+            <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="full_name" placeholder={t('fullNamePlaceholder')} required />
           </label>
           <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-            Email
-            <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="email" placeholder="marie@example.com" type="email" />
+            {t('email')}
+            <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="email" placeholder={t('emailPlaceholder')} type="email" />
           </label>
         </div>
       </SectionCard>
-      <SectionCard title="2. Coordonnees">
+      <SectionCard title={t('contactTitle')}>
         <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-          Telephone
+          {t('phone')}
           <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="phone" placeholder="+33 ..." />
         </label>
       </SectionCard>
-      <SectionCard title="3. Notes internes">
+      <SectionCard title={t('notesTitle')}>
         <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-          Notes
-          <textarea className="focus-ring min-h-28 rounded-md border border-[var(--line)] px-3 py-3 text-sm font-normal" name="notes" placeholder="Informations utiles" />
+          {t('notes')}
+          <textarea className="focus-ring min-h-28 rounded-md border border-[var(--line)] px-3 py-3 text-sm font-normal" name="notes" placeholder={t('notesPlaceholder')} />
         </label>
       </SectionCard>
       <div className="flex justify-end gap-3">
         <Link className="focus-ring inline-flex min-h-11 items-center rounded-md border border-[var(--line)] px-5 text-sm font-semibold" href="/tenants">
-          Annuler
+          {common('cancel')}
         </Link>
         <button className="focus-ring min-h-11 rounded-md bg-[var(--accent)] px-5 text-sm font-semibold text-white" style={{color: '#ffffff'}} type="submit">
-          Ajouter
+          {common('add')}
         </button>
       </div>
     </form>

@@ -1,39 +1,42 @@
 import Link from 'next/link';
+import {getTranslations} from 'next-intl/server';
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const common = await getTranslations('common');
+  const t = await getTranslations('legal.privacy');
   const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'support@fzmanager.app';
 
   return (
     <main className="min-h-screen bg-[#f7f6f2] px-5 py-8">
       <article className="mx-auto max-w-3xl rounded-lg border border-[var(--line)] bg-white p-6">
-        <p className="text-sm font-semibold text-[var(--accent)]">Derniere mise a jour: 7 juillet 2026</p>
-        <h1 className="mt-3 text-3xl font-semibold">Politique de confidentialite</h1>
+        <p className="text-sm font-semibold text-[var(--accent)]">{t('updated')}</p>
+        <h1 className="mt-3 text-3xl font-semibold">{t('title')}</h1>
         <div className="mt-6 grid gap-6 text-sm leading-7 text-[var(--muted)]">
           <section>
-            <h2 className="text-lg font-semibold text-[var(--foreground)]">Donnees collectees</h2>
-            <p className="mt-2">Loyelio collecte les informations de compte, les biens, locataires, baux, loyers, depenses et documents que vous ajoutez volontairement dans votre espace.</p>
+            <h2 className="text-lg font-semibold text-[var(--foreground)]">{t('collectedTitle')}</h2>
+            <p className="mt-2">{t('collectedCopy')}</p>
           </section>
           <section>
-            <h2 className="text-lg font-semibold text-[var(--foreground)]">Utilisation</h2>
-            <p className="mt-2">Ces donnees servent a fournir le service, securiser votre compte, generer vos exports et ameliorer l experience produit. Les paiements sont traites par Stripe.</p>
+            <h2 className="text-lg font-semibold text-[var(--foreground)]">{t('usageTitle')}</h2>
+            <p className="mt-2">{t('usageCopy')}</p>
           </section>
           <section>
-            <h2 className="text-lg font-semibold text-[var(--foreground)]">Sous-traitants</h2>
-            <p className="mt-2">Le service s appuie sur Supabase pour l authentification, la base de donnees et le stockage, Stripe pour la facturation, et Vercel pour l hebergement.</p>
+            <h2 className="text-lg font-semibold text-[var(--foreground)]">{t('processorsTitle')}</h2>
+            <p className="mt-2">{t('processorsCopy')}</p>
           </section>
           <section>
-            <h2 className="text-lg font-semibold text-[var(--foreground)]">Vos droits</h2>
-            <p className="mt-2">Vous pouvez demander l acces, la correction ou la suppression de vos donnees. Les obligations comptables ou legales peuvent imposer une conservation limitee de certaines informations.</p>
+            <h2 className="text-lg font-semibold text-[var(--foreground)]">{t('rightsTitle')}</h2>
+            <p className="mt-2">{t('rightsCopy')}</p>
           </section>
           <section>
-            <h2 className="text-lg font-semibold text-[var(--foreground)]">Contact</h2>
+            <h2 className="text-lg font-semibold text-[var(--foreground)]">{common('contact')}</h2>
             <p className="mt-2">
-              Pour toute demande liee aux donnees personnelles, contactez <a className="font-semibold text-[var(--accent)]" href={`mailto:${supportEmail}`}>{supportEmail}</a>.
+              {t('contactCopy')} <a className="font-semibold text-[var(--accent)]" href={`mailto:${supportEmail}`}>{supportEmail}</a>.
             </p>
           </section>
         </div>
         <Link className="focus-ring mt-8 inline-flex min-h-11 items-center rounded-md border border-[var(--line)] px-4 text-sm font-semibold hover:bg-[#f2f0ea]" href="/">
-          Retour
+          {common('back')}
         </Link>
       </article>
     </main>

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import {useTranslations} from 'next-intl';
 import {useEffect, useRef, useState} from 'react';
 
 import {ConfirmSubmitButton} from '@/components/app/confirm-submit-button';
@@ -11,6 +12,8 @@ const MENU_WIDTH = 176;
 const MENU_HEIGHT_ESTIMATE = 180;
 
 export function PropertyActionsMenu({locale, propertyId}: {locale: string; propertyId: string}) {
+  const common = useTranslations('common');
+  const t = useTranslations('properties.actions');
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const summaryRef = useRef<HTMLElement>(null);
   const [position, setPosition] = useState({left: 0, top: 0});
@@ -70,24 +73,24 @@ export function PropertyActionsMenu({locale, propertyId}: {locale: string; prope
       </summary>
       <div className="fixed z-[9999] w-44 rounded-lg border border-[var(--line-soft)] bg-white p-1 text-left text-sm shadow-xl" style={{left: position.left, top: position.top}}>
         <Link className="block rounded-md px-3 py-2 hover:bg-[#f0f5f2]" href={`/properties/${propertyId}`}>
-          Voir
+          {common('view')}
         </Link>
         <Link className="block rounded-md px-3 py-2 hover:bg-[#f0f5f2]" href={`/properties/${propertyId}/edit`}>
-          Modifier
+          {common('edit')}
         </Link>
         <Link className="block rounded-md px-3 py-2 hover:bg-[#f0f5f2]" href={`/properties/${propertyId}/tenants`}>
-          Gerer locataires
+          {t('manageTenants')}
         </Link>
         <form action={deletePropertyAction}>
           <input name="locale" type="hidden" value={locale} />
           <input name="property_id" type="hidden" value={propertyId} />
           <ConfirmSubmitButton
             className="block w-full rounded-md px-3 py-2 text-left text-[#ba1a1a] hover:bg-[#fff1f1]"
-            confirmLabel="Supprimer"
-            description="Cette action supprimera aussi les baux, echeances et donnees associes a ce bien."
-            title="Supprimer ce bien ?"
+            confirmLabel={common('delete')}
+            description={t('deleteDescription')}
+            title={t('deleteTitle')}
           >
-            Supprimer
+            {common('delete')}
           </ConfirmSubmitButton>
         </form>
       </div>

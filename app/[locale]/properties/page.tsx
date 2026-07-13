@@ -97,6 +97,12 @@ export default async function PropertiesPage({searchParams}: PropertiesPageProps
     .filter((charge) => charge.period_month.startsWith(previousMonth))
     .reduce((sum, charge) => sum + Number(charge.total_due ?? 0), 0);
   const monthlyTrend = previousMonthRevenue > 0 ? ((currentMonthRevenue - previousMonthRevenue) / previousMonthRevenue) * 100 : null;
+  const monthlyTrendLabel =
+    monthlyTrend === null
+      ? undefined
+      : t('summary.monthlyTrend', {
+          value: `${monthlyTrend >= 0 ? '+' : ''}${monthlyTrend.toLocaleString('fr-FR', {maximumFractionDigits: 1})}`
+        });
   const signedPhotos = new Map<string, string>();
 
   await Promise.all(
@@ -136,7 +142,7 @@ export default async function PropertiesPage({searchParams}: PropertiesPageProps
         </div>
         {showCreate ? (
           <Link className="focus-ring inline-flex min-h-11 items-center justify-center rounded-lg border border-[var(--line)] px-5 text-sm font-semibold text-[#171d1c]" href="/properties">
-            Retour
+            {t('backToList')}
           </Link>
         ) : (
           <Link className="focus-ring inline-flex min-h-11 items-center justify-center rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white" href="/properties?new=1" style={{color: '#ffffff'}}>
@@ -147,31 +153,31 @@ export default async function PropertiesPage({searchParams}: PropertiesPageProps
 
       {error ? (
         <div className="mt-6 rounded-lg border border-[#f0d6b6] bg-[#fff8ec] p-4 text-sm leading-6 text-[#7a4a11]">
-          Impossible de charger les biens. Lancez les migrations Supabase des biens et photos avant de continuer.
+          {t('errors.loadFailed')}
         </div>
       ) : null}
 
       {params.error === 'plan_limit' ? (
         <div className="mt-6 rounded-lg border border-[#f0d6b6] bg-[#fff8ec] p-4 text-sm leading-6 text-[#7a4a11]">
-          Le plan gratuit inclut 1 bien. Passez a Solo depuis les parametres pour ajouter d autres biens.
+          {t('errors.planLimit')}
         </div>
       ) : null}
 
       {params.error === 'photo_limit' ? (
         <div className="mt-6 rounded-lg border border-[#f0d6b6] bg-[#fff8ec] p-4 text-sm leading-6 text-[#7a4a11]">
-          Votre plan autorise {photoLimit} photo(s) par bien. Supprimez des fichiers ou changez de plan.
+          {t('errors.photoLimit', {limit: photoLimit})}
         </div>
       ) : null}
 
       {params.error === 'photo_size' ? (
         <div className="mt-6 rounded-lg border border-[#f0d6b6] bg-[#fff8ec] p-4 text-sm leading-6 text-[#7a4a11]">
-          La photo est trop lourde pour votre forfait. Choisissez une image plus legere ou reduisez sa taille avant l&apos;envoi.
+          {t('errors.photoSize')}
         </div>
       ) : null}
 
       {params.error === 'delete_failed' ? (
         <div className="mt-6 rounded-lg border border-[#f0d6b6] bg-[#fff8ec] p-4 text-sm leading-6 text-[#7a4a11]">
-          Suppression impossible. Verifiez que la policy Supabase de suppression des biens est appliquee.
+          {t('errors.deleteFailed')}
         </div>
       ) : null}
 
@@ -180,13 +186,13 @@ export default async function PropertiesPage({searchParams}: PropertiesPageProps
       ) : (
         <>
           <section className="mt-8 grid gap-4 md:grid-cols-3">
-            <SummaryCard icon="domain" iconClassName="text-[var(--accent)]" label="Total Biens" note="Patrimoine actif" value={rows.length.toString()} />
-            <SummaryCard icon="analytics" iconClassName="text-[var(--secondary)]" label="Taux d'occupation" progress={occupancyRate} value={`${occupancyRate}%`} />
+            <SummaryCard icon="domain" iconClassName="text-[var(--accent)]" label={t('summary.totalProperties')} note={t('summary.activePortfolio')} value={rows.length.toString()} />
+            <SummaryCard icon="analytics" iconClassName="text-[var(--secondary)]" label={t('summary.occupancyRate')} progress={occupancyRate} value={`${occupancyRate}%`} />
             <SummaryCard
               icon="payments"
               iconClassName="text-[var(--accent)]"
-              label="Revenus Mensuels"
-              note={monthlyTrend === null ? undefined : `${monthlyTrend >= 0 ? '+' : ''}${monthlyTrend.toLocaleString('fr-FR', {maximumFractionDigits: 1})}% vs mois dernier`}
+              label={t('summary.monthlyRevenue')}
+              note={monthlyTrendLabel}
               trend={monthlyTrend !== null}
               value={`${monthlyRent.toLocaleString('fr-FR')} €`}
             />

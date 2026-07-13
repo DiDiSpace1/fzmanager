@@ -1,6 +1,7 @@
 'use client';
 
 import {useRef, useState} from 'react';
+import {useTranslations} from 'next-intl';
 
 type PropertyPhotoPickerProps = {
   disabled?: boolean;
@@ -23,6 +24,8 @@ function fileKey(file: File) {
 }
 
 export function PropertyPhotoPicker({disabled = false, existingCount = 0, maxFiles, maxSizeBytes, onFilesChange}: PropertyPhotoPickerProps) {
+  const common = useTranslations('common');
+  const t = useTranslations('properties.photos');
   const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState('');
@@ -64,7 +67,7 @@ export function PropertyPhotoPicker({disabled = false, existingCount = 0, maxFil
           const nextFiles = Array.from(mergedByKey.values());
 
           if (nextFiles.length > remainingSlots) {
-            setError(`Vous pouvez ajouter encore ${remainingSlots} photo(s) maximum.`);
+            setError(t('remainingLimit', {count: remainingSlots}));
             syncInput(files);
             return;
           }
@@ -72,7 +75,7 @@ export function PropertyPhotoPicker({disabled = false, existingCount = 0, maxFil
           const oversized = nextFiles.find((file) => file.size > maxSizeBytes);
 
           if (oversized) {
-            setError(`${oversized.name} depasse la taille maximale de ${formatSize(maxSizeBytes)}.`);
+            setError(t('fileTooLarge', {name: oversized.name, size: formatSize(maxSizeBytes)}));
             syncInput(files);
             return;
           }
@@ -83,7 +86,7 @@ export function PropertyPhotoPicker({disabled = false, existingCount = 0, maxFil
         type="file"
       />
       <p className="text-xs text-[var(--muted)]">
-        {existingCount + files.length}/{maxFiles} photo(s) selectionnee(s). Taille maximale par fichier: {formatSize(maxSizeBytes)}.
+        {t('selectionSummary', {selected: existingCount + files.length, max: maxFiles, size: formatSize(maxSizeBytes)})}
       </p>
       {error ? <p className="text-sm font-semibold text-[#ba1a1a]">{error}</p> : null}
       {files.length ? (
@@ -102,7 +105,7 @@ export function PropertyPhotoPicker({disabled = false, existingCount = 0, maxFil
                   }}
                   type="button"
                 >
-                  Retirer
+                  {common('remove')}
                 </button>
               </div>
             </div>

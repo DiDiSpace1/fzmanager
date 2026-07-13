@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import {useTranslations} from 'next-intl';
 import {useMemo, useState} from 'react';
 
 import {deleteTenantAction, updateTenantActiveAction} from './actions';
@@ -70,24 +71,24 @@ function activeLease(tenant: TenantTableRow, month: string) {
 
 function paymentStatus(lease: TenantTableRow['leases'][number] | null, month: string) {
   if (!lease) {
-    return {className: 'bg-[#eef2ff] text-[#3755c3]', label: 'Sans bail'};
+    return {className: 'bg-[#eef2ff] text-[#3755c3]', labelKey: 'noLease'};
   }
 
   const charge = lease.rent_charges.find((rentCharge) => rentCharge.period_month === monthStart(month));
 
   if (!charge) {
-    return {className: 'bg-[#eef2ff] text-[#3755c3]', label: lease.status === 'active' ? 'Actif' : lease.status};
+    return {className: 'bg-[#eef2ff] text-[#3755c3]', labelKey: lease.status === 'active' ? 'active' : 'raw', rawLabel: lease.status};
   }
 
   if (charge.status === 'paid') {
-    return {className: 'bg-[#ecfdf5] text-[#047857]', label: 'Paye'};
+    return {className: 'bg-[#ecfdf5] text-[#047857]', labelKey: 'paid'};
   }
 
   if (charge.status === 'partial') {
-    return {className: 'bg-[#fff7ed] text-[#b45309]', label: 'Partiel'};
+    return {className: 'bg-[#fff7ed] text-[#b45309]', labelKey: 'partial'};
   }
 
-  return {className: 'bg-[#fee2e2] text-[#ba1a1a]', label: 'Non paye'};
+  return {className: 'bg-[#fee2e2] text-[#ba1a1a]', labelKey: 'unpaid'};
 }
 
 function hasOverdueRent(tenant: TenantTableRow, month: string) {
@@ -150,6 +151,8 @@ export function TenantTableClient({
   locale: string;
   tenants: TenantTableRow[];
 }) {
+  const common = useTranslations('common');
+  const t = useTranslations('tenants');
   const [selectedMonth, setSelectedMonth] = useState(sanitizeMonth(initialMonth));
   const [queryInput, setQueryInput] = useState(initialQuery);
   const [appliedQuery, setAppliedQuery] = useState(initialQuery);
@@ -206,11 +209,11 @@ export function TenantTableClient({
     <section className="mt-6 overflow-visible rounded-lg border border-[var(--line-soft)] bg-white shadow-sm">
       <div className="flex flex-col gap-3 border-b border-[var(--line-soft)] p-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-2">
-          <button aria-label="Mois precedent" className="focus-ring inline-flex h-9 w-9 items-center justify-center rounded-md text-[#33413f] hover:bg-[#f0f5f2]" onClick={() => changeMonth(addMonths(selectedMonth, -1))} type="button">
+          <button aria-label={t('previousMonth')} className="focus-ring inline-flex h-9 w-9 items-center justify-center rounded-md text-[#33413f] hover:bg-[#f0f5f2]" onClick={() => changeMonth(addMonths(selectedMonth, -1))} type="button">
             <ChevronLeftIcon />
           </button>
           <div className="min-w-32 text-center text-sm font-semibold text-[#171d1c]">{formatMonthLabel(selectedMonth, locale)}</div>
-          <button aria-label="Mois suivant" className="focus-ring inline-flex h-9 w-9 items-center justify-center rounded-md text-[#33413f] hover:bg-[#f0f5f2]" onClick={() => changeMonth(addMonths(selectedMonth, 1))} type="button">
+          <button aria-label={t('nextMonth')} className="focus-ring inline-flex h-9 w-9 items-center justify-center rounded-md text-[#33413f] hover:bg-[#f0f5f2]" onClick={() => changeMonth(addMonths(selectedMonth, 1))} type="button">
             <ChevronRightIcon />
           </button>
         </div>
@@ -221,9 +224,9 @@ export function TenantTableClient({
             applySearch();
           }}
         >
-          <input className="focus-ring min-h-11 w-full rounded-full border border-transparent bg-[#eef2f7] px-4 pr-11 text-sm" onChange={(event) => setQueryInput(event.target.value)} placeholder="Rechercher un locataire..." value={queryInput} />
+          <input className="focus-ring min-h-11 w-full rounded-full border border-transparent bg-[#eef2f7] px-4 pr-11 text-sm" onChange={(event) => setQueryInput(event.target.value)} placeholder={t('searchPlaceholder')} value={queryInput} />
           {queryInput ? (
-            <button aria-label="Effacer la recherche" className="focus-ring absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[#33413f] hover:bg-[#dce3eb]" onClick={clearSearch} type="button">
+            <button aria-label={common('clearSearch')} className="focus-ring absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[#33413f] hover:bg-[#dce3eb]" onClick={clearSearch} type="button">
               <span className="material-symbols-outlined text-[22px]">close</span>
             </button>
           ) : null}
@@ -234,19 +237,19 @@ export function TenantTableClient({
         <table className="w-full min-w-[920px] border-collapse text-left">
           <thead className="border-b border-[var(--line-soft)] bg-[#eaefed] text-[11px] font-semibold uppercase text-[var(--muted)]">
             <tr>
-              <th className="px-5 py-4">Nom & prenom</th>
-              <th className="px-5 py-4">Bien occupe</th>
-              <th className="px-5 py-4">Date entree</th>
-              <th className="px-5 py-4">Fin du contrat</th>
-              <th className="px-5 py-4">Statut</th>
-              <th className="px-5 py-4 text-right">Actions</th>
+              <th className="px-5 py-4">{t('table.name')}</th>
+              <th className="px-5 py-4">{t('table.property')}</th>
+              <th className="px-5 py-4">{t('table.startDate')}</th>
+              <th className="px-5 py-4">{t('table.endDate')}</th>
+              <th className="px-5 py-4">{common('status')}</th>
+              <th className="px-5 py-4 text-right">{common('actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--line-soft)]">
             {rows.length ? (
               rows.map((tenant) => {
                 const lease = displayLease(tenant, selectedMonth);
-                const status = tenant.is_active ? paymentStatus(lease, selectedMonth) : {className: 'bg-[#e5e7eb] text-[#4b5563]', label: 'Desactive'};
+                const status = tenant.is_active ? paymentStatus(lease, selectedMonth) : {className: 'bg-[#e5e7eb] text-[#4b5563]', labelKey: 'disabled'};
 
                 return (
                   <tr className="transition hover:bg-[#f0f5f2]" key={tenant.id}>
@@ -257,7 +260,7 @@ export function TenantTableClient({
                           <Link className="font-semibold hover:text-[var(--accent)]" href={`/tenants/${tenant.id}`}>
                             {tenant.full_name}
                           </Link>
-                          <p className="mt-1 text-sm text-[var(--muted)]">{tenant.email ?? tenant.phone ?? 'Contact a completer'}</p>
+                          <p className="mt-1 text-sm text-[var(--muted)]">{tenant.email ?? tenant.phone ?? t('contactMissing')}</p>
                         </div>
                       </div>
                     </td>
@@ -268,21 +271,21 @@ export function TenantTableClient({
                     <td className="px-5 py-4 text-sm tabular-nums">{lease?.start_date ?? '-'}</td>
                     <td className="px-5 py-4 text-sm tabular-nums">{lease?.end_date ?? '-'}</td>
                     <td className="px-5 py-4">
-                      <span className={`inline-flex rounded px-2.5 py-1 text-xs font-semibold ${status.className}`}>{status.label}</span>
+                      <span className={`inline-flex rounded px-2.5 py-1 text-xs font-semibold ${status.className}`}>{status.labelKey === 'raw' ? status.rawLabel : t(`paymentStatus.${status.labelKey}`)}</span>
                     </td>
                     <td className="px-5 py-4 text-right">
                       <TenantActionDetails>
                         <Link className="block rounded-md px-3 py-2 hover:bg-[#f0f5f2]" href={`/tenants/${tenant.id}`}>
-                          Voir
+                          {common('view')}
                         </Link>
                         <Link className="block rounded-md px-3 py-2 hover:bg-[#f0f5f2]" href={`/tenants/${tenant.id}/edit`}>
-                          Modifier
+                          {common('edit')}
                         </Link>
                         <Link className="block rounded-md px-3 py-2 hover:bg-[#f0f5f2]" href={`/bail/new?tenant_id=${tenant.id}`}>
-                          Creer un bail
+                          {t('actions.createLease')}
                         </Link>
                         <Link className="block rounded-md px-3 py-2 hover:bg-[#f0f5f2]" href={`/transactions?new=transaction&tenant_id=${tenant.id}`}>
-                          Transaction
+                          {t('actions.transaction')}
                         </Link>
                         <form action={updateTenantActiveAction}>
                           <input name="locale" type="hidden" value={locale} />
@@ -292,7 +295,7 @@ export function TenantTableClient({
                           <input name="view" type="hidden" value={selectedView} />
                           <input name="q" type="hidden" value={appliedQuery} />
                           <button className="block w-full rounded-md px-3 py-2 text-left hover:bg-[#f0f5f2]" type="submit">
-                            {tenant.is_active ? 'Desactiver' : 'Activer'}
+                            {tenant.is_active ? t('actions.deactivate') : t('actions.activate')}
                           </button>
                         </form>
                         <form action={deleteTenantAction}>
@@ -308,7 +311,7 @@ export function TenantTableClient({
             ) : (
               <tr>
                 <td className="px-5 py-10 text-center text-sm text-[var(--muted)]" colSpan={6}>
-                  Aucun locataire pour le moment.
+                  {t('empty')}
                 </td>
               </tr>
             )}
@@ -316,7 +319,7 @@ export function TenantTableClient({
         </table>
       </div>
       <div className="border-t border-[var(--line-soft)] px-5 py-4 text-sm text-[var(--muted)]">
-        Affichage {rows.length ? `1-${rows.length}` : '0'} sur {rows.length} locataire(s)
+        {t('pagination', {range: rows.length ? `1-${rows.length}` : '0', count: rows.length})}
       </div>
     </section>
   );

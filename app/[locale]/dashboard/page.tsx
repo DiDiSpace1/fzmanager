@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import {getLocale} from 'next-intl/server';
+import {getLocale, getTranslations} from 'next-intl/server';
 
 import {AppShell} from '@/components/app/app-shell';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
@@ -89,11 +89,13 @@ function formatMoney(value: number) {
 }
 
 function formatAddress(property: Pick<DashboardProperty, 'address_line1' | 'postal_code' | 'city'>) {
-  return [property.address_line1, property.postal_code, property.city].filter(Boolean).join(', ') || 'Adresse a completer';
+  return [property.address_line1, property.postal_code, property.city].filter(Boolean).join(', ');
 }
 
 export default async function DashboardPage() {
   const locale = await getLocale();
+  const t = await getTranslations('dashboard');
+  const propertiesT = await getTranslations('properties');
   const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
   const month = currentMonthStart();
   const chartMonths = buildRecentMonths();
@@ -180,24 +182,24 @@ export default async function DashboardPage() {
     <AppShell>
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold tracking-normal text-[#171d1c]">Tableau de bord</h1>
-          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">Vue rapide de vos biens, baux et loyers du mois.</p>
+          <h1 className="text-3xl font-semibold tracking-normal text-[#171d1c]">{t('title')}</h1>
+          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{t('overviewSubtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link className="focus-ring inline-flex min-h-10 items-center rounded-lg border border-[var(--line)] bg-white px-4 text-sm font-semibold" href="/documents">
-            Rapport
+            {t('report')}
           </Link>
           <Link className="focus-ring inline-flex min-h-10 items-center rounded-lg bg-[var(--accent)] px-4 text-sm font-semibold text-white" href="/properties?new=1" style={{color: '#ffffff'}}>
-            + Ajouter un bien
+            + {propertiesT('newProperty')}
           </Link>
         </div>
       </div>
 
       <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard icon="payments" tone="primary" label="Loyers encaissés" value={formatMoney(activeRentTotal)} />
-        <MetricCard icon="hourglass_empty" tone="secondary" label="En attente" value={formatMoney(paidTotal)} />
-        <MetricCard icon="warning" tone="error" label="Impayes" value={formatMoney(unpaidTotal)} />
-        <MetricCard icon="home_work" tone="primary" label="Locations actives" value={activeLeaseCount.toString()} />
+        <MetricCard icon="payments" tone="primary" label={t('metrics.collectedRent')} value={formatMoney(activeRentTotal)} />
+        <MetricCard icon="hourglass_empty" tone="secondary" label={t('metrics.pending')} value={formatMoney(paidTotal)} />
+        <MetricCard icon="warning" tone="error" label={t('metrics.unpaid')} value={formatMoney(unpaidTotal)} />
+        <MetricCard icon="home_work" tone="primary" label={t('metrics.activeRentals')} value={activeLeaseCount.toString()} />
       </section>
 
       <section className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px]">
@@ -206,9 +208,9 @@ export default async function DashboardPage() {
 
           <section>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-base font-semibold">Biens crees</h2>
+              <h2 className="text-base font-semibold">{t('createdProperties')}</h2>
               <Link className="text-sm font-semibold text-[var(--accent)]" href="/properties">
-                Tout voir
+                {t('viewAll')}
               </Link>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
@@ -224,19 +226,19 @@ export default async function DashboardPage() {
                       <img alt="" className="h-36 w-full object-cover" src={photoUrl} />
                       <div className="p-5">
                         <h3 className="truncate text-base font-semibold">{property.name}</h3>
-                        <p className="mt-1 truncate text-sm text-[var(--muted)]">{formatAddress(property)}</p>
+                        <p className="mt-1 truncate text-sm text-[var(--muted)]">{formatAddress(property) || propertiesT('addressMissing')}</p>
                         <div className="mt-4 flex items-center justify-between gap-3">
                           <span className={activeLeases.length ? 'rounded bg-[#ecfdf5] px-2.5 py-1 text-xs font-semibold text-[#047857]' : 'rounded bg-[#eef2ff] px-2.5 py-1 text-xs font-semibold text-[#3755c3]'}>
-                            {activeLeases.length ? 'Loue' : 'Vacant'}
+                            {activeLeases.length ? propertiesT('status.rented') : propertiesT('status.vacant')}
                           </span>
-                          <span className="text-sm font-bold text-[var(--accent)] tabular-nums">{activeLeases.length ? `${formatMoney(propertyRentTotal)} / mois` : '暂无'}</span>
+                          <span className="text-sm font-bold text-[var(--accent)] tabular-nums">{activeLeases.length ? t('perMonth', {amount: formatMoney(propertyRentTotal)}) : t('none')}</span>
                         </div>
                       </div>
                     </Link>
                   );
                 })
               ) : (
-                <div className="rounded-xl border border-[var(--line-soft)] bg-white p-6 text-sm text-[var(--muted)] md:col-span-2">Aucun bien cree pour le moment.</div>
+                <div className="rounded-xl border border-[var(--line-soft)] bg-white p-6 text-sm text-[var(--muted)] md:col-span-2">{t('noProperties')}</div>
               )}
             </div>
           </section>
@@ -245,13 +247,13 @@ export default async function DashboardPage() {
         <aside className="grid content-start gap-6">
           <section className="rounded-xl border border-[var(--line-soft)] bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-semibold">Actions rapides</h2>
-              <span className="text-sm text-[var(--muted)]">Checklist</span>
+              <h2 className="text-base font-semibold">{t('quickActions')}</h2>
+              <span className="text-sm text-[var(--muted)]">{t('checklist')}</span>
             </div>
             <div className="mt-5 grid gap-3">
-              <QuickAction href="/bail" label="Creer un bail" note="Associer un locataire a un bien" />
-              <QuickAction href="/documents" label="Ajouter un document" note="Classer bail, quittance ou impots" />
-              <QuickAction href="/tax" label="Preparer le fiscal" note="Verifier les revenus et depenses" />
+              <QuickAction href="/bail" label={t('quick.createLease')} note={t('quick.createLeaseNote')} />
+              <QuickAction href="/documents" label={t('quick.addDocument')} note={t('quick.addDocumentNote')} />
+              <QuickAction href="/tax" label={t('quick.prepareTax')} note={t('quick.prepareTaxNote')} />
             </div>
           </section>
         </aside>

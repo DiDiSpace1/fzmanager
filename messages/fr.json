@@ -5,7 +5,31 @@
     "save": "Enregistrer",
     "soon": "Bientôt",
     "start": "Commencer",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "back": "Retour",
+    "home": "Accueil",
+    "dashboard": "Tableau de bord",
+    "retry": "Reessayer",
+    "contact": "Contact",
+    "privacy": "Confidentialite",
+    "help": "Aide",
+    "search": "Rechercher",
+    "clearSearch": "Effacer la recherche",
+    "add": "Ajouter",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "view": "Voir",
+    "download": "Telecharger",
+    "filter": "Filtrer",
+    "all": "Tous",
+    "actions": "Actions",
+    "date": "Date",
+    "amount": "Montant",
+    "status": "Statut",
+    "loading": "Chargement...",
+    "noData": "Aucune donnee disponible",
+    "remove": "Retirer",
+    "language": "Langue"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -133,6 +157,17 @@
       "check_email": "Inscription envoyée. Vérifiez votre email pour confirmer le compte.",
       "password_updated": "Mot de passe mis à jour. Vous pouvez vous connecter.",
       "reset_sent": "Si ce compte existe, un email de réinitialisation vient d'être envoyé."
+    },
+    "resetPassword": {
+      "title": "Nouveau mot de passe",
+      "subtitle": "Choisissez un nouveau mot de passe pour votre compte.",
+      "password": "Mot de passe",
+      "errors": {
+        "passwordShort": "Le mot de passe doit contenir au moins 6 caracteres.",
+        "sessionFailed": "Le lien de reinitialisation a expire ou a deja ete utilise.",
+        "updateFailed": "Impossible de mettre a jour le mot de passe. Relancez le lien de reinitialisation.",
+        "default": "Le mot de passe n a pas pu etre modifie."
+      }
     }
   },
   "dashboard": {
@@ -145,20 +180,242 @@
     "quickActions": "Actions rapides",
     "addRent": "Ajouter un loyer",
     "addExpense": "Ajouter une dépense",
-    "uploadDocument": "Téléverser un justificatif"
+    "uploadDocument": "Téléverser un justificatif",
+    "overviewSubtitle": "Vue rapide de vos biens, baux et loyers du mois.",
+    "report": "Rapport",
+    "createdProperties": "Biens crees",
+    "viewAll": "Tout voir",
+    "perMonth": "{amount} / mois",
+    "none": "Aucun",
+    "noProperties": "Aucun bien cree pour le moment.",
+    "checklist": "Checklist",
+    "metrics": {
+      "collectedRent": "Loyers encaisses",
+      "pending": "En attente",
+      "unpaid": "Impayes",
+      "activeRentals": "Locations actives"
+    },
+    "quick": {
+      "createLease": "Creer un bail",
+      "createLeaseNote": "Associer un locataire a un bien",
+      "addDocument": "Ajouter un document",
+      "addDocumentNote": "Classer bail, quittance ou impots",
+      "prepareTax": "Preparer le fiscal",
+      "prepareTaxNote": "Verifier les revenus et depenses"
+    },
+    "chart": {
+      "title": "Revenus & depenses",
+      "revenue": "Revenus",
+      "expenses": "Depenses",
+      "ariaLabel": "Revenus et depenses des six derniers mois"
+    }
   },
   "properties": {
     "title": "Biens",
     "subtitle": "Gérez les biens, chambres et unités louées.",
-    "newProperty": "Nouveau bien"
+    "newProperty": "Nouveau bien",
+    "backToList": "Retour",
+    "searchPlaceholder": "Rechercher un bien, une adresse, une ville...",
+    "addressMissing": "Adresse a completer",
+    "empty": "Aucun bien pour le moment.",
+    "pagination": "Affichage {range} sur {count} bien(s)",
+    "rentalModes": {
+      "allModes": "Tous les modes",
+      "sharedRooms": "colocation",
+      "entirePlace": "entier",
+      "mixed": "mixte"
+    },
+    "status": {
+      "rented": "Loue",
+      "vacant": "Vacant"
+    },
+    "table": {
+      "property": "Bien & adresse",
+      "mode": "Mode",
+      "tenant": "Locataire",
+      "rent": "Loyer HC"
+    },
+    "summary": {
+      "totalProperties": "Total biens",
+      "activePortfolio": "Patrimoine actif",
+      "occupancyRate": "Taux d'occupation",
+      "monthlyRevenue": "Revenus mensuels",
+      "monthlyTrend": "{value}% vs mois dernier"
+    },
+    "errors": {
+      "loadFailed": "Impossible de charger les biens. Lancez les migrations Supabase des biens et photos avant de continuer.",
+      "planLimit": "Le plan gratuit inclut 1 bien. Passez a Solo depuis les parametres pour ajouter d autres biens.",
+      "photoLimit": "Votre plan autorise {limit} photo(s) par bien. Supprimez des fichiers ou changez de plan.",
+      "photoSize": "La photo est trop lourde pour votre forfait. Choisissez une image plus legere ou reduisez sa taille avant l'envoi.",
+      "deleteFailed": "Suppression impossible. Verifiez que la policy Supabase de suppression des biens est appliquee."
+    },
+    "form": {
+      "generalTitle": "1. Informations generales",
+      "photosTitle": "2. Photos & documents",
+      "name": "Nom du bien",
+      "namePlaceholder": "Appartement Lyon",
+      "address": "Adresse complete",
+      "addressPlaceholder": "12 rue de la Paix",
+      "postalCode": "Code postal",
+      "city": "Ville",
+      "cityPlaceholder": "Paris",
+      "propertyType": "Type de bien",
+      "rentalMode": "Mode de location",
+      "surfaceArea": "Surface habitable (m2)",
+      "propertyPhotos": "Photos du bien",
+      "photosNotIncluded": "Les photos ne sont pas incluses dans le plan Free.",
+      "photoLimit": "{limit} photo(s) maximum par bien.",
+      "creating": "Creation...",
+      "create": "Creer le bien",
+      "propertyTypes": {
+        "studio": "Studio",
+        "room": "Chambre",
+        "house": "Maison",
+        "apartment": "Appartement",
+        "other": "Autre"
+      },
+      "rentalModes": {
+        "sharedRooms": "colocation",
+        "entirePlace": "entier",
+        "mixed": "mixte"
+      },
+      "errors": {
+        "planLimit": "Votre forfait ne permet pas de creer un bien supplementaire.",
+        "createFailed": "Impossible de creer le bien pour le moment.",
+        "photoUploadFailed": "Le bien a ete cree, mais une photo n a pas pu etre envoyee. Vous pouvez reessayer depuis la page Modifier.",
+        "photoArchiveFailed": "Le bien a ete cree, mais une photo n a pas pu etre archivee. Vous pouvez reessayer depuis la page Modifier."
+      }
+    },
+    "actions": {
+      "manageTenants": "Gerer locataires",
+      "deleteTitle": "Supprimer ce bien ?",
+      "deleteDescription": "Cette action supprimera aussi les baux, echeances et donnees associes a ce bien."
+    },
+    "photos": {
+      "title": "Photos",
+      "deletePhoto": "Supprimer la photo",
+      "empty": "Aucune photo pour ce bien.",
+      "addPhotos": "Ajouter des photos",
+      "uploading": "Envoi...",
+      "uploadFailed": "Impossible d envoyer cette photo. Reessayez avec une image plus legere.",
+      "archiveFailed": "Photo envoyee, mais impossible de l archiver. Reessayez.",
+      "remainingLimit": "Vous pouvez ajouter encore {count} photo(s) maximum.",
+      "fileTooLarge": "{name} depasse la taille maximale de {size}.",
+      "selectionSummary": "{selected}/{max} photo(s) selectionnee(s). Taille maximale par fichier: {size}."
+    }
   },
   "tenants": {
     "title": "Locataires",
-    "subtitle": "Suivez les locataires, baux, dépôts et périodes de location."
+    "subtitle": "Suivez les locataires, baux, dépôts et périodes de location.",
+    "backToList": "Retour",
+    "addTenant": "Ajouter un locataire",
+    "editTitle": "Modifier le locataire",
+    "searchPlaceholder": "Rechercher un locataire...",
+    "previousMonth": "Mois precedent",
+    "nextMonth": "Mois suivant",
+    "contactMissing": "Contact a completer",
+    "empty": "Aucun locataire pour le moment.",
+    "pagination": "Affichage {range} sur {count} locataire(s)",
+    "errors": {
+      "loadFailed": "Impossible de charger les locataires. Verifiez que les migrations Supabase sont bien appliquees.",
+      "planLimit": "Le plan gratuit inclut 3 locataires. Passez a Solo depuis les parametres pour continuer."
+    },
+    "summary": {
+      "unassigned": "Non assignes",
+      "unassignedNote": "A rattacher a un bien",
+      "expiring": "Baux < 3 mois",
+      "expiringNote": "A renouveler bientot",
+      "overdue": "Retards",
+      "overdueNote": "Paiements a suivre",
+      "allTenants": "Tous les locataires",
+      "allTenantsNote": "Passes, futurs et non assignes",
+      "activeLeases": "Baux actifs",
+      "activeLeasesNote": "Assignes et en periode"
+    },
+    "table": {
+      "name": "Nom & prenom",
+      "property": "Bien occupe",
+      "startDate": "Date entree",
+      "endDate": "Fin du contrat"
+    },
+    "paymentStatus": {
+      "noLease": "Sans bail",
+      "active": "Actif",
+      "paid": "Paye",
+      "partial": "Partiel",
+      "unpaid": "Non paye",
+      "disabled": "Desactive"
+    },
+    "actions": {
+      "createLease": "Creer un bail",
+      "transaction": "Transaction",
+      "deactivate": "Desactiver",
+      "activate": "Activer",
+      "deleteTitle": "Supprimer ce locataire ?",
+      "deleteDescription": "Supprimer ce locataire supprimera aussi ses donnees historiques liees aux baux, loyers et documents."
+    },
+    "form": {
+      "identityTitle": "1. Identite du locataire",
+      "contactTitle": "2. Coordonnees",
+      "notesTitle": "3. Notes internes",
+      "fullName": "Nom complet",
+      "fullNamePlaceholder": "Marie Dupont",
+      "email": "Email",
+      "emailPlaceholder": "marie@example.com",
+      "phone": "Telephone",
+      "notes": "Notes",
+      "notesPlaceholder": "Informations utiles"
+    },
+    "detail": {
+      "backToTenants": "Retour aux locataires",
+      "backToTenant": "Retour au locataire",
+      "contactMissing": "Contact a completer",
+      "noLease": "Sans bail",
+      "occupiedProperty": "Bien occupe",
+      "rent": "Loyer",
+      "deposit": "Depot",
+      "contactDetails": "Coordonnees",
+      "phone": "Telephone",
+      "leases": "Baux",
+      "propertyFallback": "Bien",
+      "noLeases": "Aucun bail enregistre pour ce locataire.",
+      "recentCharges": "Dernieres echeances",
+      "noCharges": "Aucune echeance generee.",
+      "notes": "Notes",
+      "noNotes": "Aucune note pour le moment."
+    }
   },
   "documents": {
     "title": "Documents",
-    "subtitle": "Classez contrats, factures, assurances et justificatifs par bien et par période."
+    "subtitle": "Classez contrats, factures, assurances et justificatifs par bien et par période.",
+    "generateReceipt": "Generer une quittance",
+    "searchPlaceholder": "Rechercher un document...",
+    "year": "Annee",
+    "type": "Type",
+    "property": "Bien",
+    "allProperties": "Tous les biens",
+    "recentDocuments": "Documents recents",
+    "viewAll": "Tout voir",
+    "fileCount": "{count} fichiers",
+    "global": "Global",
+    "empty": "Aucun document pour le moment.",
+    "types": {
+      "lease": "Bail",
+      "rentReceipt": "Quittance",
+      "invoice": "Depense",
+      "tax": "Fiscal"
+    },
+    "table": {
+      "fileName": "Nom du fichier",
+      "category": "Categorie",
+      "size": "Taille"
+    },
+    "errors": {
+      "loadFailed": "Impossible de charger les documents. Lancez la migration Supabase de la phase documents.",
+      "planLimit": "Votre forfait ne permet pas de televerser plus de documents. Passez a un forfait superieur depuis les parametres.",
+      "storageLimit": "Le stockage documents de votre forfait est atteint.",
+      "invoiceAmount": "Ajoutez un montant valide pour enregistrer une facture travaux dans les depenses."
+    }
   },
   "tax": {
     "title": "Dossier fiscal",
@@ -194,5 +451,48 @@
     "country": "Pays du compte",
     "locale": "Langue",
     "billing": "Facturation"
+  },
+  "shell": {
+    "tagline": "Gestion immobiliere"
+  },
+  "cookie": {
+    "notice": "Loyelio utilise uniquement les cookies necessaires au fonctionnement du compte. Les outils de paiement et d authentification peuvent deposer leurs propres cookies.",
+    "accept": "Accepter",
+    "decline": "Refuser"
+  },
+  "errors": {
+    "serverTitle": "La page n a pas pu se charger",
+    "serverCopy": "Une erreur serveur est survenue. Vous pouvez reessayer ou revenir au tableau de bord.",
+    "reference": "Reference: {digest}",
+    "notFoundTitle": "Page introuvable",
+    "notFoundCopy": "Cette page n existe pas ou vous n avez plus acces a cette ressource."
+  },
+  "legal": {
+    "privacy": {
+      "updated": "Derniere mise a jour: 7 juillet 2026",
+      "title": "Politique de confidentialite",
+      "collectedTitle": "Donnees collectees",
+      "collectedCopy": "Loyelio collecte les informations de compte, les biens, locataires, baux, loyers, depenses et documents que vous ajoutez volontairement dans votre espace.",
+      "usageTitle": "Utilisation",
+      "usageCopy": "Ces donnees servent a fournir le service, securiser votre compte, generer vos exports et ameliorer l experience produit. Les paiements sont traites par Stripe.",
+      "processorsTitle": "Sous-traitants",
+      "processorsCopy": "Le service s appuie sur Supabase pour l authentification, la base de donnees et le stockage, Stripe pour la facturation, et Vercel pour l hebergement.",
+      "rightsTitle": "Vos droits",
+      "rightsCopy": "Vous pouvez demander l acces, la correction ou la suppression de vos donnees. Les obligations comptables ou legales peuvent imposer une conservation limitee de certaines informations.",
+      "contactCopy": "Pour toute demande liee aux donnees personnelles, contactez"
+    },
+    "terms": {
+      "updated": "Derniere mise a jour: 7 juillet 2026",
+      "title": "Conditions d utilisation",
+      "serviceTitle": "Service",
+      "serviceCopy": "Loyelio fournit un espace de suivi locatif, documentaire et fiscal indicatif pour petits bailleurs. Le service ne remplace pas un expert-comptable, un avocat ou un conseiller fiscal.",
+      "accountTitle": "Compte",
+      "accountCopy": "Vous etes responsable de l exactitude des informations saisies et de la confidentialite de votre compte. Vous devez disposer des droits necessaires pour stocker les documents ajoutes.",
+      "billingTitle": "Facturation",
+      "billingCopy": "Les abonnements et paiements sont geres par Stripe. Les acces payants sont actives apres confirmation du paiement par Stripe et peuvent etre suspendus en cas d echec ou d annulation.",
+      "availabilityTitle": "Disponibilite",
+      "availabilityCopy": "Nous faisons des efforts raisonnables pour maintenir le service disponible, sans garantie d absence totale d interruption, d erreur ou de perte de donnees.",
+      "contactCopy": "Pour toute question sur le service, contactez"
+    }
   }
 }

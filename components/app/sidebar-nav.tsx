@@ -3,6 +3,12 @@
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 
+const localeOptions = [
+  {label: 'FR', value: 'fr'},
+  {label: 'EN', value: 'en'},
+  {label: '中文', value: 'zh'}
+] as const;
+
 type NavItem = {
   href: string;
   key: string;
@@ -22,15 +28,28 @@ const iconPaths: Record<string, string[]> = {
 export function SidebarNav({
   helpLabel,
   items,
+  languageLabel,
   logoutAction,
-  logoutLabel
+  logoutLabel,
+  locale
 }: {
   helpLabel: string;
   items: NavItem[];
+  languageLabel: string;
   logoutAction: string;
   logoutLabel: string;
+  locale: string;
 }) {
   const pathname = usePathname();
+
+  function switchLanguage(nextLocale: string) {
+    const segments = pathname.split('/').filter(Boolean);
+    const [, ...restWithoutLocale] = segments;
+    const hasLocalePrefix = localeOptions.some((option) => option.value === segments[0]);
+    const rest = hasLocalePrefix ? restWithoutLocale : segments;
+    const nextPath = nextLocale === 'fr' ? `/${rest.join('/')}` : `/${[nextLocale, ...rest].join('/')}`;
+    window.location.href = nextPath === '/' ? nextPath : nextPath.replace(/\/$/, '');
+  }
 
   return (
     <>
@@ -54,6 +73,23 @@ export function SidebarNav({
         })}
       </nav>
       <div className="absolute inset-x-4 bottom-5 grid gap-2">
+        <label className="grid gap-1 rounded-lg border border-[var(--line-soft)] bg-white/65 px-3 py-2 text-[11px] font-semibold text-[#253331] shadow-sm">
+          <span className="flex items-center gap-2 text-[var(--muted)]">
+            <NavIcon name="language" />
+            {languageLabel}
+          </span>
+          <select
+            className="focus-ring min-h-9 rounded-md border border-[var(--line-soft)] bg-white px-2 text-[12px] font-semibold text-[#253331]"
+            onChange={(event) => switchLanguage(event.target.value)}
+            value={locale}
+          >
+            {localeOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
         <button className="focus-ring flex min-h-9 items-center gap-3 rounded-md px-3 text-left text-[12px] font-medium text-[#253331] hover:bg-[#eef7f4]" type="button">
           <NavIcon name="help" />
           <span>{helpLabel}</span>
@@ -86,6 +122,17 @@ function NavIcon({active = false, name}: {active?: boolean; name: string}) {
         <circle cx="12" cy="12" r="9" />
         <path d="M9.5 9a2.5 2.5 0 1 1 4.1 1.9c-.9.6-1.6 1.2-1.6 2.4" />
         <path d="M12 17h.01" />
+      </svg>
+    );
+  }
+
+  if (name === 'language') {
+    return (
+      <svg aria-hidden="true" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M3 12h18" />
+        <path d="M12 3a14 14 0 0 1 0 18" />
+        <path d="M12 3a14 14 0 0 0 0 18" />
       </svg>
     );
   }

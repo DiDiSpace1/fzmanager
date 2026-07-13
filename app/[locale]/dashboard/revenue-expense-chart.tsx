@@ -1,6 +1,7 @@
 'use client';
 
 import {useMemo, useState} from 'react';
+import {useTranslations} from 'next-intl';
 
 type ChartPoint = {
   expense: number;
@@ -35,6 +36,7 @@ function buildPath(values: number[], maxValue: number) {
 }
 
 export function RevenueExpenseChart({points}: RevenueExpenseChartProps) {
+  const t = useTranslations('dashboard.chart');
   const [showRevenue, setShowRevenue] = useState(true);
   const [showExpense, setShowExpense] = useState(true);
   const maxValue = useMemo(() => Math.max(1, ...points.flatMap((point) => [point.revenue, point.expense])), [points]);
@@ -50,20 +52,20 @@ export function RevenueExpenseChart({points}: RevenueExpenseChartProps) {
   return (
     <section className="overflow-hidden rounded-xl border border-[var(--line-soft)] bg-white shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
-        <h2 className="text-base font-semibold">Revenus & Depenses</h2>
+        <h2 className="text-base font-semibold">{t('title')}</h2>
         <div className="flex items-center gap-3 text-xs font-semibold">
           <button className={showRevenue ? 'inline-flex items-center gap-1.5 text-[#00796b]' : 'inline-flex items-center gap-1.5 text-[var(--muted)]'} onClick={() => setShowRevenue((value) => !value)} type="button">
             <span className={showRevenue ? 'h-2.5 w-2.5 rounded-sm bg-[#00796b]' : 'h-2.5 w-2.5 rounded-sm bg-[#cfd8d4]'} />
-            Revenus
+            {t('revenue')}
           </button>
           <button className={showExpense ? 'inline-flex items-center gap-1.5 text-[#ba1a1a]' : 'inline-flex items-center gap-1.5 text-[var(--muted)]'} onClick={() => setShowExpense((value) => !value)} type="button">
             <span className={showExpense ? 'h-2.5 w-2.5 rounded-sm bg-[#ba1a1a]' : 'h-2.5 w-2.5 rounded-sm bg-[#cfd8d4]'} />
-            Depenses
+            {t('expenses')}
           </button>
         </div>
       </div>
       <div className="px-4 pb-4">
-        <svg aria-label="Revenus et depenses des six derniers mois" className="h-[250px] w-full" preserveAspectRatio="none" viewBox={`0 0 ${chartWidth} ${chartHeight}`} role="img">
+        <svg aria-label={t('ariaLabel')} className="h-[250px] w-full" preserveAspectRatio="none" viewBox={`0 0 ${chartWidth} ${chartHeight}`} role="img">
           <line stroke="#d7e0dc" strokeWidth="1" x1={padding.left} x2={chartWidth - padding.right} y1={chartHeight - padding.bottom} y2={chartHeight - padding.bottom} />
           {showRevenue ? <path d={revenuePath} fill="none" stroke="#00796b" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" /> : null}
           {showExpense ? <path d={expensePath} fill="none" stroke="#ba1a1a" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" /> : null}

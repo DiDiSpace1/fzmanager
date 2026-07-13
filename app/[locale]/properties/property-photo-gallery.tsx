@@ -1,6 +1,7 @@
 'use client';
 
 import {useRouter} from 'next/navigation';
+import {useTranslations} from 'next-intl';
 import {useState, useTransition} from 'react';
 
 import {createSupabaseBrowserClient} from '@/lib/supabase/browser';
@@ -31,6 +32,8 @@ function extensionFor(file: File) {
 }
 
 export function PropertyPhotoGallery({existingCount, locale, maxPhotoSizeBytes, photoLimit, photos, propertyId, workspaceId}: PropertyPhotoGalleryProps) {
+  const common = useTranslations('common');
+  const t = useTranslations('properties.photos');
   const router = useRouter();
   const [files, setFiles] = useState<File[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -54,7 +57,7 @@ export function PropertyPhotoGallery({existingCount, locale, maxPhotoSizeBytes, 
         });
 
         if (uploadError) {
-          setError('Impossible d envoyer cette photo. Reessayez avec une image plus legere.');
+          setError(t('uploadFailed'));
           return;
         }
 
@@ -71,7 +74,7 @@ export function PropertyPhotoGallery({existingCount, locale, maxPhotoSizeBytes, 
 
         if (photoError) {
           await supabase.storage.from('property-photos').remove([filePath]);
-          setError('Photo envoyee, mais impossible de l archiver. Reessayez.');
+          setError(t('archiveFailed'));
           return;
         }
       }
@@ -84,7 +87,7 @@ export function PropertyPhotoGallery({existingCount, locale, maxPhotoSizeBytes, 
   return (
     <section className="rounded-lg border border-[var(--line-soft)] bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold">Photos</h2>
+        <h2 className="text-lg font-semibold">{t('title')}</h2>
         <span className="text-xs font-semibold text-[var(--muted)]">
           {existingCount}/{photoLimit}
         </span>
@@ -104,7 +107,7 @@ export function PropertyPhotoGallery({existingCount, locale, maxPhotoSizeBytes, 
                 <input name="property_id" type="hidden" value={propertyId} />
                 <input name="photo_id" type="hidden" value={photo.id} />
                 <button
-                  aria-label="Supprimer la photo"
+                  aria-label={t('deletePhoto')}
                   className="focus-ring absolute right-2 top-2 hidden h-7 w-7 items-center justify-center rounded-full bg-[#ba1a1a] text-sm font-bold text-white shadow group-hover:flex"
                   type="submit"
                 >
@@ -115,15 +118,15 @@ export function PropertyPhotoGallery({existingCount, locale, maxPhotoSizeBytes, 
           ))}
         </div>
       ) : (
-        <p className="text-sm text-[var(--muted)]">Aucune photo pour ce bien.</p>
+        <p className="text-sm text-[var(--muted)]">{t('empty')}</p>
       )}
 
       <div className="mt-4 rounded-lg border border-dashed border-[var(--line)] bg-[#fbfdfc] p-4">
-        <p className="text-sm font-semibold">Ajouter des photos</p>
+        <p className="text-sm font-semibold">{t('addPhotos')}</p>
         <PropertyPhotoPicker disabled={existingCount >= photoLimit || isPending} existingCount={existingCount} maxFiles={photoLimit} maxSizeBytes={maxPhotoSizeBytes} onFilesChange={setFiles} />
         {files.length ? (
           <button className="focus-ring mt-3 min-h-10 rounded-md bg-[var(--accent)] px-4 text-sm font-semibold text-white disabled:opacity-60" disabled={isPending} onClick={uploadSelectedPhotos} type="button">
-            {isPending ? 'Envoi...' : 'Ajouter'}
+            {isPending ? t('uploading') : common('add')}
           </button>
         ) : null}
         {error ? <p className="mt-3 text-sm font-semibold text-[#ba1a1a]">{error}</p> : null}

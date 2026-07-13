@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import {useTranslations} from 'next-intl';
 import {useRouter} from 'next/navigation';
 import {useState, useTransition} from 'react';
 
@@ -21,6 +22,8 @@ function extensionFor(file: File) {
 }
 
 export function CreatePropertyForm({locale, maxPhotoSizeBytes, photoLimit}: CreatePropertyFormProps) {
+  const common = useTranslations('common');
+  const t = useTranslations('properties.form');
   const router = useRouter();
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState('');
@@ -41,7 +44,7 @@ export function CreatePropertyForm({locale, maxPhotoSizeBytes, photoLimit}: Crea
           const result = await createPropertyDraftAction(formData);
 
           if ('error' in result) {
-            setError(result.error === 'plan_limit' ? 'Votre forfait ne permet pas de creer un bien supplementaire.' : 'Impossible de creer le bien pour le moment.');
+            setError(result.error === 'plan_limit' ? t('errors.planLimit') : t('errors.createFailed'));
             return;
           }
 
@@ -56,7 +59,7 @@ export function CreatePropertyForm({locale, maxPhotoSizeBytes, photoLimit}: Crea
               });
 
               if (uploadError) {
-                setError('Le bien a ete cree, mais une photo n a pas pu etre envoyee. Vous pouvez reessayer depuis la page Modifier.');
+                setError(t('errors.photoUploadFailed'));
                 router.push(localizedPath(locale, `/properties/${result.propertyId}/edit?error=photo_failed`));
                 return;
               }
@@ -74,7 +77,7 @@ export function CreatePropertyForm({locale, maxPhotoSizeBytes, photoLimit}: Crea
 
               if (photoError) {
                 await supabase.storage.from('property-photos').remove([filePath]);
-                setError('Le bien a ete cree, mais une photo n a pas pu etre archivee. Vous pouvez reessayer depuis la page Modifier.');
+                setError(t('errors.photoArchiveFailed'));
                 router.push(localizedPath(locale, `/properties/${result.propertyId}/edit?error=photo_failed`));
                 return;
               }
@@ -87,68 +90,68 @@ export function CreatePropertyForm({locale, maxPhotoSizeBytes, photoLimit}: Crea
     >
       <input name="locale" type="hidden" value={locale} />
       {error ? <div className="rounded-lg border border-[#f3b4b4] bg-[#ffdad6] p-4 text-sm font-semibold text-[#ba1a1a]">{error}</div> : null}
-      <SectionCard icon="pin" title="1. Informations Generales">
+      <SectionCard icon="pin" title={t('generalTitle')}>
         <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-          Nom du bien
-          <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="name" placeholder="Appartement Lyon" required />
+          {t('name')}
+          <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="name" placeholder={t('namePlaceholder')} required />
         </label>
         <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-          Adresse complete
-          <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="address_line1" placeholder="12 rue de la Paix" />
+          {t('address')}
+          <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="address_line1" placeholder={t('addressPlaceholder')} />
         </label>
         <div className="grid gap-4 md:grid-cols-2">
           <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-            Code postal
+            {t('postalCode')}
             <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="postal_code" placeholder="75002" />
           </label>
           <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-            Ville
-            <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="city" placeholder="Paris" />
+            {t('city')}
+            <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="city" placeholder={t('cityPlaceholder')} />
           </label>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-            Type de bien
+            {t('propertyType')}
             <select className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="property_type" defaultValue="studio">
-              <option value="studio">Studio</option>
+              <option value="studio">{t('propertyTypes.studio')}</option>
               <option value="t1">T1</option>
               <option value="t2">T2</option>
               <option value="t3">T3</option>
-              <option value="room">Chambre</option>
-              <option value="house">Maison</option>
-              <option value="apartment">Appartement</option>
-              <option value="other">Autre</option>
+              <option value="room">{t('propertyTypes.room')}</option>
+              <option value="house">{t('propertyTypes.house')}</option>
+              <option value="apartment">{t('propertyTypes.apartment')}</option>
+              <option value="other">{t('propertyTypes.other')}</option>
             </select>
           </label>
           <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-            Mode de location
+            {t('rentalMode')}
             <select className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="rental_mode" defaultValue="shared_rooms">
-              <option value="shared_rooms">colocation</option>
-              <option value="entire_place">entier</option>
-              <option value="mixed">mixte</option>
+              <option value="shared_rooms">{t('rentalModes.sharedRooms')}</option>
+              <option value="entire_place">{t('rentalModes.entirePlace')}</option>
+              <option value="mixed">{t('rentalModes.mixed')}</option>
             </select>
           </label>
           <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
-            Surface habitable (m2)
+            {t('surfaceArea')}
             <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" min="0" name="surface_area" placeholder="35" step="0.01" type="number" />
           </label>
         </div>
       </SectionCard>
 
-      <SectionCard icon="camera" title="2. Photos & Documents">
+      <SectionCard icon="camera" title={t('photosTitle')}>
         <div className="rounded-lg border border-dashed border-[var(--line)] bg-[#fbfdfc] p-6 text-center">
-          <p className="text-sm font-semibold">Photos du bien</p>
-          <p className="mt-1 text-sm text-[var(--muted)]">{photoLimit === 0 ? 'Les photos ne sont pas incluses dans le plan Free.' : `${photoLimit} photo(s) maximum par bien.`}</p>
+          <p className="text-sm font-semibold">{t('propertyPhotos')}</p>
+          <p className="mt-1 text-sm text-[var(--muted)]">{photoLimit === 0 ? t('photosNotIncluded') : t('photoLimit', {limit: photoLimit})}</p>
           <PropertyPhotoPicker disabled={photoLimit === 0 || isPending} maxFiles={photoLimit} maxSizeBytes={maxPhotoSizeBytes} onFilesChange={setFiles} />
         </div>
       </SectionCard>
 
       <div className="flex justify-end gap-3">
         <Link className="focus-ring inline-flex min-h-11 items-center rounded-md border border-[var(--line)] px-5 text-sm font-semibold" href="/properties">
-          Annuler
+          {common('cancel')}
         </Link>
         <button className="focus-ring min-h-11 rounded-md bg-[var(--accent)] px-5 text-sm font-semibold text-white disabled:opacity-60" disabled={isPending} type="submit">
-          {isPending ? 'Creation...' : 'Creer le bien'}
+          {isPending ? t('creating') : t('create')}
         </button>
       </div>
     </form>
