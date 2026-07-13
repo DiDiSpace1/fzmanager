@@ -1,4 +1,4 @@
-# HabitatLog Billing Plans
+# Loyelio Billing Plans
 
 This document is the product source of truth for membership tiers and feature limits.
 

@@ -479,8 +479,8 @@ export default async function TaxPage({searchParams}: TaxPageProps) {
 
         <footer className="flex flex-col gap-4 border-t border-[var(--line-soft)] py-8 text-sm text-[#3d4947] sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="font-semibold text-[#171d1c]">Petit Bailleur</p>
-            <p className="mt-2">© 2026 Petit Bailleur - Gestion Immobilière Simplifiée</p>
+            <p className="font-semibold text-[#171d1c]">Loyelio</p>
+            <p className="mt-2">© 2026 Loyelio - Gestion Immobilière Simplifiée</p>
           </div>
           <Link className="hover:text-[var(--accent)]" href={localizedPath(locale, '/terms')}>
             Mentions Légales

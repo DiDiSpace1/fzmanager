@@ -11,7 +11,7 @@ export default function TermsPage() {
         <div className="mt-6 grid gap-6 text-sm leading-7 text-[var(--muted)]">
           <section>
             <h2 className="text-lg font-semibold text-[var(--foreground)]">Service</h2>
-            <p className="mt-2">Petit Bailleur fournit un espace de suivi locatif, documentaire et fiscal indicatif pour petits bailleurs. Le service ne remplace pas un expert-comptable, un avocat ou un conseiller fiscal.</p>
+            <p className="mt-2">Loyelio fournit un espace de suivi locatif, documentaire et fiscal indicatif pour petits bailleurs. Le service ne remplace pas un expert-comptable, un avocat ou un conseiller fiscal.</p>
           </section>
           <section>
             <h2 className="text-lg font-semibold text-[var(--foreground)]">Compte</h2>

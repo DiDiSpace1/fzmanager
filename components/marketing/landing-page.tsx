@@ -27,6 +27,12 @@ export function LandingPage() {
             </a>
             <Link
               className="text-xs font-medium text-[var(--muted)] transition-colors hover:text-[var(--accent)]"
+              href={localized('/contact')}
+            >
+              {t('contactCta')}
+            </Link>
+            <Link
+              className="text-xs font-medium text-[var(--muted)] transition-colors hover:text-[var(--accent)]"
               href={localized('/login')}
             >
               {t('navLogin')}
@@ -224,7 +230,7 @@ export function LandingPage() {
                 cta={plan === 'custom' ? t('contactCta') : t('startCta')}
                 description={t(`pricing.${plan}.description`)}
                 featured={plan === 'solo'}
-                href={plan === 'custom' ? 'mailto:contact@habitatlog.com' : localized('/login')}
+                href={plan === 'custom' ? 'mailto:contact@loyelio.com' : localized('/login')}
                 key={plan}
                 name={t(`pricing.${plan}.name`)}
                 popularLabel={t('popular')}
@@ -246,7 +252,7 @@ export function LandingPage() {
             </Link>
             <a
               className="rounded-lg bg-white/10 px-10 py-4 font-bold !text-white transition-colors hover:bg-white/20"
-              href="mailto:contact@habitatlog.com"
+              href="mailto:contact@loyelio.com"
             >
               {t('contactCta')}
             </a>
@@ -258,7 +264,7 @@ export function LandingPage() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-8 py-8 md:flex-row">
           <div className="flex flex-col items-center gap-1 md:items-start">
             <span className="text-base font-bold text-[var(--foreground)]">{common('appName')}</span>
-            <p className="text-[13px] leading-[18px] text-[var(--muted)]">2026 HabitatLog - {t('footerTagline')}</p>
+            <p className="text-[13px] leading-[18px] text-[var(--muted)]">2026 Loyelio - {t('footerTagline')}</p>
           </div>
           <div className="flex flex-wrap justify-center gap-6">
             <Link className="text-[11px] font-semibold leading-4 text-[var(--muted)] hover:text-[var(--accent)]" href={localized('/terms')}>
@@ -270,9 +276,9 @@ export function LandingPage() {
             <Link className="text-[11px] font-semibold leading-4 text-[var(--muted)] hover:text-[var(--accent)]" href={localized('/privacy')}>
               {t('privacy')}
             </Link>
-            <a className="text-[11px] font-semibold leading-4 text-[var(--muted)] hover:text-[var(--accent)]" href="mailto:contact@habitatlog.com">
+            <Link className="text-[11px] font-semibold leading-4 text-[var(--muted)] hover:text-[var(--accent)]" href={localized('/contact')}>
               Contact
-            </a>
+            </Link>
           </div>
         </div>
       </footer>

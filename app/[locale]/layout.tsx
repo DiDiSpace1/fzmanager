@@ -13,8 +13,8 @@ export const metadata: Metadata = {
   openGraph: {
     description: 'Classez vos loyers, factures et contrats, puis exportez un dossier fiscal clair.',
     locale: 'fr_FR',
-    siteName: 'HabitatLog',
-    title: 'HabitatLog',
+    siteName: 'Loyelio',
+    title: 'Loyelio',
     type: 'website'
   },
   robots: {
@@ -22,8 +22,8 @@ export const metadata: Metadata = {
     index: true
   },
   title: {
-    default: 'HabitatLog',
-    template: '%s | HabitatLog'
+    default: 'Loyelio',
+    template: '%s | Loyelio'
   }
 };
 

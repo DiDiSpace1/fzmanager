@@ -156,7 +156,7 @@ export function buildTaxCsv(data: TaxExportData) {
   const rows: string[] = [];
   const totals = getTaxExportTotals(data);
 
-  rows.push(csvRow(['Petit Bailleur tax export', data.year]));
+  rows.push(csvRow(['Loyelio tax export', data.year]));
   rows.push(csvRow(['Generated at', new Date().toISOString()]));
   rows.push(csvRow([]));
   rows.push(csvRow(['Summary']));
@@ -217,7 +217,7 @@ export async function buildTaxPdf(data: TaxExportData) {
 
   doc.on('data', (chunk: Buffer) => chunks.push(chunk));
 
-  doc.fontSize(22).text('Petit Bailleur - Tax preparation summary');
+  doc.fontSize(22).text('Loyelio - Tax preparation summary');
   doc.moveDown(0.5);
   doc.fontSize(11).fillColor('#555555').text(`Year: ${data.year}`);
   doc.text(`Generated at: ${new Date().toISOString()}`);

@@ -71,7 +71,7 @@ function planLabel(plan: string | null | undefined) {
 }
 
 function initials(name: string | null | undefined, email: string | null | undefined) {
-  const value = name || email || 'HabitatLog';
+  const value = name || email || 'Loyelio';
   const parts = value.split(/\s+|@/).filter(Boolean);
   return `${parts[0]?.[0] ?? 'H'}${parts[1]?.[0] ?? parts[0]?.[1] ?? 'L'}`.toUpperCase();
 }
@@ -248,7 +248,7 @@ function SubscriptionTab({
           <div className="flex items-center justify-between border-b border-[var(--line-soft)] bg-[#f0f5f2] px-6 py-5">
             <div>
               <h2 className="text-lg font-semibold">Forfait actuel</h2>
-              <p className="mt-1 text-sm text-[var(--muted)]">Details de votre engagement HabitatLog</p>
+              <p className="mt-1 text-sm text-[var(--muted)]">Details de votre engagement Loyelio</p>
             </div>
             <span className="rounded-full bg-[#ecfdf5] px-3 py-1 text-xs font-bold uppercase text-[#047857]">{currentPlan === 'free' ? 'Free' : 'Actif'}</span>
           </div>

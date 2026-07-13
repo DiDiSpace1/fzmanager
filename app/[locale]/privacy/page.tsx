@@ -11,7 +11,7 @@ export default function PrivacyPage() {
         <div className="mt-6 grid gap-6 text-sm leading-7 text-[var(--muted)]">
           <section>
             <h2 className="text-lg font-semibold text-[var(--foreground)]">Donnees collectees</h2>
-            <p className="mt-2">Petit Bailleur collecte les informations de compte, les biens, locataires, baux, loyers, depenses et documents que vous ajoutez volontairement dans votre espace.</p>
+            <p className="mt-2">Loyelio collecte les informations de compte, les biens, locataires, baux, loyers, depenses et documents que vous ajoutez volontairement dans votre espace.</p>
           </section>
           <section>
             <h2 className="text-lg font-semibold text-[var(--foreground)]">Utilisation</h2>

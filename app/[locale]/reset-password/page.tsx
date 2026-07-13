@@ -26,7 +26,7 @@ export default async function ResetPasswordPage({params, searchParams}: ResetPas
     <main className="flex min-h-screen items-center justify-center bg-[#f7f6f2] px-5 py-10">
       <section className="w-full max-w-md rounded-lg border border-[var(--line)] bg-white p-6 shadow-sm">
         <Link href="/" className="text-sm font-semibold text-[var(--accent)]">
-          Petit Bailleur
+          Loyelio
         </Link>
         <h1 className="mt-6 text-3xl font-semibold">Nouveau mot de passe</h1>
         <p className="mt-2 leading-7 text-[var(--muted)]">Choisissez un nouveau mot de passe pour votre compte.</p>

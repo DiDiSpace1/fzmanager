@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Petit Bailleur",
+    "appName": "Loyelio",
     "cancel": "Annuler",
     "save": "Enregistrer",
     "soon": "Bientôt",
@@ -61,7 +61,7 @@
         "name": "Free",
         "price": "0 EUR",
         "units": "1 bien",
-        "description": "Pour tester HabitatLog ou suivre une seule chambre."
+        "description": "Pour tester Loyelio ou suivre une seule chambre."
       },
       "solo": {
         "name": "Solo",
@@ -117,11 +117,11 @@
     "signIn": "Se connecter",
     "signUp": "Créer un compte",
     "alreadyAccount": "Vous avez déjà un compte ?",
-    "newHere": "Nouveau sur HabitatLog ?",
+    "newHere": "Nouveau sur Loyelio ?",
     "or": "Ou",
     "sendResetLink": "Envoyer le lien",
     "backToLogin": "Retour à la connexion",
-    "footerText": "2026 HabitatLog - Gestion locative simplifiée",
+    "footerText": "2026 Loyelio - Gestion locative simplifiée",
     "legal": "Mentions légales",
     "privacy": "Confidentialité",
     "terms": "CGU",
@@ -164,6 +164,29 @@
     "title": "Dossier fiscal",
     "subtitle": "Préparez un export annuel clair pour votre comptable.",
     "disclaimer": "Les catégories sont indicatives et ne remplacent pas un conseil fiscal."
+  },
+  "contact": {
+    "title": "Contactez-nous",
+    "intro": "Notre équipe est là pour vous aider à simplifier votre gestion immobilière. Que vous ayez une question technique ou besoin d'un conseil fiscal, nous vous répondons rapidement.",
+    "backHome": "Accueil",
+    "nameLabel": "Nom complet",
+    "namePlaceholder": "Jean Dupont",
+    "emailLabel": "Email",
+    "emailPlaceholder": "jean.dupont@example.com",
+    "subjectLabel": "Sujet",
+    "subjectSupport": "Support technique",
+    "subjectFiscal": "Question fiscale",
+    "subjectBilling": "Facturation",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Comment pouvons-nous vous aider ?",
+    "submit": "Envoyer le message",
+    "supportTitle": "Support Prioritaire",
+    "supportCopy": "Nos experts vous accompagnent du lundi au vendredi de 9h à 18h.",
+    "responseTime": "Réponse sous 24h ouvrées",
+    "officeEyebrow": "Nos bureaux",
+    "officeTitle": "Basés à Paris, France",
+    "faqTitle": "Consultez notre FAQ",
+    "faqCopy": "Plus de 80% des questions trouvent leur réponse dans notre centre d'aide."
   },
   "settings": {
     "title": "Paramètres",

@@ -26,7 +26,7 @@ export function AuthFrame({children, footerText, legal, locale, privacy, tagline
         <div className="w-full max-w-[400px]">
           <div className="mb-6 text-center">
             <Link className="inline-flex items-center justify-center text-[30px] font-semibold leading-[38px] tracking-[-0.02em] text-[var(--accent)]" href={localizedPath(locale, '/')}>
-              HabitatLog
+              Loyelio
             </Link>
             <p className="mt-1 text-sm leading-5 text-[var(--muted)]">{tagline}</p>
           </div>
@@ -48,7 +48,7 @@ export function AuthFrame({children, footerText, legal, locale, privacy, tagline
             <Link className="font-semibold hover:text-[var(--accent)]" href={localizedPath(locale, '/privacy')}>
               {privacy}
             </Link>
-            <a className="font-semibold hover:text-[var(--accent)]" href="mailto:contact@habitatlog.com">
+            <a className="font-semibold hover:text-[var(--accent)]" href="mailto:contact@loyelio.com">
               Contact
             </a>
           </div>
