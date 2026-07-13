@@ -12,6 +12,7 @@
     "properties": "Biens",
     "tenants": "Locataires",
     "bail": "Bail",
+    "transactions": "Transactions",
     "documents": "Documents",
     "tax": "Comptabilité",
     "settings": "Paramètres"
