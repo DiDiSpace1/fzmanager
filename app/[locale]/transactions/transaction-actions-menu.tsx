@@ -4,6 +4,7 @@ import {useEffect, useRef, useState} from 'react';
 import type {ReactNode} from 'react';
 
 import {ConfirmSubmitButton} from '@/components/app/confirm-submit-button';
+import {DateDisplayInput, isoDateToDisplay} from '@/components/forms/date-display-input';
 
 import {deleteTransactionAction, updateTransactionAction} from './actions';
 
@@ -129,7 +130,7 @@ export function TransactionActionsMenu({
         <Modal title="Detail de la transaction" onClose={() => setViewOpen(false)}>
           <dl className="grid gap-3 text-sm">
             <Info label="Type" value={row.type === 'revenue' ? 'Revenu' : 'Depense'} />
-            <Info label="Date" value={row.date} />
+            <Info label="Date" value={isoDateToDisplay(row.date)} />
             <Info label="Categorie" value={row.category} />
             <Info label="Bien / Locataire" value={row.meta} />
             <Info label="Montant" value={`${moneyValue(row.amount)} EUR`} />
@@ -148,7 +149,7 @@ export function TransactionActionsMenu({
             <input name="id" type="hidden" value={row.id} />
             <label className="grid gap-2 text-sm text-[#3d4947]">
               Date
-              <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3" defaultValue={row.date} name="date" required type="date" />
+              <DateDisplayInput className="focus-ring h-11 min-h-11 w-full rounded-md border border-[var(--line)] px-3" defaultValue={row.date} name="date" required />
             </label>
             <label className="grid gap-2 text-sm text-[#3d4947]">
               Montant

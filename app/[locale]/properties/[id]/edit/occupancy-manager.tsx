@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import {useState} from 'react';
 
+import {DateDisplayInput, isoDateToDisplay} from '@/components/forms/date-display-input';
+
 import {terminateLeaseAction} from '../../actions';
 
 type TenantOption = {
@@ -71,11 +73,11 @@ export function OccupancyManager({
               </label>
               <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
                 Date entree
-                <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="assignment_start_date" type="date" />
+                <DateDisplayInput className="focus-ring h-11 min-h-11 w-full rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="assignment_start_date" />
               </label>
               <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
                 Date sortie
-                <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="assignment_end_date" type="date" />
+                <DateDisplayInput className="focus-ring h-11 min-h-11 w-full rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="assignment_end_date" />
               </label>
               <MoneyField label="Montant loyer" name="assignment_monthly_rent" required />
               <MoneyField label="Charge" name="assignment_charges_amount" />
@@ -148,11 +150,11 @@ export function LeaseTerminationManager({leases, locale, propertyId, returnTo}: 
           {returnTo ? <input name="return_to" type="hidden" value={returnTo} /> : null}
           <div>
             <p className="font-medium">{lease.tenants?.full_name ?? 'Locataire'}</p>
-            <p className="mt-1 text-sm text-[var(--muted)]">Depuis {lease.start_date}</p>
+            <p className="mt-1 text-sm text-[var(--muted)]">Depuis {isoDateToDisplay(lease.start_date)}</p>
           </div>
           <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
             Date de fin
-            <input className="focus-ring min-h-10 rounded-md border border-[var(--line)] px-3 text-sm font-normal" defaultValue={lease.end_date ?? ''} name="end_date" required type="date" />
+            <DateDisplayInput className="focus-ring h-10 min-h-10 w-full rounded-md border border-[var(--line)] px-3 text-sm font-normal" defaultValue={lease.end_date ?? ''} name="end_date" required />
           </label>
           <button className="focus-ring self-end rounded-md border border-[#f3b4b4] px-4 py-2 text-sm font-semibold text-[#ba1a1a]" type="submit">
             Terminer le contrat

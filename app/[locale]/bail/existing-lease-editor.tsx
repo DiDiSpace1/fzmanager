@@ -2,7 +2,9 @@
 
 import {useState} from 'react';
 
-import {updateLeaseAction} from '../properties/actions';
+import {DateDisplayInput, isoDateToDisplay} from '@/components/forms/date-display-input';
+
+import {deleteLeaseAction, updateLeaseAction} from '../properties/actions';
 
 type EditableLease = {
   charges_amount: number | null;
@@ -36,21 +38,29 @@ export function ExistingLeaseEditor({leases, locale, propertyId}: {leases: Edita
         </div>
         <div className="grid gap-3">
           {leases.map((lease) => (
-            <div className="grid gap-3 rounded-md border border-[var(--line-soft)] bg-white p-3 md:grid-cols-[minmax(0,1fr)_140px_140px_auto] md:items-center" key={lease.id}>
+            <div className="grid gap-3 rounded-md border border-[var(--line-soft)] bg-white p-3 md:grid-cols-[minmax(0,1fr)_140px_140px_auto_auto] md:items-center" key={lease.id}>
               <div className="min-w-0">
                 <p className="truncate font-medium">{lease.tenants?.full_name ?? 'Locataire'}</p>
               </div>
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-wide text-[#53615f]">Date debut</p>
-                <p className="mt-1 text-sm">{lease.start_date}</p>
+                <p className="mt-1 text-sm">{isoDateToDisplay(lease.start_date)}</p>
               </div>
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-wide text-[#53615f]">Date fin</p>
-                <p className="mt-1 text-sm">{lease.end_date ?? '-'}</p>
+                <p className="mt-1 text-sm">{lease.end_date ? isoDateToDisplay(lease.end_date) : '-'}</p>
               </div>
               <button className="focus-ring rounded-md border border-[var(--line)] px-4 py-2 text-sm font-semibold" onClick={() => setEditingLease(lease)} type="button">
                 Modifier
               </button>
+              <form action={deleteLeaseAction}>
+                <input name="locale" type="hidden" value={locale} />
+                <input name="property_id" type="hidden" value={propertyId} />
+                <input name="lease_id" type="hidden" value={lease.id} />
+                <button className="focus-ring w-full rounded-md border border-[#f3b4b4] px-4 py-2 text-sm font-semibold text-[#ba1a1a]" type="submit">
+                  Supprimer
+                </button>
+              </form>
             </div>
           ))}
         </div>
@@ -58,7 +68,7 @@ export function ExistingLeaseEditor({leases, locale, propertyId}: {leases: Edita
 
       {editingLease ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 p-4" role="dialog" aria-modal="true">
-          <div className="w-full max-w-2xl overflow-hidden rounded-lg bg-white shadow-xl">
+          <form action={updateLeaseAction} className="w-full max-w-2xl overflow-hidden rounded-lg bg-white shadow-xl">
             <input name="locale" type="hidden" value={locale} />
             <input name="property_id" type="hidden" value={propertyId} />
             <input name="lease_id" type="hidden" value={editingLease.id} />
@@ -75,11 +85,11 @@ export function ExistingLeaseEditor({leases, locale, propertyId}: {leases: Edita
             <div className="grid gap-4 p-5 md:grid-cols-2">
               <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
                 Date debut
-                <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" defaultValue={editingLease.start_date} name="start_date" required type="date" />
+                <DateDisplayInput className="focus-ring h-11 min-h-11 w-full rounded-md border border-[var(--line)] px-3 text-sm font-normal" defaultValue={editingLease.start_date} name="start_date" required />
               </label>
               <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
                 Date fin
-                <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" defaultValue={editingLease.end_date ?? ''} name="end_date" type="date" />
+                <DateDisplayInput className="focus-ring h-11 min-h-11 w-full rounded-md border border-[var(--line)] px-3 text-sm font-normal" defaultValue={editingLease.end_date ?? ''} name="end_date" />
               </label>
               <MoneyField defaultValue={moneyInput(editingLease.monthly_rent)} label="Montant loyer" name="monthly_rent" required />
               <MoneyField defaultValue={moneyInput(editingLease.charges_amount)} label="Charge" name="charges_amount" />
@@ -90,11 +100,11 @@ export function ExistingLeaseEditor({leases, locale, propertyId}: {leases: Edita
               <button className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-5 text-sm font-semibold" onClick={() => setEditingLease(null)} type="button">
                 Annuler
               </button>
-              <button className="focus-ring min-h-11 rounded-md bg-[var(--accent)] px-5 text-sm font-semibold text-white" formAction={updateLeaseAction} style={{color: '#ffffff'}} type="submit">
+              <button className="focus-ring min-h-11 rounded-md bg-[var(--accent)] px-5 text-sm font-semibold text-white" style={{color: '#ffffff'}} type="submit">
                 Enregistrer
               </button>
             </div>
-          </div>
+          </form>
         </div>
       ) : null}
     </>

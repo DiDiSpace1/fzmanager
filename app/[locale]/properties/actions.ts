@@ -453,6 +453,67 @@ export async function updateLeaseAction(formData: FormData) {
   redirect(returnUrl);
 }
 
+export async function deleteLeaseAction(formData: FormData) {
+  const locale = value(formData, 'locale') || 'fr';
+  const propertyId = value(formData, 'property_id');
+  const leaseId = value(formData, 'lease_id');
+  const returnPath = `/bail?property_id=${propertyId}` as `/${string}`;
+  const returnUrl = localizedPath(locale, returnPath);
+  const errorUrl = (code: string) => `${returnUrl}&error=${code}`;
+
+  if (!propertyId || !leaseId) {
+    redirect(errorUrl('lease_delete_missing'));
+  }
+
+  const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
+  const {data: charges, error: chargesLookupError} = await supabase.from('rent_charges').select('id').eq('lease_id', leaseId).eq('workspace_id', workspaceId);
+
+  if (chargesLookupError) {
+    redirect(errorUrl('lease_delete_lookup_failed'));
+  }
+
+  const chargeIds = (charges ?? []).map((charge: {id: string}) => charge.id);
+
+  if (chargeIds.length) {
+    const {error: paymentDeleteError} = await supabase.from('rent_payments').delete().in('rent_charge_id', chargeIds).eq('workspace_id', workspaceId);
+
+    if (paymentDeleteError) {
+      redirect(errorUrl('lease_payments_delete_failed'));
+    }
+
+    const {error: chargeDeleteError} = await supabase.from('rent_charges').delete().eq('lease_id', leaseId).eq('workspace_id', workspaceId);
+
+    if (chargeDeleteError) {
+      redirect(errorUrl('lease_charges_delete_failed'));
+    }
+  }
+
+  const {error} = await supabase.from('leases').delete().eq('id', leaseId).eq('property_id', propertyId).eq('workspace_id', workspaceId);
+
+  if (error) {
+    redirect(errorUrl('lease_delete_failed'));
+  }
+
+  const {count} = await supabase
+    .from('leases')
+    .select('*', {count: 'exact', head: true})
+    .eq('property_id', propertyId)
+    .eq('workspace_id', workspaceId)
+    .eq('status', 'active');
+
+  if ((count ?? 0) === 0) {
+    await supabase.from('properties').update({occupancy_status: 'vacant'}).eq('id', propertyId).eq('workspace_id', workspaceId);
+  }
+
+  revalidatePath(localizedPath(locale, '/bail'));
+  revalidatePath(localizedPath(locale, `/bail/${leaseId}`));
+  revalidatePath(localizedPath(locale, '/properties'));
+  revalidatePath(localizedPath(locale, `/properties/${propertyId}`));
+  revalidatePath(localizedPath(locale, `/properties/${propertyId}/tenants`));
+  revalidatePath(localizedPath(locale, '/tenants'));
+  redirect(returnUrl);
+}
+
 export async function assignPropertyTenantsAction(formData: FormData) {
   const locale = value(formData, 'locale') || 'fr';
   const propertyId = value(formData, 'property_id');
