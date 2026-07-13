@@ -385,7 +385,7 @@ function DataTab({locale, storageLimit, storageUsage}: {locale: string; storageL
               <p className="text-xs font-semibold uppercase text-[var(--muted)]">Format JSON</p>
               <h3 className="mt-3 font-semibold">Archive complete</h3>
               <p className="mt-2 text-sm leading-6 text-[var(--muted)]">Ideal pour l importation technique ou la sauvegarde brute.</p>
-              <Link className="focus-ring mt-5 inline-flex min-h-10 w-full items-center justify-center rounded-lg bg-[var(--accent)] px-4 text-sm font-semibold text-white" href="/api/account/export">
+              <Link className="focus-ring mt-5 inline-flex min-h-10 w-full items-center justify-center rounded-lg bg-[var(--accent)] px-4 text-sm font-semibold text-white"  style={{color: '#ffffff'}} href="/api/account/export">
                 Exporter en .json
               </Link>
             </div>
