@@ -55,14 +55,14 @@ type DocumentsPageProps = {
 const DOCUMENT_TYPES = [
   {className: 'bg-[#d9fbf4] text-[#00685f]', label: 'Baux', value: 'lease'},
   {className: 'bg-[#dde1ff] text-[#3755c3]', label: 'Quittances', value: 'rent_receipt'},
-  {className: 'bg-[#ffdbce] text-[#924628]', label: 'Factures', value: 'invoice'},
+  {className: 'bg-[#ffdbce] text-[#924628]', label: 'Depense', value: 'invoice'},
   {className: 'bg-[#dee4e1] text-[#3d4947]', label: 'Impots', value: 'tax'}
 ];
 
 const FOLDER_TYPES = [
   {iconClassName: 'bg-[#89f5e7] text-[#00685f]', label: 'Baux', value: 'lease'},
+  {iconClassName: 'bg-[#ffdbce] text-[#924628]', label: 'Depense', value: 'invoice'},
   {iconClassName: 'bg-[#dde1ff] text-[#3755c3]', label: 'Quittances', value: 'rent_receipt'},
-  {iconClassName: 'bg-[#ffdbce] text-[#924628]', label: 'Factures Travaux', value: 'invoice'},
   {iconClassName: 'bg-[#dee4e1] text-[#3d4947]', label: 'Impots', value: 'tax'}
 ];
 
@@ -276,8 +276,8 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
           <span className="sr-only">Type</span>
           <select className="focus-ring min-h-11 w-full rounded-lg border border-[var(--line)] bg-white px-3 text-sm" defaultValue={selectedType} name="type">
             <option value="">Tous</option>
-            <option value="invoice">Facture</option>
             <option value="lease">Bail</option>
+            <option value="invoice">Depense</option>
             <option value="rent_receipt">Quittance</option>
             <option value="tax">Fiscal</option>
           </select>

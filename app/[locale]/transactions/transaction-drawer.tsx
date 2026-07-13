@@ -215,7 +215,7 @@ export function TransactionDrawer({
                   <label className="grid gap-2 text-sm text-[#3d4947]">
                     Categorie de la depense
                     <select className="focus-ring min-h-11 rounded-md border border-[var(--line)] bg-white px-3 text-sm" name="tax_category_id" defaultValue={taxCategories[0]?.id ?? ''}>
-                      <option value="">Autres frais</option>
+                      {taxCategories.length ? null : <option value="">Autres frais</option>}
                       {taxCategories.map((category) => (
                         <option key={category.id} value={category.id}>
                           {category.label}
@@ -249,11 +249,11 @@ export function TransactionDrawer({
                     <input className="focus-ring min-h-11 rounded-md border border-[var(--line)] bg-white px-3 text-sm" name="description" placeholder="ex: Peinture et materiel de renovation" />
                   </label>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <label className="grid gap-2 text-sm text-[#3d4947]">
+                    <label className="grid min-w-0 gap-2 text-sm text-[#3d4947]">
                       Montant TTC
-                      <div className="flex min-h-11 items-center rounded-md border border-[var(--line)] bg-white">
-                        <input className="min-w-0 flex-1 border-0 bg-transparent px-3 text-sm outline-none" name="amount" placeholder="0.00" required />
-                        <span className="px-3 text-sm font-semibold text-[#3d4947]">EUR</span>
+                      <div className="relative min-h-11 min-w-0 rounded-md border border-[var(--line)] bg-white">
+                        <input className="h-11 w-full min-w-0 border-0 bg-transparent px-3 pr-14 text-sm outline-none" name="amount" placeholder="0.00" required />
+                        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-[#3d4947]">EUR</span>
                       </div>
                     </label>
                     <label className="grid gap-2 text-sm text-[#3d4947]">

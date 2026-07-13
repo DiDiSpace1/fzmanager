@@ -15,9 +15,7 @@ type TenantOption = {
 };
 
 const DOCUMENT_TYPES = [
-  {label: 'Baux', value: 'lease'},
   {label: 'Quittances', value: 'rent_receipt'},
-  {label: 'Factures Travaux', value: 'invoice'},
   {label: 'Impots', value: 'tax'}
 ];
 
@@ -64,7 +62,6 @@ function FileArrowIcon() {
 export function UploadDocumentModal({locale, properties, tenants}: {locale: string; properties: PropertyOption[]; tenants: TenantOption[]}) {
   const [open, setOpen] = useState(false);
   const [documentType, setDocumentType] = useState('');
-  const isInvoice = documentType === 'invoice';
 
   return (
     <>
@@ -83,7 +80,7 @@ export function UploadDocumentModal({locale, properties, tenants}: {locale: stri
           <div className="grid max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-lg bg-white shadow-2xl md:grid-cols-[195px_1fr]">
             <aside className="hidden bg-[var(--accent)] p-7 text-white md:flex md:flex-col" style={{color: '#ffffff'}}>
               <h2 className="text-xl font-semibold leading-7">Centralisez vos documents</h2>
-              <p className="mt-5 text-sm font-semibold leading-6 text-white/90">Ajoutez vos baux, quittances et factures pour une gestion simplifiee.</p>
+              <p className="mt-5 text-sm font-semibold leading-6 text-white/90">Ajoutez vos quittances et documents fiscaux pour une gestion simplifiee.</p>
               <div className="mt-10 grid gap-5 text-sm font-semibold text-white/85">
                 <div className="flex items-center gap-3">
                   <ShieldIcon />
@@ -133,26 +130,6 @@ export function UploadDocumentModal({locale, properties, tenants}: {locale: stri
                     ))}
                   </select>
                 </label>
-
-                {isInvoice ? (
-                  <label className="grid gap-2 text-xs font-medium text-[#33413f]">
-                    Montant de la facture
-                    <span className="relative">
-                      <input
-                        className="focus-ring min-h-10 w-full rounded-lg border border-[var(--line)] bg-white px-3 pr-12 text-sm font-normal tabular-nums"
-                        inputMode="decimal"
-                        min="0.01"
-                        name="invoice_amount"
-                        placeholder="0,00"
-                        required
-                        step="0.01"
-                        type="number"
-                      />
-                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-[#33413f]">EUR</span>
-                    </span>
-                    <span className="text-xs font-normal text-[var(--muted)]">Ce montant sera ajoute aux depenses.</span>
-                  </label>
-                ) : null}
 
                 <label className="grid gap-2 text-xs font-medium text-[#33413f]">
                   Bien immobilier associe

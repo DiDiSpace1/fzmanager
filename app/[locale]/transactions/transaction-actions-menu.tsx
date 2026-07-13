@@ -179,7 +179,7 @@ export function TransactionActionsMenu({
                 <label className="grid gap-2 text-sm text-[#3d4947]">
                   Categorie
                   <select className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3" defaultValue={row.taxCategoryId ?? ''} name="tax_category_id">
-                    <option value="">Autres frais</option>
+                    {taxCategories.length ? null : <option value="">Autres frais</option>}
                     {taxCategories.map((category) => (
                       <option key={category.id} value={category.id}>
                         {category.label}

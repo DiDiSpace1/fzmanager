@@ -117,6 +117,7 @@ export async function createRevenueTransactionAction(formData: FormData) {
   }
 
   revalidatePath(localizedPath(locale, '/transactions'));
+  revalidatePath(localizedPath(locale, '/documents'));
   revalidatePath(localizedPath(locale, '/dashboard'));
   revalidatePath(localizedPath(locale, '/tax'));
   redirect(localizedPath(locale, '/transactions'));
@@ -192,6 +193,7 @@ export async function createExpenseTransactionAction(formData: FormData) {
   }
 
   revalidatePath(localizedPath(locale, '/transactions'));
+  revalidatePath(localizedPath(locale, '/documents'));
   revalidatePath(localizedPath(locale, '/dashboard'));
   revalidatePath(localizedPath(locale, '/tax'));
   redirect(localizedPath(locale, '/transactions'));
