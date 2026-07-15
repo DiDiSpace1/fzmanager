@@ -70,6 +70,13 @@ export function DateDisplayInput({
       <input name={name} type="hidden" value={isoValue} />
       <span
         className={`${className} relative inline-flex cursor-pointer items-center overflow-hidden text-left`}
+        onPointerDown={(event) => {
+          if (event.button !== 0) {
+            return;
+          }
+
+          openNativePicker(pickerRef.current);
+        }}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
@@ -125,6 +132,13 @@ export function MonthDisplayInput({
       <input name={name} type="hidden" value={monthValue} />
       <span
         className={`${className} relative inline-flex cursor-pointer items-center overflow-hidden text-left`}
+        onPointerDown={(event) => {
+          if (event.button !== 0) {
+            return;
+          }
+
+          openNativePicker(pickerRef.current);
+        }}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
