@@ -47,7 +47,7 @@ export function SidebarNav({
     const [, ...restWithoutLocale] = segments;
     const hasLocalePrefix = localeOptions.some((option) => option.value === segments[0]);
     const rest = hasLocalePrefix ? restWithoutLocale : segments;
-    const nextPath = nextLocale === 'fr' ? `/${rest.join('/')}` : `/${[nextLocale, ...rest].join('/')}`;
+    const nextPath = `/${[nextLocale, ...rest].join('/')}`;
     window.location.href = nextPath === '/' ? nextPath : nextPath.replace(/\/$/, '');
   }
 
