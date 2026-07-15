@@ -122,7 +122,7 @@ export async function createExpenseAction(formData: FormData) {
 
   revalidatePath(localizedPath(locale, '/documents'));
   revalidatePath(localizedPath(locale, '/tax'));
-  redirect(localizedPath(locale, '/documents'));
+  redirect(`${localizedPath(locale, '/documents')}?success=transaction_created`);
 }
 
 export async function deleteDocumentAction(formData: FormData) {
@@ -155,5 +155,5 @@ export async function deleteDocumentAction(formData: FormData) {
 
   revalidatePath(localizedPath(locale, '/documents'));
   revalidatePath(localizedPath(locale, '/tax'));
-  redirect(localizedPath(locale, '/documents'));
+  redirect(`${localizedPath(locale, '/documents')}?success=document_deleted`);
 }

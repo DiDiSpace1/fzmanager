@@ -284,7 +284,7 @@ export async function updateTransactionAction(formData: FormData) {
   revalidatePath(localizedPath(locale, '/transactions'));
   revalidatePath(localizedPath(locale, '/dashboard'));
   revalidatePath(localizedPath(locale, '/tax'));
-  redirect(localizedPath(locale, '/transactions'));
+  redirect(`${localizedPath(locale, '/transactions')}?success=transaction_updated`);
 }
 
 export async function deleteTransactionAction(formData: FormData) {
@@ -320,5 +320,5 @@ export async function deleteTransactionAction(formData: FormData) {
   revalidatePath(localizedPath(locale, '/transactions'));
   revalidatePath(localizedPath(locale, '/dashboard'));
   revalidatePath(localizedPath(locale, '/tax'));
-  redirect(localizedPath(locale, '/transactions'));
+  redirect(`${localizedPath(locale, '/transactions')}?success=transaction_deleted`);
 }

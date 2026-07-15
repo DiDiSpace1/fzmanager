@@ -46,6 +46,10 @@ function moneyValues(formData: FormData, key: string) {
   });
 }
 
+function withStatus(url: string, key: 'error' | 'success', value: string) {
+  return `${url}${url.includes('?') ? '&' : '?'}${key}=${value}`;
+}
+
 async function uploadPropertyPhotos({
   coverOffset = 0,
   files,
@@ -286,7 +290,7 @@ export async function updatePropertyAction(formData: FormData) {
   revalidatePath(localizedPath(locale, `/properties/${propertyId}`));
   revalidatePath(localizedPath(locale, `/properties/${propertyId}/edit`));
   revalidatePath(localizedPath(locale, '/tenants'));
-  redirect(localizedPath(locale, `/properties/${propertyId}`));
+  redirect(`${localizedPath(locale, `/properties/${propertyId}`)}?success=property_updated`);
 }
 
 export async function deletePropertyPhotoAction(formData: FormData) {
@@ -322,7 +326,7 @@ export async function deletePropertyPhotoAction(formData: FormData) {
   revalidatePath(localizedPath(locale, '/properties'));
   revalidatePath(localizedPath(locale, `/properties/${propertyId}`));
   revalidatePath(localizedPath(locale, `/properties/${propertyId}/edit`));
-  redirect(localizedPath(locale, `/properties/${propertyId}/edit`));
+  redirect(`${localizedPath(locale, `/properties/${propertyId}/edit`)}?success=property_photo_deleted`);
 }
 
 export async function terminateLeaseAction(formData: FormData) {
@@ -371,7 +375,7 @@ export async function terminateLeaseAction(formData: FormData) {
   revalidatePath(localizedPath(locale, `/properties/${propertyId}/edit`));
   revalidatePath(localizedPath(locale, `/properties/${propertyId}/tenants`));
   revalidatePath(localizedPath(locale, '/tenants'));
-  redirect(localizedPath(locale, returnPath));
+  redirect(withStatus(localizedPath(locale, returnPath), 'success', 'lease_terminated'));
 }
 
 export async function updateLeaseAction(formData: FormData) {
@@ -450,7 +454,7 @@ export async function updateLeaseAction(formData: FormData) {
   revalidatePath(localizedPath(locale, `/properties/${propertyId}`));
   revalidatePath(localizedPath(locale, `/properties/${propertyId}/tenants`));
   revalidatePath(localizedPath(locale, '/tenants'));
-  redirect(returnUrl);
+  redirect(withStatus(returnUrl, 'success', 'lease_updated'));
 }
 
 export async function deleteLeaseAction(formData: FormData) {
@@ -511,7 +515,7 @@ export async function deleteLeaseAction(formData: FormData) {
   revalidatePath(localizedPath(locale, `/properties/${propertyId}`));
   revalidatePath(localizedPath(locale, `/properties/${propertyId}/tenants`));
   revalidatePath(localizedPath(locale, '/tenants'));
-  redirect(returnUrl);
+  redirect(withStatus(returnUrl, 'success', 'lease_deleted'));
 }
 
 export async function assignPropertyTenantsAction(formData: FormData) {
@@ -621,7 +625,7 @@ export async function deletePropertyAction(formData: FormData) {
   }
 
   revalidatePath(localizedPath(locale, '/properties'));
-  redirect(localizedPath(locale, '/properties'));
+  redirect(`${localizedPath(locale, '/properties')}?success=property_deleted`);
 }
 
 export async function createUnitAction(formData: FormData) {

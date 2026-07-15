@@ -39,6 +39,10 @@ function tenantsHref(locale: string, formData: FormData) {
   return `${localizedPath(locale, '/tenants')}${suffix ? `?${suffix}` : ''}`;
 }
 
+function withStatus(url: string, key: 'error' | 'success', value: string) {
+  return `${url}${url.includes('?') ? '&' : '?'}${key}=${value}`;
+}
+
 export async function createTenantAction(formData: FormData) {
   const locale = value(formData, 'locale') || 'fr';
   const fullName = value(formData, 'full_name');
@@ -98,7 +102,7 @@ export async function updateTenantAction(formData: FormData) {
 
   revalidatePath(localizedPath(locale, '/tenants'));
   revalidatePath(localizedPath(locale, `/tenants/${tenantId}`));
-  redirect(localizedPath(locale, `/tenants/${tenantId}`));
+  redirect(`${localizedPath(locale, `/tenants/${tenantId}`)}?success=tenant_updated`);
 }
 
 export async function deleteTenantAction(formData: FormData) {
@@ -117,7 +121,7 @@ export async function deleteTenantAction(formData: FormData) {
   }
 
   revalidatePath(localizedPath(locale, '/tenants'));
-  redirect(localizedPath(locale, '/tenants'));
+  redirect(`${localizedPath(locale, '/tenants')}?success=tenant_deleted`);
 }
 
 export async function updateTenantActiveAction(formData: FormData) {
@@ -137,7 +141,7 @@ export async function updateTenantActiveAction(formData: FormData) {
   }
 
   revalidatePath(localizedPath(locale, '/tenants'));
-  redirect(tenantsHref(locale, formData));
+  redirect(withStatus(tenantsHref(locale, formData), 'success', 'tenant_status_updated'));
 }
 
 export async function updateRentStatusAction(formData: FormData) {
@@ -201,5 +205,5 @@ export async function updateRentStatusAction(formData: FormData) {
   }
 
   revalidatePath(localizedPath(locale, '/tenants'));
-  redirect(localizedPath(locale, `/tenants?month=${periodMonth.slice(0, 7)}`));
+  redirect(localizedPath(locale, `/tenants?month=${periodMonth.slice(0, 7)}&success=rent_status_updated`));
 }
