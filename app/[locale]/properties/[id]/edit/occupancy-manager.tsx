@@ -59,10 +59,10 @@ export function OccupancyManager({
             <p className="mt-1 text-sm text-[var(--muted)]">Selectionnez un ou plusieurs locataires et renseignez les dates du contrat.</p>
           </div>
           {assignmentRows.map((row, index) => (
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[1.2fr_150px_150px_130px_130px_130px_auto]" key={row.id}>
-              <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
+            <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-[minmax(150px,1.2fr)_repeat(2,minmax(112px,0.75fr))_repeat(3,minmax(108px,0.65fr))_auto]" key={row.id}>
+              <label className="grid min-w-0 gap-2 text-xs font-semibold text-[#33413f]">
                 Locataire
-                <select className="focus-ring min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-normal" defaultValue={index === 0 ? initialTenantId : ''} name="assignment_tenant_id">
+                <select className="focus-ring min-h-11 min-w-0 rounded-md border border-[var(--line)] px-3 text-sm font-normal" defaultValue={index === 0 ? initialTenantId : ''} name="assignment_tenant_id">
                   <option value="">Choisir un locataire</option>
                   {tenants.map((tenant) => (
                     <option key={tenant.id} value={tenant.id}>
@@ -71,11 +71,11 @@ export function OccupancyManager({
                   ))}
                 </select>
               </label>
-              <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
+              <label className="grid min-w-0 gap-2 text-xs font-semibold text-[#33413f]">
                 Date entree
                 <DateDisplayInput className="focus-ring h-11 min-h-11 w-full rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="assignment_start_date" />
               </label>
-              <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
+              <label className="grid min-w-0 gap-2 text-xs font-semibold text-[#33413f]">
                 Date sortie
                 <DateDisplayInput className="focus-ring h-11 min-h-11 w-full rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="assignment_end_date" />
               </label>
@@ -92,7 +92,7 @@ export function OccupancyManager({
               </button>
               {index === assignmentRows.length - 1 ? (
                 <button
-                  className="focus-ring justify-self-start rounded-md border border-[var(--line)] px-4 py-2 text-sm font-semibold md:col-span-2 xl:col-span-7"
+                  className="focus-ring justify-self-start rounded-md border border-[var(--line)] px-4 py-2 text-sm font-semibold md:col-span-2 2xl:col-span-7"
                   onClick={() => setAssignmentRows((rows) => [...rows, {id: crypto.randomUUID()}])}
                   type="button"
                 >
@@ -115,11 +115,11 @@ export function OccupancyManager({
 
 function MoneyField({label, name, required = false}: {label: string; name: string; required?: boolean}) {
   return (
-    <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
+    <label className="grid min-w-0 gap-2 text-xs font-semibold text-[#33413f]">
       {label}
-      <span className="flex min-h-11 items-center rounded-md border border-[var(--line)] bg-white px-3">
-        <input className="min-w-0 flex-1 border-0 bg-transparent text-sm font-normal outline-none" min="0" name={name} required={required} step="0.01" type="number" />
-        <span className="text-sm font-semibold">EUR</span>
+      <span className="relative min-h-11 min-w-0 rounded-md border border-[var(--line)] bg-white">
+        <input className="h-11 w-full min-w-0 border-0 bg-transparent px-3 pr-12 text-sm font-normal outline-none" min="0" name={name} required={required} step="0.01" type="number" />
+        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm font-semibold">EUR</span>
       </span>
     </label>
   );

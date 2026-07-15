@@ -50,26 +50,24 @@ export function DateDisplayInput({
   return (
     <>
       <input name={name} type="hidden" value={isoValue} />
-      <input
-        className={className}
-        inputMode="numeric"
-        onChange={(event) => {
-          const nextDisplay = event.target.value;
-          setDisplayValue(nextDisplay);
-          const nextIso = displayDateToIso(nextDisplay);
-          if (nextIso) {
+      <span className={`${className} relative inline-flex items-center overflow-hidden`}>
+        <span className={displayValue ? 'text-current' : 'text-[#8a9693]'}>{displayValue || placeholder}</span>
+        <input
+          aria-label={placeholder}
+          className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+          max="9999-12-31"
+          min="1900-01-01"
+          onChange={(event) => {
+            const nextIso = event.target.value;
             setIsoValue(nextIso);
+            setDisplayValue(isoDateToDisplay(nextIso));
             onIsoChange?.(nextIso);
-          } else if (!nextDisplay.trim()) {
-            setIsoValue('');
-            onIsoChange?.('');
-          }
-        }}
-        pattern="\d{1,2}/\d{1,2}/\d{4}"
-        placeholder={placeholder}
-        required={required}
-        value={displayValue}
-      />
+          }}
+          required={required}
+          type="date"
+          value={isoValue}
+        />
+      </span>
     </>
   );
 }
@@ -95,19 +93,62 @@ export function MonthDisplayInput({
   return (
     <>
       <input name={name} type="hidden" value={monthValue} />
+      <span className={`${className} relative inline-flex items-center overflow-hidden`}>
+        <span className={displayValue ? 'text-current' : 'text-[#8a9693]'}>{displayValue || placeholder}</span>
+        <input
+          aria-label={placeholder}
+          className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+          max="9999-12"
+          min="1900-01"
+          onChange={(event) => {
+            const nextMonth = event.target.value;
+            setMonthValue(nextMonth);
+            setDisplayValue(monthToDisplayDate(nextMonth));
+            onMonthChange?.(nextMonth);
+          }}
+          required={required}
+          type="month"
+          value={monthValue}
+        />
+      </span>
+    </>
+  );
+}
+
+export function TextDateInput({
+  className = '',
+  defaultValue = '',
+  name,
+  onIsoChange,
+  placeholder = '13/07/2026',
+  required = false
+}: {
+  className?: string;
+  defaultValue?: string;
+  name: string;
+  onIsoChange?: (value: string) => void;
+  placeholder?: string;
+  required?: boolean;
+}) {
+  const [isoValue, setIsoValue] = useState(defaultValue);
+  const [displayValue, setDisplayValue] = useState(isoDateToDisplay(defaultValue));
+
+  return (
+    <>
+      <input name={name} type="hidden" value={isoValue} />
       <input
         className={className}
         inputMode="numeric"
         onChange={(event) => {
           const nextDisplay = event.target.value;
           setDisplayValue(nextDisplay);
-          const nextMonth = displayDateToMonth(nextDisplay);
-          if (nextMonth) {
-            setMonthValue(nextMonth);
-            onMonthChange?.(nextMonth);
+          const nextIso = displayDateToIso(nextDisplay);
+          if (nextIso) {
+            setIsoValue(nextIso);
+            onIsoChange?.(nextIso);
           } else if (!nextDisplay.trim()) {
-            setMonthValue('');
-            onMonthChange?.('');
+            setIsoValue('');
+            onIsoChange?.('');
           }
         }}
         pattern="\d{1,2}/\d{1,2}/\d{4}"
