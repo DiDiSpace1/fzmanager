@@ -141,7 +141,7 @@ function StatCard({
   return (
     <div className={`min-h-[150px] rounded-lg border border-[var(--line-soft)] bg-white p-6 shadow-sm ${accent === 'expense' ? 'border-l-4 border-l-[#b05e3d]' : ''} ${accent === 'missing' ? 'border-l-4 border-l-[#ba1a1a]' : ''}`}>
       <p className="mb-2 text-xs font-semibold uppercase tracking-[0.02em] text-[var(--muted)]">{label}</p>
-      <p className={`text-2xl font-semibold tabular-nums ${tone === 'primary' ? 'text-[var(--accent)]' : tone === 'danger' ? 'text-[#ba1a1a]' : 'text-[#171d1c]'}`}>{value}</p>
+      <p className={`text-xl font-semibold tabular-nums ${tone === 'primary' ? 'text-[var(--accent)]' : tone === 'danger' ? 'text-[#ba1a1a]' : 'text-[#171d1c]'}`}>{value}</p>
       <p className="mt-2 max-w-[220px] text-sm leading-5 text-[var(--muted)]">{note}</p>
     </div>
   );
@@ -319,7 +319,7 @@ export default async function TaxPage({searchParams}: TaxPageProps) {
             </div>
             <div className="flex items-center justify-between gap-4 border-t border-[var(--line-soft)] pt-4">
               <span className="text-base font-semibold">Solde de trésorerie</span>
-              <span className={`text-2xl font-semibold tabular-nums ${cashBalance < 0 ? 'text-[#ba1a1a]' : 'text-[var(--accent)]'}`}>{formatMoney(cashBalance)}</span>
+              <span className={`text-xl font-semibold tabular-nums ${cashBalance < 0 ? 'text-[#ba1a1a]' : 'text-[var(--accent)]'}`}>{formatMoney(cashBalance)}</span>
             </div>
           </div>
           <div className="border-t border-[var(--line-soft)] bg-white px-6 py-3">

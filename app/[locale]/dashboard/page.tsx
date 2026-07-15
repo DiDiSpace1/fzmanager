@@ -276,7 +276,7 @@ function MetricCard({icon, label, tone, value}: {icon: string; label: string; to
         <span className="material-symbols-outlined text-[22px]">{icon}</span>
       </div>
       <p className="mb-1 text-sm font-medium text-[var(--muted)]">{label}</p>
-      <p className={`text-2xl font-semibold tabular-nums ${valueClass}`}>{value}</p>
+      <p className={`text-xl font-semibold tabular-nums ${valueClass}`}>{value}</p>
     </div>
   );
 }

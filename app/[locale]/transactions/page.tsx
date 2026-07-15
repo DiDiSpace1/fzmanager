@@ -381,7 +381,7 @@ function StatCard({icon, label, note, tone, value}: {icon: string; label: string
         </div>
       </div>
       <p className="text-sm font-semibold text-[#3d4947]">{label}</p>
-      <p className={`mt-1 text-2xl font-semibold tabular-nums ${tones[tone].value}`}>{value}</p>
+      <p className={`mt-1 text-xl font-semibold tabular-nums ${tones[tone].value}`}>{value}</p>
       <p className="mt-3 text-sm font-medium text-[#3d4947]">{note}</p>
     </div>
   );
