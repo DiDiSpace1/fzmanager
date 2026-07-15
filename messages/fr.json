@@ -29,7 +29,9 @@
     "loading": "Chargement...",
     "noData": "Aucune donnee disponible",
     "remove": "Retirer",
-    "language": "Langue"
+    "language": "Langue",
+    "close": "Fermer",
+    "upload": "Uploader"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -415,6 +417,29 @@
       "planLimit": "Votre forfait ne permet pas de televerser plus de documents. Passez a un forfait superieur depuis les parametres.",
       "storageLimit": "Le stockage documents de votre forfait est atteint.",
       "invoiceAmount": "Ajoutez un montant valide pour enregistrer une facture travaux dans les depenses."
+    },
+    "upload": "Uploader",
+    "uploadModal": {
+      "sideTitle": "Centralisez vos documents",
+      "sideCopy": "Ajoutez vos quittances et documents fiscaux pour une gestion simplifiee.",
+      "secureStorage": "Stockage securise",
+      "access": "Acces 24/7",
+      "title": "Uploader un document",
+      "close": "Fermer",
+      "dropTitle": "Cliquer ou glisser un fichier",
+      "dropHint": "PDF, JPG ou PNG (max. 10MB)",
+      "documentType": "Type de document",
+      "selectType": "Selectionner un type",
+      "associatedProperty": "Bien immobilier associe",
+      "chooseProperty": "Choisir un bien",
+      "tenantOptional": "Locataire (optionnel)",
+      "noSpecificTenant": "Aucun locataire specifique"
+    },
+    "receiptUpload": {
+      "button": "Ajouter un justificatif",
+      "title": "Ajouter un justificatif",
+      "hint": "PDF, JPG, JPEG ou PNG. Taille maximale selon votre forfait.",
+      "file": "Fichier"
     }
   },
   "tax": {
@@ -498,10 +523,95 @@
   },
   "settings": {
     "title": "Paramètres",
-    "subtitle": "Pays, langue, facturation et export des données.",
+    "subtitle": "Gerez votre compte, votre abonnement et vos preferences de securite.",
     "country": "Pays du compte",
     "locale": "Langue",
-    "billing": "Facturation"
+    "billing": "Facturation",
+    "tabs": {
+      "profil": "Profil",
+      "abonnement": "Abonnement",
+      "securite": "Securite",
+      "donnees": "Donnees"
+    },
+    "profile": {
+      "landlord": "Proprietaire bailleur",
+      "fullName": "Nom complet",
+      "phone": "Telephone",
+      "taxRegime": "Regime fiscal",
+      "save": "Sauvegarder les modifications"
+    },
+    "status": {
+      "checkoutSuccess": "Paiement recu. Le statut peut prendre quelques secondes a se synchroniser via Stripe.",
+      "checkoutCancelled": "Paiement annule. Vos donnees restent sur le plan gratuit.",
+      "billingError": "Une action de facturation a echoue.",
+      "saved": "Parametres enregistres."
+    },
+    "subscription": {
+      "currentPlan": "Forfait actuel",
+      "planDetails": "Details de votre engagement Loyelio",
+      "active": "Actif",
+      "plan": "Plan {plan}",
+      "currentPlanDescription": "Votre forfait actuel controle les limites de biens, locataires, documents, stockage et photos.",
+      "currentPlanButton": "Forfait actuel",
+      "choosePlan": "Choisir {plan}",
+      "included": "Inclus dans votre offre",
+      "propertiesLimit": "Jusqu a {count} biens immobiliers",
+      "tenantsLimit": "Jusqu a {count} locataires",
+      "documentsLimit": "{count} documents",
+      "storageLimit": "{value} de stockage documents",
+      "comparePlans": "Comparer les forfaits",
+      "planSummary": "{properties} biens ? {tenants} locataires ? {documents} documents ? {storage}",
+      "changePlan": "Changer de forfait",
+      "paymentMethod": "Mode de paiement",
+      "stripeCard": "Carte geree par Stripe",
+      "stripePortalHint": "Accedez au portail client pour voir vos factures ou modifier vos coordonnees bancaires.",
+      "manageStripe": "Gerer sur Stripe",
+      "planUsage": "Utilisation du forfait",
+      "propertiesUsage": "Biens enregistres",
+      "tenantsUsage": "Locataires",
+      "documentsUsage": "Documents",
+      "storageUsage": "Stockage documents"
+    },
+    "security": {
+      "changePassword": "Modifier le mot de passe",
+      "oldPassword": "Ancien mot de passe",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le nouveau mot de passe",
+      "passwordHint": "Votre mot de passe doit contenir au moins 12 caracteres, une majuscule et un chiffre.",
+      "updatePassword": "Mettre a jour le mot de passe",
+      "tipsTitle": "Conseils de securite",
+      "tip1": "Utilisez un gestionnaire de mots de passe pour des cles uniques.",
+      "tip2": "Ne partagez jamais vos codes de validation par SMS ou email.",
+      "tip3": "Verifiez regulierement vos sessions actives pour detecter des activites suspectes."
+    },
+    "data": {
+      "exportTitle": "Exporter vos donnees",
+      "exportCopy": "Telechargez une archive complete de vos biens, locataires et quittances. Utile pour vos archives personnelles ou pour changer de logiciel.",
+      "jsonFormat": "Format JSON",
+      "completeArchive": "Archive complete",
+      "jsonCopy": "Ideal pour l importation technique ou la sauvegarde brute.",
+      "exportJson": "Exporter en .json",
+      "csvFormat": "Format CSV / Excel",
+      "accountingReports": "Rapports comptables",
+      "csvCopy": "Ideal pour analyser vos chiffres sous Excel ou Numbers.",
+      "exportCsv": "Exporter en .csv",
+      "dangerZone": "Zone de danger",
+      "deleteTitle": "Supprimer mon compte et mes donnees",
+      "deleteCopy": "Cette action est irreversible. Toutes vos proprietes, baux, quittances et documents seront supprimes definitivement de nos serveurs.",
+      "typeDelete": "Tapez SUPPRIMER",
+      "deleteForever": "Supprimer definitivement",
+      "retentionTitle": "Conservation des donnees",
+      "legalDocuments": "Documents legaux",
+      "legalDocumentsCopy": "Conserves selon vos besoins d archivage fiscal.",
+      "receiptsInvoices": "Quittances & factures",
+      "receiptsInvoicesCopy": "Disponibles tant que votre compte est actif.",
+      "cookiesTracking": "Cookies & tracage",
+      "cookiesTrackingCopy": "Limite au strict necessaire pour la session et la securite.",
+      "privacyPolicy": "Consulter la Politique de Confidentialite",
+      "storageUsed": "Stockage utilise",
+      "documentsImages": "Documents (PDF/Images)",
+      "storageCurrentPlan": "Votre forfait actuel permet de stocker jusqu a {value} de documents numerises."
+    }
   },
   "shell": {
     "tagline": "Gestion immobiliere"
@@ -660,5 +770,42 @@
     "amount": "Montant",
     "actions": "Actions",
     "noTransactions": "Aucune transaction pour le moment."
+  },
+  "quittance": {
+    "breadcrumbDocuments": "Documents",
+    "breadcrumbReceipts": "Quittances",
+    "title": "Generer une quittance",
+    "preview": "Apercu",
+    "generate": "Generer la quittance",
+    "generating": "Generation...",
+    "infoTitle": "Informations du document",
+    "owner": "Proprietaire",
+    "property": "Bien",
+    "noProperty": "Aucun bien enregistre",
+    "tenant": "Locataire",
+    "chooseTenant": "Choisir un locataire",
+    "rentAmount": "Montant du loyer",
+    "chargesOptional": "Charges (optionnel)",
+    "period": "Periode pour la quittance",
+    "paymentDate": "Date du paiement",
+    "paymentMethod": "Mode de paiement",
+    "bankTransfer": "Virement bancaire",
+    "cash": "Especes",
+    "cheque": "Cheque",
+    "card": "Carte bancaire",
+    "other": "Autre",
+    "archivedHint": "La quittance sera generee au format PDF et archivee automatiquement dans vos documents.",
+    "livePreview": "Apercu en temps reel",
+    "livePreviewHint": "Remplissez les champs a gauche puis cliquez sur Apercu.",
+    "latestReceipts": "Dernieres quittances",
+    "noReceipts": "Aucune quittance archivee.",
+    "leaseMissing": "Bail non cree",
+    "receiptTitle": "Quittance de loyer",
+    "totalReceived": "Total recu",
+    "paymentSentence": "Paiement recu le {date} par {method}.",
+    "madeAt": "Fait a {city}, le {date}",
+    "ownerSignature": "Signature du proprietaire",
+    "success": "Quittance generee et archivee dans vos documents.",
+    "error": "Impossible de generer la quittance."
   }
 }

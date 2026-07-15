@@ -1,6 +1,7 @@
 'use client';
 
 import {useState} from 'react';
+import {useTranslations} from 'next-intl';
 
 import {uploadDocumentAction} from './actions';
 
@@ -15,8 +16,8 @@ type TenantOption = {
 };
 
 const DOCUMENT_TYPES = [
-  {label: 'Quittances', value: 'rent_receipt'},
-  {label: 'Impots', value: 'tax'}
+  {labelKey: 'rentReceipt', value: 'rent_receipt'},
+  {labelKey: 'tax', value: 'tax'}
 ];
 
 function UploadIcon() {
@@ -60,6 +61,9 @@ function FileArrowIcon() {
 }
 
 export function UploadDocumentModal({locale, properties, tenants}: {locale: string; properties: PropertyOption[]; tenants: TenantOption[]}) {
+  const t = useTranslations('documents');
+  const modal = useTranslations('documents.uploadModal');
+  const common = useTranslations('common');
   const [open, setOpen] = useState(false);
   const [documentType, setDocumentType] = useState('');
 
@@ -72,23 +76,23 @@ export function UploadDocumentModal({locale, properties, tenants}: {locale: stri
         type="button"
       >
         <UploadIcon />
-        Uploader
+        {t('upload')}
       </button>
 
       {open ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/35 p-4" role="dialog" aria-modal="true" aria-labelledby="upload-document-title">
           <div className="grid max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-lg bg-white shadow-2xl md:grid-cols-[195px_1fr]">
             <aside className="hidden bg-[var(--accent)] p-7 text-white md:flex md:flex-col" style={{color: '#ffffff'}}>
-              <h2 className="text-xl font-semibold leading-7">Centralisez vos documents</h2>
-              <p className="mt-5 text-sm font-semibold leading-6 text-white/90">Ajoutez vos quittances et documents fiscaux pour une gestion simplifiee.</p>
+              <h2 className="text-xl font-semibold leading-7">{modal('sideTitle')}</h2>
+              <p className="mt-5 text-sm font-semibold leading-6 text-white/90">{modal('sideCopy')}</p>
               <div className="mt-10 grid gap-5 text-sm font-semibold text-white/85">
                 <div className="flex items-center gap-3">
                   <ShieldIcon />
-                  Stockage securise
+                  {modal('secureStorage')}
                 </div>
                 <div className="flex items-center gap-3">
                   <CloudUploadIcon />
-                  Acces 24/7
+                  {modal('access')}
                 </div>
               </div>
               <div className="mt-auto text-white">
@@ -100,9 +104,9 @@ export function UploadDocumentModal({locale, properties, tenants}: {locale: stri
               <input name="locale" type="hidden" value={locale} />
               <div className="flex items-start justify-between gap-4">
                 <h2 className="text-2xl font-semibold text-[#171d1c]" id="upload-document-title">
-                  Uploader un document
+                  {modal('title')}
                 </h2>
-                <button className="focus-ring rounded-md p-1 text-2xl leading-none text-[#33413f] hover:bg-[#f0f5f2]" onClick={() => setOpen(false)} type="button" aria-label="Fermer">
+                <button className="focus-ring rounded-md p-1 text-2xl leading-none text-[#33413f] hover:bg-[#f0f5f2]" onClick={() => setOpen(false)} type="button" aria-label={common('close')}>
                   x
                 </button>
               </div>
@@ -111,30 +115,30 @@ export function UploadDocumentModal({locale, properties, tenants}: {locale: stri
                 <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)] text-white" style={{color: '#ffffff'}}>
                   <CloudUploadIcon />
                 </span>
-                <span className="text-sm font-semibold text-[#171d1c]">Cliquer ou glisser un fichier</span>
-                <span className="mt-1 text-xs text-[var(--muted)]">PDF, JPG ou PNG (max. 10MB)</span>
+                <span className="text-sm font-semibold text-[#171d1c]">{modal('dropTitle')}</span>
+                <span className="mt-1 text-xs text-[var(--muted)]">{modal('dropHint')}</span>
                 <input accept=".pdf,image/png,image/jpeg" className="sr-only" name="file" required type="file" />
               </label>
 
               <div className="mt-5 grid gap-4">
                 <label className="grid gap-2 text-xs font-medium text-[#33413f]">
-                  Type de document
+                  {modal('documentType')}
                   <select className="focus-ring min-h-10 rounded-lg border border-[var(--line)] bg-white px-3 text-sm font-normal" name="document_type" onChange={(event) => setDocumentType(event.target.value)} required value={documentType}>
                     <option disabled value="">
-                      Selectionner un type
+                      {modal('selectType')}
                     </option>
                     {DOCUMENT_TYPES.map((type) => (
                       <option key={type.value} value={type.value}>
-                        {type.label}
+                        {t(`types.${type.labelKey}`)}
                       </option>
                     ))}
                   </select>
                 </label>
 
                 <label className="grid gap-2 text-xs font-medium text-[#33413f]">
-                  Bien immobilier associe
+                  {modal('associatedProperty')}
                   <select className="focus-ring min-h-10 rounded-lg border border-[var(--line)] bg-white px-3 text-sm font-normal" name="property_id">
-                    <option value="">Choisir un bien</option>
+                    <option value="">{modal('chooseProperty')}</option>
                     {properties.map((property) => (
                       <option key={property.id} value={property.id}>
                         {property.name}
@@ -144,9 +148,9 @@ export function UploadDocumentModal({locale, properties, tenants}: {locale: stri
                 </label>
 
                 <label className="grid gap-2 text-xs font-medium text-[#33413f]">
-                  Locataire (optionnel)
+                  {modal('tenantOptional')}
                   <select className="focus-ring min-h-10 rounded-lg border border-[var(--line)] bg-white px-3 text-sm font-normal" name="tenant_id">
-                    <option value="">Aucun locataire specifique</option>
+                    <option value="">{modal('noSpecificTenant')}</option>
                     {tenants.map((tenant) => (
                       <option key={tenant.id} value={tenant.id}>
                         {tenant.full_name}
@@ -158,11 +162,11 @@ export function UploadDocumentModal({locale, properties, tenants}: {locale: stri
 
               <div className="mt-6 flex justify-end gap-3 border-t border-[var(--line-soft)] pt-5">
                 <button className="focus-ring min-h-10 rounded-lg px-4 text-sm font-semibold text-[#171d1c] hover:bg-[#f0f5f2]" onClick={() => setOpen(false)} type="button">
-                  Annuler
+                  {common('cancel')}
                 </button>
                 <button className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white" style={{color: '#ffffff'}} type="submit">
                   <UploadIcon />
-                  Uploader
+                  {t('upload')}
                 </button>
               </div>
             </form>

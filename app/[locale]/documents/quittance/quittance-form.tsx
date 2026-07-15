@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import {useTranslations} from 'next-intl';
 import {useMemo, useState, useTransition} from 'react';
 
 import {useMessage} from '@/components/message/MessageProvider';
@@ -142,44 +143,46 @@ function todayLabel() {
 }
 
 function ReceiptPreview({property, state, tenant}: {property: QuittancePropertyOption | null; state: FormState; tenant: QuittanceTenantOption | null}) {
+  const t = useTranslations('quittance');
   const total = Number.parseFloat(state.amount.replace(',', '.')) + Number.parseFloat((state.charges || '0').replace(',', '.'));
+  const paymentMethod = state.paymentMethod === 'cash' ? t('cash') : state.paymentMethod === 'cheque' ? t('cheque') : state.paymentMethod === 'card' ? t('card') : state.paymentMethod === 'other' ? t('other') : t('bankTransfer');
 
   return (
     <div className="mx-auto min-h-[440px] w-full max-w-[320px] rounded-sm bg-white p-7 text-left shadow-sm ring-1 ring-[var(--line-soft)]">
-      <p className="text-center text-lg font-semibold text-[#171d1c]">Quittance de loyer</p>
+      <p className="text-center text-lg font-semibold text-[#171d1c]">{t('receiptTitle')}</p>
       <p className="mt-1 text-center text-xs text-[var(--muted)]">{monthLabel(state.periodMonth)}</p>
       <div className="mt-7 grid gap-4 text-xs leading-5 text-[#33413f]">
         <div>
-          <p className="font-semibold uppercase tracking-wide text-[var(--muted)]">Proprietaire</p>
+          <p className="font-semibold uppercase tracking-wide text-[var(--muted)]">{t('owner')}</p>
           <p className="mt-1 text-sm text-[#171d1c]">{state.ownerName || '-'}</p>
         </div>
         <div>
-          <p className="font-semibold uppercase tracking-wide text-[var(--muted)]">Locataire</p>
+          <p className="font-semibold uppercase tracking-wide text-[var(--muted)]">{t('tenant')}</p>
           <p className="mt-1 text-sm text-[#171d1c]">{tenant?.full_name ?? '-'}</p>
         </div>
         <div>
-          <p className="font-semibold uppercase tracking-wide text-[var(--muted)]">Bien</p>
+          <p className="font-semibold uppercase tracking-wide text-[var(--muted)]">{t('property')}</p>
           <p className="mt-1 text-sm text-[#171d1c]">{propertyAddress(property)}</p>
         </div>
       </div>
       <div className="mt-7 border-t border-[var(--line-soft)] pt-5 text-sm">
         <div className="flex justify-between gap-4">
-          <span>Loyer</span>
+          <span>{t('rentAmount')}</span>
           <span className="font-semibold tabular-nums">{money(state.amount)}</span>
         </div>
         <div className="mt-2 flex justify-between gap-4">
-          <span>Charges</span>
+          <span>{t('chargesOptional')}</span>
           <span className="font-semibold tabular-nums">{money(state.charges || '0')}</span>
         </div>
         <div className="mt-3 flex justify-between gap-4 border-t border-[var(--line-soft)] pt-3 text-[#00685f]">
-          <span className="font-semibold">Total recu</span>
+          <span className="font-semibold">{t('totalReceived')}</span>
           <span className="font-semibold tabular-nums">{Number.isFinite(total) ? money(String(total)) : '0,00 EUR'}</span>
         </div>
       </div>
-      <p className="mt-7 text-xs leading-5 text-[var(--muted)]">Paiement recu le {dateLabel(state.paidAt) || '-'} par {state.paymentMethod === 'cash' ? 'especes' : state.paymentMethod === 'cheque' ? 'cheque' : 'virement bancaire'}.</p>
+      <p className="mt-7 text-xs leading-5 text-[var(--muted)]">{t('paymentSentence', {date: dateLabel(state.paidAt) || '-', method: paymentMethod})}</p>
       <div className="mt-7 border-t border-[var(--line-soft)] pt-5 text-xs leading-5 text-[#33413f]">
-        <p>Fait a {property?.city ?? '-'}, le {todayLabel()}</p>
-        <p className="mt-5 text-[var(--muted)]">Signature du proprietaire</p>
+        <p>{t('madeAt', {city: property?.city ?? '-', date: todayLabel()})}</p>
+        <p className="mt-5 text-[var(--muted)]">{t('ownerSignature')}</p>
         <p className="mt-2 text-sm font-semibold text-[#171d1c]">{state.ownerName || '-'}</p>
       </div>
     </div>
@@ -199,6 +202,7 @@ export function QuittanceForm({
   recentReceipts: RecentReceipt[];
   tenants: QuittanceTenantOption[];
 }) {
+  const t = useTranslations('quittance');
   const message = useMessage();
   const initialProperty = properties[0] ?? null;
   const initialPaidAt = today();
@@ -301,11 +305,11 @@ export function QuittanceForm({
       const result = (await response.json()) as {downloadUrl?: string | null; error?: string};
 
       if (!response.ok) {
-        message.error(result.error ?? 'Impossible de generer la quittance.');
+        message.error(result.error ?? t('error'));
         return;
       }
 
-      message.success('Quittance generee et archivee dans vos documents.');
+      message.success(t('success'));
 
       if (result.downloadUrl) {
         window.location.href = result.downloadUrl;
@@ -319,19 +323,19 @@ export function QuittanceForm({
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold text-[var(--muted)]">
             <Link className="hover:text-[var(--accent)]" href="/documents">
-              Documents
+              {t('breadcrumbDocuments')}
             </Link>
             <span>/</span>
-            <span className="text-[var(--accent)]">Quittances</span>
+            <span className="text-[var(--accent)]">{t('breadcrumbReceipts')}</span>
           </div>
-          <h1 className="mt-3 text-3xl font-semibold tracking-normal text-[#171d1c]">Generer une quittance</h1>
+          <h1 className="mt-3 text-3xl font-semibold tracking-normal text-[#171d1c]">{t('title')}</h1>
         </div>
         <div className="flex flex-wrap gap-3">
           <button className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--line)] bg-white px-5 text-sm font-semibold text-[#171d1c] shadow-sm hover:bg-[#f0f5f2]" onClick={() => setShowPreview(true)} type="button">
-            Apercu
+            {t('preview')}
           </button>
           <button className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white shadow-sm disabled:opacity-60" disabled={isPending || !properties.length} onClick={generatePdf} style={{color: '#ffffff'}} type="button">
-            {isPending ? 'Generation...' : 'Generer la quittance'}
+            {isPending ? t('generating') : t('generate')}
           </button>
         </div>
       </div>
@@ -342,18 +346,18 @@ export function QuittanceForm({
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#d9fbf4] text-[var(--accent)]">
               <span className="text-lg font-semibold">Q</span>
             </div>
-            <h2 className="text-lg font-semibold text-[#171d1c]">Informations du document</h2>
+            <h2 className="text-lg font-semibold text-[#171d1c]">{t('infoTitle')}</h2>
           </div>
 
           <div className="mt-6 grid gap-4 border-t border-[var(--line-soft)] pt-6 md:grid-cols-2">
             <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-              Proprietaire
+              {t('owner')}
               <input className="focus-ring min-h-11 w-full min-w-0 truncate rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => update({ownerName: event.target.value})} value={state.ownerName} />
             </label>
             <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-              Bien
+              {t('property')}
               <select className="focus-ring min-h-11 w-full min-w-0 truncate rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => onPropertyChange(event.target.value)} value={state.propertyId}>
-                {properties.length ? null : <option value="">Aucun bien enregistre</option>}
+                {properties.length ? null : <option value="">{t('noProperty')}</option>}
                 {properties.map((property) => (
                   <option key={property.id} value={property.id}>
                     {propertyOptionLabel(property)}
@@ -362,9 +366,9 @@ export function QuittanceForm({
               </select>
             </label>
             <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)] md:col-span-2">
-              Locataire
+              {t('tenant')}
               <select className="focus-ring min-h-11 w-full min-w-0 truncate rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => onTenantChange(event.target.value)} value={state.tenantId}>
-                <option value="">Choisir un locataire</option>
+                <option value="">{t('chooseTenant')}</option>
                 {tenants.map((tenant) => (
                   <option key={tenant.id} value={tenant.id}>
                     {tenant.full_name}
@@ -373,34 +377,34 @@ export function QuittanceForm({
               </select>
             </label>
             <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-              Montant du loyer
-              <input className="focus-ring min-h-11 w-full min-w-0 truncate rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c] disabled:bg-[#f8fbfa] disabled:text-[var(--muted)]" disabled={selectedTenantHasNoBail} min="0" onChange={(event) => update({amount: event.target.value})} placeholder={selectedTenantHasNoBail ? 'Bail non cree' : '0'} step="0.01" type="number" value={state.amount} />
+              {t('rentAmount')}
+              <input className="focus-ring min-h-11 w-full min-w-0 truncate rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c] disabled:bg-[#f8fbfa] disabled:text-[var(--muted)]" disabled={selectedTenantHasNoBail} min="0" onChange={(event) => update({amount: event.target.value})} placeholder={selectedTenantHasNoBail ? t('leaseMissing') : '0'} step="0.01" type="number" value={state.amount} />
             </label>
             <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-              Charges (optionnel)
-              <input className="focus-ring min-h-11 w-full min-w-0 truncate rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c] disabled:bg-[#f8fbfa] disabled:text-[var(--muted)]" disabled={selectedTenantHasNoBail} min="0" onChange={(event) => update({charges: event.target.value})} placeholder={selectedTenantHasNoBail ? 'Bail non cree' : '0'} step="0.01" type="number" value={state.charges} />
+              {t('chargesOptional')}
+              <input className="focus-ring min-h-11 w-full min-w-0 truncate rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c] disabled:bg-[#f8fbfa] disabled:text-[var(--muted)]" disabled={selectedTenantHasNoBail} min="0" onChange={(event) => update({charges: event.target.value})} placeholder={selectedTenantHasNoBail ? t('leaseMissing') : '0'} step="0.01" type="number" value={state.charges} />
             </label>
             <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-              Periode pour la quittance
+              {t('period')}
               <input className="focus-ring min-h-11 w-full min-w-0 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" inputMode="numeric" onChange={(event) => onPeriodChange(event.target.value)} placeholder="01/07/2026" value={periodDisplay} />
             </label>
             <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-              Date du paiement
+              {t('paymentDate')}
               <input className="focus-ring min-h-11 w-full min-w-0 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" inputMode="numeric" onChange={(event) => onPaidAtChange(event.target.value)} placeholder="13/07/2026" value={paidAtDisplay} />
             </label>
             <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)] md:col-span-2">
-              Mode de paiement
+              {t('paymentMethod')}
               <select className="focus-ring min-h-11 w-full min-w-0 truncate rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => update({paymentMethod: event.target.value})} value={state.paymentMethod}>
-                <option value="bank_transfer">Virement bancaire</option>
-                <option value="cash">Especes</option>
-                <option value="cheque">Cheque</option>
-                <option value="card">Carte bancaire</option>
-                <option value="other">Autre</option>
+                <option value="bank_transfer">{t('bankTransfer')}</option>
+                <option value="cash">{t('cash')}</option>
+                <option value="cheque">{t('cheque')}</option>
+                <option value="card">{t('card')}</option>
+                <option value="other">{t('other')}</option>
               </select>
             </label>
           </div>
 
-          <p className="mt-5 border-t border-[var(--line-soft)] pt-5 text-sm leading-6 text-[var(--muted)]">La quittance sera generee au format PDF et archivee automatiquement dans vos documents.</p>
+          <p className="mt-5 border-t border-[var(--line-soft)] pt-5 text-sm leading-6 text-[var(--muted)]">{t('archivedHint')}</p>
         </section>
 
         <aside className="grid gap-5">
@@ -411,28 +415,28 @@ export function QuittanceForm({
               <div className="grid min-h-[320px] place-items-center rounded-lg bg-[#f8fbfa] text-center">
                 <div>
                   <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--line)] text-[var(--accent)]">Q</div>
-                  <p className="font-semibold text-[#171d1c]">Apercu en temps reel</p>
-                  <p className="mt-2 text-sm leading-5 text-[var(--muted)]">Remplissez les champs a gauche puis cliquez sur Apercu.</p>
+                  <p className="font-semibold text-[#171d1c]">{t('livePreview')}</p>
+                  <p className="mt-2 text-sm leading-5 text-[var(--muted)]">{t('livePreviewHint')}</p>
                 </div>
               </div>
             )}
           </button>
 
           <section className="rounded-xl border border-[var(--line-soft)] bg-white p-4 shadow-sm">
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Dernieres quittances</h2>
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">{t('latestReceipts')}</h2>
             <div className="mt-4 grid gap-3">
               {recentReceipts.length ? (
                 recentReceipts.map((receipt) => (
                   <a className="flex items-center justify-between rounded-lg border border-[var(--line-soft)] bg-[#f0f5f2] px-3 py-3 text-sm hover:bg-[#e4e9e7]" href={receipt.downloadUrl ?? '#'} key={receipt.id}>
                     <span>
                       <span className="block font-semibold text-[#171d1c]">{receipt.period_month ? monthLabel(receipt.period_month.slice(0, 7)) : receipt.file_name}</span>
-                      <span className="block text-xs text-[var(--muted)]">{receipt.tenants?.full_name ?? 'Locataire'}</span>
+                      <span className="block text-xs text-[var(--muted)]">{receipt.tenants?.full_name ?? t('tenant')}</span>
                     </span>
                     <span className="text-lg">↓</span>
                   </a>
                 ))
               ) : (
-                <p className="text-sm text-[var(--muted)]">Aucune quittance archivee.</p>
+                <p className="text-sm text-[var(--muted)]">{t('noReceipts')}</p>
               )}
             </div>
           </section>

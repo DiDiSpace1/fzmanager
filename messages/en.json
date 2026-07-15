@@ -29,7 +29,9 @@
     "loading": "Loading...",
     "noData": "No data available",
     "remove": "Remove",
-    "language": "Language"
+    "language": "Language",
+    "close": "Close",
+    "upload": "Upload"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -415,6 +417,29 @@
       "planLimit": "Your plan does not allow uploading more documents. Upgrade from settings.",
       "storageLimit": "Your document storage limit has been reached.",
       "invoiceAmount": "Add a valid amount to save a work invoice as an expense."
+    },
+    "upload": "Upload",
+    "uploadModal": {
+      "sideTitle": "Centralize your documents",
+      "sideCopy": "Add your receipts and tax documents for simpler management.",
+      "secureStorage": "Secure storage",
+      "access": "24/7 access",
+      "title": "Upload a document",
+      "close": "Close",
+      "dropTitle": "Click or drag a file",
+      "dropHint": "PDF, JPG or PNG (max. 10MB)",
+      "documentType": "Document type",
+      "selectType": "Select a type",
+      "associatedProperty": "Associated property",
+      "chooseProperty": "Choose a property",
+      "tenantOptional": "Tenant (optional)",
+      "noSpecificTenant": "No specific tenant"
+    },
+    "receiptUpload": {
+      "button": "Add receipt",
+      "title": "Add receipt",
+      "hint": "PDF, JPG, JPEG or PNG. Maximum size depends on your plan.",
+      "file": "File"
     }
   },
   "tax": {
@@ -498,10 +523,95 @@
   },
   "settings": {
     "title": "Settings",
-    "subtitle": "Country, language, billing and data export.",
+    "subtitle": "Manage your account, subscription and security preferences.",
     "country": "Account country",
     "locale": "Language",
-    "billing": "Billing"
+    "billing": "Billing",
+    "tabs": {
+      "profil": "Profile",
+      "abonnement": "Subscription",
+      "securite": "Security",
+      "donnees": "Data"
+    },
+    "profile": {
+      "landlord": "Landlord owner",
+      "fullName": "Full name",
+      "phone": "Phone",
+      "taxRegime": "Tax regime",
+      "save": "Save changes"
+    },
+    "status": {
+      "checkoutSuccess": "Payment received. The status may take a few seconds to sync through Stripe.",
+      "checkoutCancelled": "Payment cancelled. Your data stays on the free plan.",
+      "billingError": "A billing action failed.",
+      "saved": "Settings saved."
+    },
+    "subscription": {
+      "currentPlan": "Current plan",
+      "planDetails": "Your Loyelio commitment details",
+      "active": "Active",
+      "plan": "{plan} plan",
+      "currentPlanDescription": "Your current plan controls limits for properties, tenants, documents, storage and photos.",
+      "currentPlanButton": "Current plan",
+      "choosePlan": "Choose {plan}",
+      "included": "Included in your offer",
+      "propertiesLimit": "Up to {count} properties",
+      "tenantsLimit": "Up to {count} tenants",
+      "documentsLimit": "{count} documents",
+      "storageLimit": "{value} document storage",
+      "comparePlans": "Compare plans",
+      "planSummary": "{properties} properties ? {tenants} tenants ? {documents} documents ? {storage}",
+      "changePlan": "Change plan",
+      "paymentMethod": "Payment method",
+      "stripeCard": "Card managed by Stripe",
+      "stripePortalHint": "Open the customer portal to view invoices or update payment details.",
+      "manageStripe": "Manage on Stripe",
+      "planUsage": "Plan usage",
+      "propertiesUsage": "Registered properties",
+      "tenantsUsage": "Tenants",
+      "documentsUsage": "Documents",
+      "storageUsage": "Document storage"
+    },
+    "security": {
+      "changePassword": "Change password",
+      "oldPassword": "Old password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "passwordHint": "Your password should contain at least 12 characters, one uppercase letter and one number.",
+      "updatePassword": "Update password",
+      "tipsTitle": "Security tips",
+      "tip1": "Use a password manager for unique keys.",
+      "tip2": "Never share validation codes by SMS or email.",
+      "tip3": "Regularly check active sessions for suspicious activity."
+    },
+    "data": {
+      "exportTitle": "Export your data",
+      "exportCopy": "Download a complete archive of your properties, tenants and receipts. Useful for personal records or moving to another tool.",
+      "jsonFormat": "JSON format",
+      "completeArchive": "Complete archive",
+      "jsonCopy": "Ideal for technical import or raw backup.",
+      "exportJson": "Export as .json",
+      "csvFormat": "CSV / Excel format",
+      "accountingReports": "Accounting reports",
+      "csvCopy": "Ideal for analyzing numbers in Excel or Numbers.",
+      "exportCsv": "Export as .csv",
+      "dangerZone": "Danger zone",
+      "deleteTitle": "Delete my account and data",
+      "deleteCopy": "This action is irreversible. All your properties, leases, receipts and documents will be permanently deleted from our servers.",
+      "typeDelete": "Type SUPPRIMER",
+      "deleteForever": "Delete permanently",
+      "retentionTitle": "Data retention",
+      "legalDocuments": "Legal documents",
+      "legalDocumentsCopy": "Kept according to your tax archiving needs.",
+      "receiptsInvoices": "Receipts & invoices",
+      "receiptsInvoicesCopy": "Available while your account is active.",
+      "cookiesTracking": "Cookies & tracking",
+      "cookiesTrackingCopy": "Limited to what is strictly necessary for session and security.",
+      "privacyPolicy": "Read the Privacy Policy",
+      "storageUsed": "Storage used",
+      "documentsImages": "Documents (PDF/Images)",
+      "storageCurrentPlan": "Your current plan allows storing up to {value} of scanned documents."
+    }
   },
   "shell": {
     "tagline": "Rental management"
@@ -660,5 +770,42 @@
     "amount": "Amount",
     "actions": "Actions",
     "noTransactions": "No transaction yet."
+  },
+  "quittance": {
+    "breadcrumbDocuments": "Documents",
+    "breadcrumbReceipts": "Receipts",
+    "title": "Generate a receipt",
+    "preview": "Preview",
+    "generate": "Generate receipt",
+    "generating": "Generating...",
+    "infoTitle": "Document information",
+    "owner": "Owner",
+    "property": "Property",
+    "noProperty": "No property registered",
+    "tenant": "Tenant",
+    "chooseTenant": "Choose a tenant",
+    "rentAmount": "Rent amount",
+    "chargesOptional": "Charges (optional)",
+    "period": "Receipt period",
+    "paymentDate": "Payment date",
+    "paymentMethod": "Payment method",
+    "bankTransfer": "Bank transfer",
+    "cash": "Cash",
+    "cheque": "Cheque",
+    "card": "Card",
+    "other": "Other",
+    "archivedHint": "The receipt will be generated as a PDF and archived automatically in your documents.",
+    "livePreview": "Live preview",
+    "livePreviewHint": "Fill in the fields on the left, then click Preview.",
+    "latestReceipts": "Latest receipts",
+    "noReceipts": "No archived receipt.",
+    "leaseMissing": "Lease not created",
+    "receiptTitle": "Rent receipt",
+    "totalReceived": "Total received",
+    "paymentSentence": "Payment received on {date} by {method}.",
+    "madeAt": "Issued in {city}, on {date}",
+    "ownerSignature": "Owner signature",
+    "success": "Receipt generated and archived in your documents.",
+    "error": "Unable to generate the receipt."
   }
 }
