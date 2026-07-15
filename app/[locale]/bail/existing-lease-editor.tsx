@@ -50,7 +50,7 @@ export function ExistingLeaseEditor({leases, locale, propertyId}: {leases: Edita
                 <p className="text-[11px] font-bold uppercase tracking-wide text-[#53615f]">Date fin</p>
                 <p className="mt-1 text-sm">{lease.end_date ? isoDateToDisplay(lease.end_date) : '-'}</p>
               </div>
-              <button className="focus-ring rounded-md border border-[var(--line)] px-4 py-2 text-sm font-semibold" onClick={() => setEditingLease(lease)} type="button">
+              <button className="focus-ring rounded-md border border-[var(--line)] px-4 py-2 text-sm font-semibold cursor-pointer" onClick={() => setEditingLease(lease)} type="button">
                 Modifier
               </button>
               <form action={deleteLeaseAction}>

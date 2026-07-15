@@ -120,7 +120,7 @@ export default async function PropertyDetailPage({params}: PropertyDetailPagePro
           <h1 className="mt-3 text-3xl font-semibold tracking-normal text-[#171d1c]">{property.name}</h1>
           <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{address || 'Adresse a completer'}</p>
         </div>
-        <Link className="focus-ring inline-flex min-h-11 items-center justify-center rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white" href={`/properties/${property.id}/edit`} style={{color: '#ffffff'}}>
+        <Link className="focus-ring inline-flex min-h-11 items-center justify-center rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white cursor-pointer" href={`/properties/${property.id}/edit`} style={{color: '#ffffff'}}>
           Modifier
         </Link>
       </div>

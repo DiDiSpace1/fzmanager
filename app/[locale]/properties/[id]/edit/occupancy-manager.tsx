@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import {useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 
 import {DateDisplayInput, isoDateToDisplay} from '@/components/forms/date-display-input';
 
@@ -30,11 +30,59 @@ export function OccupancyManager({
   initialTenantId?: string;
   tenants: TenantOption[];
 }) {
+  const managerRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState(initialStatus === 'rented' ? 'rented' : 'vacant');
   const [assignmentRows, setAssignmentRows] = useState([{id: crypto.randomUUID()}]);
+  const [invalidFields, setInvalidFields] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => {
+    const form = managerRef.current?.closest('form');
+    if (!form) {
+      return undefined;
+    }
+
+    const validateAssignments = (event: SubmitEvent) => {
+      if (status !== 'rented') {
+        setInvalidFields(new Set());
+        return;
+      }
+
+      const formData = new FormData(form);
+      const tenantIds = formData.getAll('assignment_tenant_id').map((entry) => (typeof entry === 'string' ? entry.trim() : ''));
+      const startDates = formData.getAll('assignment_start_date').map((entry) => (typeof entry === 'string' ? entry.trim() : ''));
+      const monthlyRents = formData.getAll('assignment_monthly_rent').map((entry) => (typeof entry === 'string' ? Number.parseFloat(entry.replace(',', '.')) : 0));
+      const nextInvalidFields = new Set<string>();
+
+      assignmentRows.forEach((_, index) => {
+        if (!tenantIds[index]) {
+          nextInvalidFields.add(`${index}:tenant`);
+        }
+
+        if (!startDates[index]) {
+          nextInvalidFields.add(`${index}:start`);
+        }
+
+        if (!Number.isFinite(monthlyRents[index]) || monthlyRents[index] <= 0) {
+          nextInvalidFields.add(`${index}:rent`);
+        }
+      });
+
+      if (nextInvalidFields.size) {
+        event.preventDefault();
+        setInvalidFields(nextInvalidFields);
+        const firstInvalidKey = Array.from(nextInvalidFields)[0];
+        form.querySelector<HTMLElement>(`[data-validation-key="${firstInvalidKey}"]`)?.focus();
+      } else {
+        setInvalidFields(new Set());
+      }
+    };
+
+    form.addEventListener('submit', validateAssignments);
+    return () => form.removeEventListener('submit', validateAssignments);
+  }, [assignmentRows, status]);
 
   return (
-    <div className="grid gap-5">
+    <div className="grid gap-5" ref={managerRef}>
       <div className="grid gap-4 md:grid-cols-2">
         <label className="flex min-h-20 cursor-pointer items-center justify-between rounded-lg border border-[var(--accent)] bg-[#f5faf8] px-4">
           <span>
@@ -62,7 +110,13 @@ export function OccupancyManager({
             <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-[minmax(150px,1.2fr)_repeat(2,minmax(112px,0.75fr))_repeat(3,minmax(108px,0.65fr))_auto]" key={row.id}>
               <label className="grid min-w-0 gap-2 text-xs font-semibold text-[#33413f]">
                 Locataire
-                <select className="focus-ring min-h-11 min-w-0 rounded-md border border-[var(--line)] px-3 text-sm font-normal" defaultValue={index === 0 ? initialTenantId : ''} name="assignment_tenant_id">
+                <select
+                  className={`focus-ring min-h-11 min-w-0 rounded-md border px-3 text-sm font-normal ${invalidFields.has(`${index}:tenant`) ? 'border-[#ba1a1a] bg-[#fff7f6]' : 'border-[var(--line)]'}`}
+                  data-validation-key={`${index}:tenant`}
+                  defaultValue={index === 0 ? initialTenantId : ''}
+                  name="assignment_tenant_id"
+                  onChange={() => setInvalidFields((fields) => withoutField(fields, `${index}:tenant`))}
+                >
                   <option value="">Choisir un locataire</option>
                   {tenants.map((tenant) => (
                     <option key={tenant.id} value={tenant.id}>
@@ -73,13 +127,18 @@ export function OccupancyManager({
               </label>
               <label className="grid min-w-0 gap-2 text-xs font-semibold text-[#33413f]">
                 Date entree
-                <DateDisplayInput className="focus-ring h-11 min-h-11 w-full rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="assignment_start_date" />
+                <DateDisplayInput
+                  className={`focus-ring h-11 min-h-11 w-full rounded-md border px-3 text-sm font-normal ${invalidFields.has(`${index}:start`) ? 'border-[#ba1a1a] bg-[#fff7f6]' : 'border-[var(--line)]'}`}
+                  name="assignment_start_date"
+                  onIsoChange={() => setInvalidFields((fields) => withoutField(fields, `${index}:start`))}
+                  validationKey={`${index}:start`}
+                />
               </label>
               <label className="grid min-w-0 gap-2 text-xs font-semibold text-[#33413f]">
                 Date sortie
                 <DateDisplayInput className="focus-ring h-11 min-h-11 w-full rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="assignment_end_date" />
               </label>
-              <MoneyField label="Montant loyer" name="assignment_monthly_rent" required />
+              <MoneyField invalid={invalidFields.has(`${index}:rent`)} label="Montant loyer" name="assignment_monthly_rent" onChange={() => setInvalidFields((fields) => withoutField(fields, `${index}:rent`))} required validationKey={`${index}:rent`} />
               <MoneyField label="Charge" name="assignment_charges_amount" />
               <MoneyField label="Caution" name="assignment_deposit_amount" />
               <button
@@ -113,12 +172,22 @@ export function OccupancyManager({
   );
 }
 
-function MoneyField({label, name, required = false}: {label: string; name: string; required?: boolean}) {
+function withoutField(fields: Set<string>, field: string) {
+  if (!fields.has(field)) {
+    return fields;
+  }
+
+  const nextFields = new Set(fields);
+  nextFields.delete(field);
+  return nextFields;
+}
+
+function MoneyField({invalid = false, label, name, onChange, required = false, validationKey}: {invalid?: boolean; label: string; name: string; onChange?: () => void; required?: boolean; validationKey?: string}) {
   return (
     <label className="grid min-w-0 gap-2 text-xs font-semibold text-[#33413f]">
       {label}
-      <span className="relative min-h-11 min-w-0 rounded-md border border-[var(--line)] bg-white">
-        <input className="h-11 w-full min-w-0 border-0 bg-transparent px-3 pr-12 text-sm font-normal outline-none" min="0" name={name} required={required} step="0.01" type="number" />
+      <span className={`relative min-h-11 min-w-0 rounded-md border bg-white ${invalid ? 'border-[#ba1a1a] bg-[#fff7f6]' : 'border-[var(--line)]'}`}>
+        <input className="h-11 w-full min-w-0 border-0 bg-transparent px-3 pr-12 text-sm font-normal outline-none" data-validation-key={validationKey} defaultValue="0" min="0" name={name} onChange={onChange} required={required} step="0.01" type="number" />
         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm font-semibold">EUR</span>
       </span>
     </label>

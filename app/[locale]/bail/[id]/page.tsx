@@ -142,7 +142,7 @@ export default async function BailDetailPage({params}: BailDetailPageProps) {
         <div className="flex flex-col items-start gap-3 text-left md:items-end md:text-right">
           <p className="text-[10px] font-bold uppercase tracking-wide text-[#33413f]">Loyer mensuel CC</p>
           <p className="mt-1 text-3xl font-semibold text-[var(--accent)] tabular-nums">{formatMoney(totalMonthly)}</p>
-          <Link className="focus-ring inline-flex min-h-11 items-center justify-center rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white shadow-sm hover:bg-[#00574f]" href={`/bail?property_id=${bail.property_id}`} style={{color: '#ffffff'}}>
+          <Link className="cursor-pointer focus-ring inline-flex min-h-11 items-center justify-center rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white shadow-sm hover:bg-[#00574f]" href={`/bail?property_id=${bail.property_id}`} style={{color: '#ffffff'}}>
             Modifier
           </Link>
         </div>

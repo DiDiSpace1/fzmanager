@@ -52,7 +52,8 @@ export function DateDisplayInput({
   name,
   onIsoChange,
   placeholder = '13/07/2026',
-  required = false
+  required = false,
+  validationKey
 }: {
   className?: string;
   defaultValue?: string;
@@ -60,6 +61,7 @@ export function DateDisplayInput({
   onIsoChange?: (value: string) => void;
   placeholder?: string;
   required?: boolean;
+  validationKey?: string;
 }) {
   const pickerRef = useRef<HTMLInputElement>(null);
   const [isoValue, setIsoValue] = useState(defaultValue);
@@ -85,6 +87,7 @@ export function DateDisplayInput({
         }}
         role="button"
         tabIndex={0}
+        data-validation-key={validationKey}
       >
         <span className={displayValue ? 'text-current' : 'text-[#8a9693]'}>{displayValue || placeholder}</span>
         <input
@@ -114,6 +117,7 @@ export function MonthDisplayInput({
   onMonthChange,
   placeholder = '01/07/2026',
   required = false,
+  validationKey,
   value
 }: {
   className?: string;
@@ -121,6 +125,7 @@ export function MonthDisplayInput({
   onMonthChange?: (value: string) => void;
   placeholder?: string;
   required?: boolean;
+  validationKey?: string;
   value: string;
 }) {
   const pickerRef = useRef<HTMLInputElement>(null);
@@ -147,6 +152,7 @@ export function MonthDisplayInput({
         }}
         role="button"
         tabIndex={0}
+        data-validation-key={validationKey}
       >
         <span className={displayValue ? 'text-current' : 'text-[#8a9693]'}>{displayValue || placeholder}</span>
         <input
