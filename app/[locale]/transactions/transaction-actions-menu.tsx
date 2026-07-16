@@ -18,6 +18,7 @@ export type TransactionActionRow = {
   notes?: string | null;
   paymentMethod?: string | null;
   propertyId?: string | null;
+  revenueType?: string | null;
   taxCategoryId?: string | null;
   type: 'expense' | 'revenue';
   vendor?: string | null;
@@ -113,6 +114,7 @@ export function TransactionActionsMenu({
           <form action={deleteTransactionAction}>
             <input name="locale" type="hidden" value={locale} />
             <input name="type" type="hidden" value={row.type} />
+            <input name="revenue_type" type="hidden" value={row.revenueType ?? 'rent'} />
             <input name="id" type="hidden" value={row.id} />
             <ConfirmSubmitButton
               className="w-full rounded-md px-3 py-2 text-left text-[#ba1a1a] hover:bg-[#fff3f0] cursor-pointer"

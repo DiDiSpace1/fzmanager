@@ -19,6 +19,7 @@ type TaxCategoryOption = {
 
 export type LeaseOption = {
   charges_amount: number | null;
+  deposit_amount: number | null;
   id: string;
   monthly_rent: number | null;
   rent_charges: {
@@ -26,6 +27,7 @@ export type LeaseOption = {
     total_due: number | null;
     rent_payments: {
       amount: number | null;
+      revenue_type: string | null;
     }[];
   }[];
   properties: {
@@ -52,7 +54,7 @@ function periodStart(month: string) {
 
 function paidForPeriod(lease: LeaseOption | undefined, month: string) {
   const charge = lease?.rent_charges.find((row) => row.period_month === periodStart(month));
-  return charge?.rent_payments.reduce((sum, payment) => sum + Number(payment.amount ?? 0), 0) ?? 0;
+  return charge?.rent_payments.filter((payment) => !payment.revenue_type || payment.revenue_type === 'rent').reduce((sum, payment) => sum + Number(payment.amount ?? 0), 0) ?? 0;
 }
 
 function remainingForPeriod(lease: LeaseOption | undefined, month: string) {
@@ -84,11 +86,13 @@ export function TransactionDrawer({
   const initialLeaseId = initialTenantId ? leases.find((lease) => lease.tenants?.id === initialTenantId)?.id : undefined;
   const [open, setOpen] = useState(initialOpen);
   const [mode, setMode] = useState<'expense' | 'revenue'>('revenue');
+  const [revenueType, setRevenueType] = useState<'deposit' | 'other' | 'rent'>('rent');
   const initialPeriodMonth = currentMonth();
   const [periodMonth, setPeriodMonth] = useState(initialPeriodMonth);
   const [selectedLeaseId, setSelectedLeaseId] = useState(initialLeaseId ?? leases[0]?.id ?? '');
   const selectedLease = useMemo(() => leases.find((lease) => lease.id === selectedLeaseId), [leases, selectedLeaseId]);
   const amountDue = remainingForPeriod(selectedLease, periodMonth);
+  const amountPlaceholder = revenueType === 'deposit' ? Number(selectedLease?.deposit_amount ?? 0).toFixed(2).replace('.', ',') : revenueType === 'rent' ? '560,00' : '0,00';
 
   return (
     <>
@@ -138,7 +142,7 @@ export function TransactionDrawer({
                   <input name="locale" type="hidden" value={locale} />
                   <label className="grid gap-2 text-sm text-[#3d4947]">
                     {t('revenueType')}
-                    <select className="focus-ring min-h-11 rounded-md border border-[var(--line)] bg-white px-3 text-sm text-[#171d1c]" name="revenue_type" defaultValue="rent">
+                    <select className="focus-ring min-h-11 rounded-md border border-[var(--line)] bg-white px-3 text-sm text-[#171d1c]" name="revenue_type" value={revenueType} onChange={(event) => setRevenueType(event.target.value as 'deposit' | 'other' | 'rent')}>
                       <option value="rent">{t('rent')}</option>
                       <option value="deposit">{t('deposit')}</option>
                       <option value="other">{t('other')}</option>
@@ -172,23 +176,26 @@ export function TransactionDrawer({
                     <label className="grid min-w-0 gap-2 text-sm text-[#3d4947]">
                       {t('period')}
                       <MonthDisplayInput className="focus-ring h-11 min-h-11 w-full rounded-md border border-[var(--line)] bg-white px-3 text-sm" name="period_month" onMonthChange={setPeriodMonth} required value={periodMonth} />
+                      <span className="min-h-4 text-xs text-transparent">.</span>
                     </label>
                     <label className="grid min-w-0 gap-2 text-sm text-[#3d4947]">
                       {t('amountDue')}
                       <div className="relative min-h-11 min-w-0 rounded-md border border-[var(--line)] bg-white">
                         <input
                           className="h-11 w-full min-w-0 border-0 bg-transparent px-3 pr-14 text-sm outline-none"
-                          key={`${selectedLeaseId}-${periodMonth}-${amountDue}`}
-                          defaultValue={amountDue ? amountDue.toFixed(2).replace('.', ',') : ''}
+                          key={`${selectedLeaseId}-${periodMonth}-${amountDue}-${revenueType}`}
+                          defaultValue={revenueType === 'rent' && amountDue ? amountDue.toFixed(2).replace('.', ',') : ''}
                           inputMode="decimal"
                           name="amount"
-                          placeholder="560,00"
+                          placeholder={amountPlaceholder}
                           required
                           type="text"
                         />
                         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-[#3d4947]">EUR</span>
                       </div>
-	                      {selectedLease ? <span className="text-xs text-[var(--muted)]">{t('alreadyPaid', {amount: paidForPeriod(selectedLease, periodMonth).toFixed(2).replace('.', ',')})}</span> : null}
+                      <span className="min-h-4 text-xs text-[var(--muted)]">
+                        {selectedLease && revenueType === 'rent' ? t('alreadyPaid', {amount: paidForPeriod(selectedLease, periodMonth).toFixed(2).replace('.', ',')}) : ''}
+                      </span>
                     </label>
                   </div>
 

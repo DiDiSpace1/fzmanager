@@ -23,6 +23,7 @@ type RevenueRow = {
   total_due: number;
   rent_payments: {
     amount: number;
+    revenue_type: string | null;
   }[];
   leases: {
     properties: {
@@ -40,6 +41,7 @@ type PaymentRow = {
   notes: string | null;
   paid_at: string;
   payment_method: string | null;
+  revenue_type: string | null;
   rent_charges: {
     period_month: string;
     status: string;
@@ -82,6 +84,7 @@ type TransactionRow =
       notes?: string | null;
       paymentMethod?: string | null;
       propertyId?: string | null;
+      revenueType?: string | null;
       status: string;
       taxCategoryId?: string | null;
       type: 'expense';
@@ -97,6 +100,7 @@ type TransactionRow =
       notes?: string | null;
       paymentMethod?: string | null;
       propertyId?: string | null;
+      revenueType?: string | null;
       status: string;
       taxCategoryId?: string | null;
       type: 'revenue';
@@ -151,7 +155,23 @@ function formatDate(value: string, locale: string) {
 }
 
 function paidAmount(row: Pick<RevenueRow, 'rent_payments'>) {
-  return row.rent_payments.reduce((sum, payment) => sum + Number(payment.amount ?? 0), 0);
+  return row.rent_payments.filter((payment) => !payment.revenue_type || payment.revenue_type === 'rent').reduce((sum, payment) => sum + Number(payment.amount ?? 0), 0);
+}
+
+function isIncomePayment(row: Pick<PaymentRow, 'revenue_type'>) {
+  return row.revenue_type !== 'deposit';
+}
+
+function revenueCategory(type: string | null | undefined, t: (key: 'deposit' | 'other' | 'rent') => string) {
+  if (type === 'deposit') {
+    return t('deposit');
+  }
+
+  if (type === 'other') {
+    return t('other');
+  }
+
+  return t('rent');
 }
 
 function Icon({children, className = ''}: {children: string; className?: string}) {
@@ -170,14 +190,14 @@ export default async function TransactionsPage({searchParams}: TransactionsPageP
     supabase.from('tax_categories').select('id, label').eq('country_code', 'FR').eq('tax_regime', 'LMNP').eq('active', true).order('sort_order', {ascending: true}).returns<TaxCategoryOption[]>(),
     supabase
       .from('leases')
-      .select('id, monthly_rent, charges_amount, properties(id, name), tenants(id, full_name), rent_charges(period_month, total_due, rent_payments(amount))')
+      .select('id, monthly_rent, charges_amount, deposit_amount, properties(id, name), tenants(id, full_name), rent_charges(period_month, total_due, rent_payments(amount, revenue_type))')
       .eq('workspace_id', workspaceId)
       .eq('status', 'active')
       .order('created_at', {ascending: false})
       .returns<LeaseOption[]>(),
     supabase
       .from('rent_charges')
-      .select('id, period_month, status, total_due, rent_payments(amount), leases(properties(name), tenants(full_name))')
+      .select('id, period_month, status, total_due, rent_payments(amount, revenue_type), leases(properties(name), tenants(full_name))')
       .eq('workspace_id', workspaceId)
       .gte('period_month', range.start)
       .lt('period_month', range.end)
@@ -185,7 +205,7 @@ export default async function TransactionsPage({searchParams}: TransactionsPageP
       .returns<RevenueRow[]>(),
     supabase
       .from('rent_payments')
-      .select('id, amount, paid_at, payment_method, notes, rent_charges(period_month, status, total_due, leases(properties(name), tenants(full_name)))')
+      .select('id, amount, paid_at, payment_method, revenue_type, notes, rent_charges(period_month, status, total_due, leases(properties(name), tenants(full_name)))')
       .eq('workspace_id', workspaceId)
       .gte('paid_at', range.start)
       .lt('paid_at', range.end)
@@ -193,7 +213,7 @@ export default async function TransactionsPage({searchParams}: TransactionsPageP
       .returns<PaymentRow[]>(),
     supabase
       .from('rent_payments')
-      .select('id, amount, paid_at, payment_method, notes, rent_charges(period_month, status, total_due, leases(properties(name), tenants(full_name)))')
+      .select('id, amount, paid_at, payment_method, revenue_type, notes, rent_charges(period_month, status, total_due, leases(properties(name), tenants(full_name)))')
       .eq('workspace_id', workspaceId)
       .gte('paid_at', previousRange.start)
       .lt('paid_at', previousRange.end)
@@ -208,7 +228,7 @@ export default async function TransactionsPage({searchParams}: TransactionsPageP
       .returns<ExpenseRow[]>(),
     supabase
       .from('rent_payments')
-      .select('id, amount, paid_at, payment_method, notes, rent_charges(period_month, status, total_due, leases(properties(name), tenants(full_name)))')
+      .select('id, amount, paid_at, payment_method, revenue_type, notes, rent_charges(period_month, status, total_due, leases(properties(name), tenants(full_name)))')
       .eq('workspace_id', workspaceId)
       .order('paid_at', {ascending: false})
       .limit(8)
@@ -224,8 +244,9 @@ export default async function TransactionsPage({searchParams}: TransactionsPageP
   const revenueRows = currentRevenues ?? [];
   const paymentRows = currentPayments ?? [];
   const expenseRows = currentExpenses ?? [];
-  const monthlyRevenue = paymentRows.reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
-  const previousRevenue = (previousPayments ?? []).reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
+  const monthlyRevenue = paymentRows.filter(isIncomePayment).reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
+  const monthlyDeposit = paymentRows.filter((row) => row.revenue_type === 'deposit').reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
+  const previousRevenue = (previousPayments ?? []).filter(isIncomePayment).reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
   const monthlyExpenses = expenseRows.reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
   const pendingRevenue = revenueRows
     .filter((row) => row.status !== 'paid' && row.status !== 'waived')
@@ -234,12 +255,13 @@ export default async function TransactionsPage({searchParams}: TransactionsPageP
   const combinedRows: TransactionRow[] = [
     ...(recentPayments ?? []).map((row) => ({
       amount: Number(row.amount ?? 0),
-      category: t('rent'),
+      category: revenueCategory(row.revenue_type, t),
 	      date: row.paid_at,
 	      id: row.id,
 	      meta: [row.rent_charges?.leases?.properties?.name, row.rent_charges?.leases?.tenants?.full_name].filter(Boolean).join(' - ') || '-',
 	      notes: row.notes,
 	      paymentMethod: row.payment_method,
+      revenueType: row.revenue_type,
 	      status: row.rent_charges?.status ?? 'paid',
       type: 'revenue' as const
     })),
@@ -276,7 +298,7 @@ export default async function TransactionsPage({searchParams}: TransactionsPageP
         </div>
       ) : null}
 
-      <section className="mt-8 grid gap-5 md:grid-cols-3">
+      <section className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           icon="payments"
           label={t('monthlyRevenue', {month: range.label.charAt(0).toUpperCase() + range.label.slice(1)})}
@@ -284,6 +306,7 @@ export default async function TransactionsPage({searchParams}: TransactionsPageP
           tone="revenue"
           value={formatMoney(monthlyRevenue, locale)}
         />
+        <StatCard icon="account_balance_wallet" label={t('monthlyDeposits')} note={t('depositsNote')} tone="deposit" value={formatMoney(monthlyDeposit, locale)} />
         <StatCard icon="receipt_long" label={t('monthlyExpenses')} note={t('transactionCount', {count: expenseRows.length})} tone="expense" value={formatMoney(monthlyExpenses, locale)} />
         <StatCard icon="hourglass_empty" label={t('pendingRents')} note={t('paymentsToFollow')} tone="pending" value={formatMoney(pendingRevenue, locale)} />
       </section>
@@ -317,6 +340,7 @@ export default async function TransactionsPage({searchParams}: TransactionsPageP
                     notes: row.notes,
                     paymentMethod: row.paymentMethod,
                     propertyId: row.propertyId,
+                    revenueType: row.revenueType,
                     taxCategoryId: row.taxCategoryId,
                     type: row.type,
                     vendor: row.vendor
@@ -358,8 +382,12 @@ export default async function TransactionsPage({searchParams}: TransactionsPageP
   );
 }
 
-function StatCard({icon, label, note, tone, value}: {icon: string; label: string; note: string; tone: 'expense' | 'pending' | 'revenue'; value: string}) {
+function StatCard({icon, label, note, tone, value}: {icon: string; label: string; note: string; tone: 'deposit' | 'expense' | 'pending' | 'revenue'; value: string}) {
   const tones = {
+    deposit: {
+      icon: 'bg-[#eef2ff] text-[#3755c3]',
+      value: 'text-[#3755c3]'
+    },
     expense: {
       icon: 'bg-[#ffdbce] text-[#924628]',
       value: 'text-[#924628]'

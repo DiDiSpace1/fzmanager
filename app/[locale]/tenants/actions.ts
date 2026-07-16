@@ -199,6 +199,7 @@ export async function updateRentStatusAction(formData: FormData) {
       amount,
       paid_at: new Date().toISOString().slice(0, 10),
       payment_method: 'bank_transfer',
+      revenue_type: 'rent',
       rent_charge_id: rentCharge.id,
       workspace_id: workspaceId
     });
