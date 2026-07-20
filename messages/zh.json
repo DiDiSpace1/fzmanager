@@ -712,6 +712,42 @@
       "active": "有效",
       "ended": "已结束",
       "draft": "待完善条款"
+    },
+    "detail": {
+      "backToLeases": "??????",
+      "title": "{tenant} ???",
+      "tenantFallback": "??",
+      "typeBadge": "???{type}",
+      "startBadge": "???{date}",
+      "monthlyRentWithCharges": "????????",
+      "tenantInfo": "????",
+      "primaryTenant": "????",
+      "financialTerms": "????",
+      "rentExcludingCharges": "??????",
+      "charges": "??",
+      "deposit": "??",
+      "calendarDuration": "?????",
+      "startDate": "????",
+      "expectedEndDate": "??????",
+      "tacitRenewal": "?????{duration}?",
+      "durationYears": "{count} ?",
+      "leaseDocuments": "????",
+      "noDocuments": "?????????",
+      "addDocument": "????",
+      "documentDate": "???{date}",
+      "modes": {
+        "entirePlace": "??",
+        "mixed": "??",
+        "sharedRooms": "??",
+        "unknown": "-"
+      },
+      "documentTypes": {
+        "insurance": "??",
+        "lease": "???",
+        "other": "???",
+        "rentReceipt": "??",
+        "tax": "??"
+      }
     }
   },
   "transactions": {

@@ -712,6 +712,42 @@
       "active": "Active",
       "ended": "Ended",
       "draft": "Clauses to define"
+    },
+    "detail": {
+      "backToLeases": "Back to leases",
+      "title": "Lease for {tenant}",
+      "tenantFallback": "Tenant",
+      "typeBadge": "Type: {type}",
+      "startBadge": "Start: {date}",
+      "monthlyRentWithCharges": "Monthly rent incl. charges",
+      "tenantInfo": "Tenant information",
+      "primaryTenant": "Primary tenant",
+      "financialTerms": "Financial terms",
+      "rentExcludingCharges": "Rent excluding charges",
+      "charges": "Charges",
+      "deposit": "Security deposit",
+      "calendarDuration": "Calendar & duration",
+      "startDate": "Start date",
+      "expectedEndDate": "Expected end date",
+      "tacitRenewal": "Tacit renewal ({duration})",
+      "durationYears": "{count, plural, one {# year} other {# years}}",
+      "leaseDocuments": "Lease documents",
+      "noDocuments": "No associated document yet.",
+      "addDocument": "Add a document",
+      "documentDate": "on {date}",
+      "modes": {
+        "entirePlace": "entire place",
+        "mixed": "mixed",
+        "sharedRooms": "shared rental",
+        "unknown": "-"
+      },
+      "documentTypes": {
+        "insurance": "Valid",
+        "lease": "Signed",
+        "other": "Added",
+        "rentReceipt": "Receipt",
+        "tax": "Tax"
+      }
     }
   },
   "transactions": {

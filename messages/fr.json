@@ -213,7 +213,7 @@
       "expenses": "Dépenses",
       "ariaLabel": "Revenus et dépenses des six derniers mois"
     }
-  },  
+  },
   "properties": {
     "title": "Biens",
     "subtitle": "Gérez les biens, chambres et unités louées.",
@@ -712,6 +712,42 @@
       "active": "Actif",
       "ended": "Terminé",
       "draft": "Clauses à définir"
+    },
+    "detail": {
+      "backToLeases": "Retour aux baux",
+      "title": "Bail de {tenant}",
+      "tenantFallback": "Locataire",
+      "typeBadge": "Type : {type}",
+      "startBadge": "D?but : {date}",
+      "monthlyRentWithCharges": "Loyer mensuel CC",
+      "tenantInfo": "Informations du locataire",
+      "primaryTenant": "Locataire principal",
+      "financialTerms": "Conditions financi?res",
+      "rentExcludingCharges": "Loyer hors charges",
+      "charges": "Charges",
+      "deposit": "D?p?t de garantie",
+      "calendarDuration": "Calendrier & dur?e",
+      "startDate": "Date de d?but",
+      "expectedEndDate": "Date de fin pr?visionnelle",
+      "tacitRenewal": "Renouvellement tacite ({duration})",
+      "durationYears": "{count, plural, one {# an} other {# ans}}",
+      "leaseDocuments": "Documents du bail",
+      "noDocuments": "Aucun document associ? pour le moment.",
+      "addDocument": "Ajouter un document",
+      "documentDate": "le {date}",
+      "modes": {
+        "entirePlace": "entier",
+        "mixed": "mixte",
+        "sharedRooms": "colocation",
+        "unknown": "-"
+      },
+      "documentTypes": {
+        "insurance": "Valide",
+        "lease": "Sign?",
+        "other": "Ajout?",
+        "rentReceipt": "Quittance",
+        "tax": "Fiscal"
+      }
     }
   },
   "transactions": {

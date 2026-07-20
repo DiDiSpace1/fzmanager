@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
-import {getLocale} from 'next-intl/server';
+import {getLocale, getTranslations} from 'next-intl/server';
 import type {ReactNode} from 'react';
 
+import {localizedPath} from '@/lib/navigation';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
 
 type BailDetailPageProps = {
@@ -43,34 +44,34 @@ type BailDocument = {
   id: string;
 };
 
-function formatMoney(value: number) {
-  return `${Number(value ?? 0).toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €`;
+function formatMoney(value: number, locale: string) {
+  return new Intl.NumberFormat(locale, {currency: 'EUR', style: 'currency'}).format(Number(value ?? 0));
 }
 
-function formatDate(value: string | null) {
+function formatDate(value: string | null, locale: string) {
   if (!value) {
     return '-';
   }
 
-  return new Intl.DateTimeFormat('fr-FR', {day: '2-digit', month: 'long', year: 'numeric'}).format(new Date(`${value}T00:00:00Z`));
+  return new Intl.DateTimeFormat(locale, {day: '2-digit', month: 'long', year: 'numeric'}).format(new Date(`${value}T00:00:00Z`));
 }
 
-function formatShortDate(value: string) {
-  return new Intl.DateTimeFormat('fr-FR').format(new Date(value));
+function formatShortDate(value: string, locale: string) {
+  return new Intl.DateTimeFormat(locale).format(new Date(value));
 }
 
-function statusLabel(status: string) {
-  return status === 'active' ? 'Actif' : status === 'ended' ? 'Termine' : 'Brouillon';
+function statusKey(status: string) {
+  return status === 'active' ? 'active' : status === 'ended' ? 'ended' : 'draft';
 }
 
-function modeLabel(mode?: string) {
+function modeKey(mode?: string) {
   const labels: Record<string, string> = {
-    entire_place: 'entier',
-    mixed: 'mixte',
-    shared_rooms: 'colocation'
+    entire_place: 'entirePlace',
+    mixed: 'mixed',
+    shared_rooms: 'sharedRooms'
   };
 
-  return labels[mode ?? ''] ?? mode ?? '-';
+  return labels[mode ?? ''] ?? 'unknown';
 }
 
 function yearsBetween(startDate: string, endDate: string | null) {
@@ -80,26 +81,26 @@ function yearsBetween(startDate: string, endDate: string | null) {
 
   const start = new Date(`${startDate}T00:00:00Z`);
   const end = new Date(`${endDate}T00:00:00Z`);
-  const years = Math.max(1, Math.round((end.getTime() - start.getTime()) / (365 * 24 * 60 * 60 * 1000)));
-
-  return `${years} an${years > 1 ? 's' : ''}`;
+  return Math.max(1, Math.round((end.getTime() - start.getTime()) / (365 * 24 * 60 * 60 * 1000)));
 }
 
-function documentLabel(type: string) {
+function documentKey(type: string) {
   const labels: Record<string, string> = {
-    insurance: 'Valide',
-    lease: 'Signe',
-    other: 'Ajoute',
-    rent_receipt: 'Quittance',
-    tax: 'Fiscal'
+    insurance: 'insurance',
+    lease: 'lease',
+    other: 'other',
+    rent_receipt: 'rentReceipt',
+    tax: 'tax'
   };
 
-  return labels[type] ?? 'Ajoute';
+  return labels[type] ?? 'other';
 }
 
 export default async function BailDetailPage({params}: BailDetailPageProps) {
   const {id} = await params;
   const locale = await getLocale();
+  const t = await getTranslations('bail');
+  const detail = await getTranslations('bail.detail');
   const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
   const {data: bail, error} = await supabase
     .from('leases')
@@ -128,57 +129,57 @@ export default async function BailDetailPage({params}: BailDetailPageProps) {
     <>
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <Link className="text-sm font-semibold text-[var(--accent)]" href="/bail">
-            Retour aux baux
+          <Link className="text-sm font-semibold text-[var(--accent)]" href={localizedPath(locale, '/bail')}>
+            {detail('backToLeases')}
           </Link>
-          <h1 className="mt-3 text-2xl font-semibold tracking-normal text-[#171d1c]">Bail de {bail.tenants?.full_name ?? 'Locataire'}</h1>
+          <h1 className="mt-3 text-2xl font-semibold tracking-normal text-[#171d1c]">{detail('title', {tenant: bail.tenants?.full_name ?? detail('tenantFallback')})}</h1>
           <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold">
-            <span className="rounded-full bg-[#ecfdf5] px-2.5 py-1 text-[#047857]">? {statusLabel(bail.status)}</span>
-            <span className="rounded-full bg-[#f0f5f2] px-2.5 py-1 text-[#53615f]">Type : {modeLabel(bail.properties?.rental_mode)}</span>
-            <span className="rounded-full bg-[#f0f5f2] px-2.5 py-1 text-[#53615f]">Debut : {formatShortDate(bail.start_date)}</span>
+            <span className="rounded-full bg-[#ecfdf5] px-2.5 py-1 text-[#047857]">{t(`status.${statusKey(bail.status)}`)}</span>
+            <span className="rounded-full bg-[#f0f5f2] px-2.5 py-1 text-[#53615f]">{detail('typeBadge', {type: detail(`modes.${modeKey(bail.properties?.rental_mode)}`)})}</span>
+            <span className="rounded-full bg-[#f0f5f2] px-2.5 py-1 text-[#53615f]">{detail('startBadge', {date: formatShortDate(bail.start_date, locale)})}</span>
           </div>
         </div>
         <div className="flex flex-col items-start gap-3 text-left md:items-end md:text-right">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-[#33413f]">Loyer mensuel CC</p>
-          <p className="mt-1 text-3xl font-semibold text-[var(--accent)] tabular-nums">{formatMoney(totalMonthly)}</p>
-          <Link className="cursor-pointer focus-ring inline-flex min-h-11 items-center justify-center rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white shadow-sm hover:bg-[#00574f]" href={`/bail?property_id=${bail.property_id}`} style={{color: '#ffffff'}}>
-            Modifier
+          <p className="text-[10px] font-bold uppercase tracking-wide text-[#33413f]">{detail('monthlyRentWithCharges')}</p>
+          <p className="mt-1 text-3xl font-semibold text-[var(--accent)] tabular-nums">{formatMoney(totalMonthly, locale)}</p>
+          <Link className="cursor-pointer focus-ring inline-flex min-h-11 items-center justify-center rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white shadow-sm hover:bg-[#00574f]" href={`${localizedPath(locale, '/bail')}?property_id=${bail.property_id}`} style={{color: '#ffffff'}}>
+            {t('edit')}
           </Link>
         </div>
       </div>
 
       <section className="mt-8 grid gap-6 lg:grid-cols-[260px_1fr]">
-        <InfoCard title="Informations du Locataire" icon="person">
+        <InfoCard title={detail('tenantInfo')} icon="person">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#f0f5f2] text-base font-bold text-[var(--accent)]">{(bail.tenants?.full_name ?? 'L').slice(0, 2).toUpperCase()}</div>
             <div>
               <p className="font-semibold">{bail.tenants?.full_name ?? '-'}</p>
-              <p className="text-sm text-[var(--muted)]">Locataire principal</p>
+              <p className="text-sm text-[var(--muted)]">{detail('primaryTenant')}</p>
             </div>
           </div>
           <ContactRow icon="mail" value={bail.tenants?.email ?? '-'} />
           <ContactRow icon="call" value={bail.tenants?.phone ?? '-'} />
         </InfoCard>
 
-        <InfoCard title="Conditions Financieres" icon="payments">
+        <InfoCard title={detail('financialTerms')} icon="payments">
           <div className="grid gap-6 sm:grid-cols-3">
-            <FinancialItem label="Loyer hors charges" value={formatMoney(bail.monthly_rent)} />
-            <FinancialItem label="Charges" value={formatMoney(bail.charges_amount)} />
-            <FinancialItem label="Depot de garantie" value={formatMoney(bail.deposit_amount)} />
+            <FinancialItem label={detail('rentExcludingCharges')} value={formatMoney(bail.monthly_rent, locale)} />
+            <FinancialItem label={detail('charges')} value={formatMoney(bail.charges_amount, locale)} />
+            <FinancialItem label={detail('deposit')} value={formatMoney(bail.deposit_amount, locale)} />
           </div>
         </InfoCard>
       </section>
 
       <section className="mt-6 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)]">
-        <InfoCard title="Calendrier & Duree" icon="calendar_month">
+        <InfoCard title={detail('calendarDuration')} icon="calendar_month">
           <div className="relative grid gap-8 pl-6">
             <span className="absolute bottom-8 left-[7px] top-3 border-l border-dashed border-[#c7d2ce]" />
-            <TimelineItem active label="Date de debut" value={formatDate(bail.start_date)} />
-            <TimelineItem label="Date de fin previsionnelle" value={formatDate(bail.end_date)} note={duration ? `Renouvellement tacite (${duration})` : undefined} />
+            <TimelineItem active label={detail('startDate')} value={formatDate(bail.start_date, locale)} />
+            <TimelineItem label={detail('expectedEndDate')} value={formatDate(bail.end_date, locale)} note={duration ? detail('tacitRenewal', {duration: detail('durationYears', {count: duration})}) : undefined} />
           </div>
         </InfoCard>
 
-        <InfoCard title="Documents du bail" icon="folder">
+        <InfoCard title={detail('leaseDocuments')} icon="folder">
           <div className="grid gap-3">
             {(documents ?? []).length ? (
               (documents ?? []).map((document) => (
@@ -186,18 +187,18 @@ export default async function BailDetailPage({params}: BailDetailPageProps) {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold">{document.file_name}</p>
                     <p className="text-xs text-[var(--muted)]">
-                      {documentLabel(document.document_type)} le {formatShortDate(document.created_at)}
+                      {detail(`documentTypes.${documentKey(document.document_type)}`)} {detail('documentDate', {date: formatShortDate(document.created_at, locale)})}
                     </p>
                   </div>
                   <span className="material-symbols-outlined shrink-0 text-base text-[var(--accent)]">download</span>
                 </div>
               ))
             ) : (
-              <p className="rounded-lg border border-[var(--line-soft)] bg-[#f8fbfa] p-4 text-sm text-[var(--muted)]">Aucun document associe pour le moment.</p>
+              <p className="rounded-lg border border-[var(--line-soft)] bg-[#f8fbfa] p-4 text-sm text-[var(--muted)]">{detail('noDocuments')}</p>
             )}
-            <Link className="focus-ring flex min-h-11 items-center justify-center gap-2 rounded-lg border border-dashed border-[var(--line)] text-sm font-semibold text-[#33413f]" href="/documents">
+            <Link className="focus-ring flex min-h-11 items-center justify-center gap-2 rounded-lg border border-dashed border-[var(--line)] text-sm font-semibold text-[#33413f]" href={localizedPath(locale, '/documents')}>
               <span className="material-symbols-outlined text-base">add_circle</span>
-              Ajouter un document
+              {detail('addDocument')}
             </Link>
           </div>
         </InfoCard>
