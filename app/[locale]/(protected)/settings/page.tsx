@@ -409,16 +409,16 @@ function SecurityTab() {
         <div className="grid gap-5 p-6">
           <label className="grid gap-2 text-sm font-medium text-[#33413f]">
             {t('oldPassword')}
-            <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-4" placeholder="????????" type="password" />
+            <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-4" type="password" />
           </label>
           <div className="grid gap-5 md:grid-cols-2">
             <label className="grid gap-2 text-sm font-medium text-[#33413f]">
               {t('newPassword')}
-              <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-4" placeholder="????????" type="password" />
+              <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-4" type="password" />
             </label>
             <label className="grid gap-2 text-sm font-medium text-[#33413f]">
               {t('confirmPassword')}
-              <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-4" placeholder="????????" type="password" />
+              <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-4" type="password" />
             </label>
           </div>
           <p className="text-sm leading-6 text-[var(--muted)]">{t('passwordHint')}</p>
