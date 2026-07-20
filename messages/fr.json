@@ -592,10 +592,10 @@
     },
     "data": {
       "exportTitle": "Exporter vos données",
-      "exportCopy": "T?l?chargez une sauvegarde JSON de vos donn?es Loyelio pour vos archives personnelles ou une migration technique.",
+      "exportCopy": "Téléchargez une sauvegarde JSON de vos données Loyelio pour vos archives personnelles ou une migration technique.",
       "jsonFormat": "Format JSON",
-      "completeArchive": "Sauvegarde compl?te JSON",
-      "jsonCopy": "Contient vos donn?es m?tier structur?es. Les fichiers PDF, images, moyens de paiement et cl?s de connexion ne sont pas inclus.",
+      "completeArchive": "Sauvegarde JSON complète",
+      "jsonCopy": "Contient vos données métier structurées. Les fichiers PDF, images, moyens de paiement et clés de connexion ne sont pas inclus.",
       "exportJson": "Exporter le JSON",
       "dangerZone": "Zone de danger",
       "deleteTitle": "Supprimer mon compte et mes données",
@@ -609,13 +609,13 @@
       "receiptsInvoicesCopy": "Disponibles tant que votre compte est actif.",
       "cookiesTracking": "Cookies & traçage",
       "cookiesTrackingCopy": "Limité au strict nécessaire pour la session et la sécurité.",
-      "privacyPolicy": "Consulter la Politique de Confidentialité",
+      "privacyPolicy": "Consulter la politique de confidentialité",
       "storageUsed": "Stockage utilisé",
       "documentsImages": "Documents (PDF/Images)",
       "storageCurrentPlan": "Votre forfait actuel permet de stocker jusqu'à {value} de documents numérisés.",
-      "jsonIncludesBusinessData": "Inclut biens, locataires, baux, loyers, paiements et d?penses.",
-      "jsonIncludesDocumentIndex": "Inclut l?index des documents et photos avec leurs chemins de stockage, sans les fichiers binaires.",
-      "jsonExcludesSensitiveData": "Exclut les sessions, identifiants Stripe et donn?es de facturation sensibles."
+      "jsonIncludesBusinessData": "Inclut les biens, locataires, baux, loyers, paiements et dépenses.",
+      "jsonIncludesDocumentIndex": "Inclut l'index des documents et photos avec leurs chemins de stockage, sans les fichiers binaires.",
+      "jsonExcludesSensitiveData": "Exclut les sessions, identifiants Stripe et données de facturation sensibles."
     }
   },
   "shell": {
