@@ -109,8 +109,8 @@ export function UploadDocumentModal({locale, properties, tenants}: {locale: stri
                 <h2 className="text-2xl font-semibold text-[#171d1c]" id="upload-document-title">
                   {modal('title')}
                 </h2>
-                <button className="focus-ring rounded-md p-1 text-2xl leading-none text-[#33413f] hover:bg-[#f0f5f2]" onClick={() => setOpen(false)} type="button" aria-label={common('close')}>
-                  x
+                <button className="focus-ring inline-flex h-10 w-10 items-center justify-center rounded-full text-[#171d1c] transition hover:bg-[#f0f5f2]" onClick={() => setOpen(false)} type="button" aria-label={common('close')}>
+                  <span className="material-symbols-outlined text-[22px]">close</span>
                 </button>
               </div>
 
