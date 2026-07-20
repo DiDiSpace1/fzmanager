@@ -8,7 +8,7 @@ export function LandingPage() {
   const locale = useLocale();
   const t = useTranslations('landing');
   const common = useTranslations('common');
-  const prefix = locale === 'fr' ? '' : `/${locale}`;
+  const prefix = `/${locale}`;
   const localized = (path: string) => `${prefix}${path}`;
 
   return (
