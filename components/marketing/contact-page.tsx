@@ -31,7 +31,7 @@ export function ContactPage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(280px,0.95fr)]">
-          <form action="mailto:support@loyelio.com" className="ui-card rounded-lg p-5 md:p-8" encType="text/plain" method="post">
+          <form action="/api/contact" className="ui-card rounded-lg p-5 md:p-8" method="post">
             <div className="grid gap-4 md:grid-cols-2">
               <Field label={t('nameLabel')} name="name" placeholder={t('namePlaceholder')} />
               <Field label={t('emailLabel')} name="email" placeholder={t('emailPlaceholder')} type="email" />

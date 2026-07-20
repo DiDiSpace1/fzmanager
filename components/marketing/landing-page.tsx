@@ -232,7 +232,7 @@ export function LandingPage() {
                 cta={plan === 'custom' ? t('contactCta') : t('startCta')}
                 description={t(`pricing.${plan}.description`)}
                 featured={plan === 'solo'}
-                href={plan === 'custom' ? 'mailto:support@loyelio.com' : localized('/login')}
+                href={plan === 'custom' ? localized('/contact') : localized('/login')}
                 key={plan}
                 name={t(`pricing.${plan}.name`)}
                 popularLabel={t('popular')}
@@ -252,12 +252,12 @@ export function LandingPage() {
             <Link className="rounded-lg bg-[var(--accent)] px-10 py-4 font-bold !text-white" href={localized('/login')}>
               {t('createAccount')}
             </Link>
-            <a
+            <Link
               className="rounded-lg bg-white/10 px-10 py-4 font-bold !text-white transition-colors hover:bg-white/20"
-              href="mailto:support@loyelio.com"
+              href={localized('/contact')}
             >
               {t('contactCta')}
-            </a>
+            </Link>
           </div>
         </div>
       </section>
