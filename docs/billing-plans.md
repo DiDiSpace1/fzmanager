@@ -56,7 +56,7 @@ Use this table to decide which features are included in each tier.
 | Rent payment status | Included | Included | Included | Included | Included |
 | Document upload | 10 docs / 50 MB storage / 5 MB per file | 150 docs / 500 MB storage / 10 MB per file | 400 docs / 1.5 GB storage / 15 MB per file | 1000 docs / 4 GB storage / 15 MB per file | Custom |
 | Quittance generation | Not included | Included | Included | Included | Included |
-| Tax export package | Included | Included | Included | Included | Included |
+| Tax export package | Not included | Included | Included | Included | Included |
 | Property photos | Not included | Included | Included | Included | Included |
 | Priority support | No | Included | Included | Included | Included |
 
