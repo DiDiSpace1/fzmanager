@@ -56,7 +56,9 @@ type TransactionsPageProps = {
   searchParams: Promise<{
     error?: string;
     new?: string;
+    rent_charge_id?: string;
     tenant_id?: string;
+    view?: string;
   }>;
 };
 
@@ -129,7 +131,7 @@ export default async function TransactionsPage({searchParams}: TransactionsPageP
     supabase.from('tax_categories').select('id, label').eq('country_code', 'FR').eq('tax_regime', 'LMNP').eq('active', true).order('sort_order', {ascending: true}).returns<TaxCategoryOption[]>(),
     supabase
       .from('leases')
-      .select('id, monthly_rent, charges_amount, deposit_amount, properties(id, name), tenants(id, full_name), rent_charges(period_month, total_due, rent_payments(amount, notes))')
+      .select('id, monthly_rent, charges_amount, deposit_amount, properties(id, name), tenants(id, full_name), rent_charges(id, period_month, total_due, rent_payments(amount, notes))')
       .eq('workspace_id', workspaceId)
       .eq('status', 'active')
       .order('created_at', {ascending: false})
@@ -158,14 +160,23 @@ export default async function TransactionsPage({searchParams}: TransactionsPageP
       .order('expense_date', {ascending: false})
       .returns<ExpenseRow[]>()
   ]);
-  const paymentRows = currentPayments ?? [];
+  const {data: viewedPayment} = params.view
+    ? await supabase
+        .from('rent_payments')
+        .select('id, amount, paid_at, payment_method, notes, rent_charges(period_month, status, total_due, leases(properties(name), tenants(full_name)))')
+        .eq('workspace_id', workspaceId)
+        .eq('id', params.view)
+        .maybeSingle<PaymentRow>()
+    : {data: null};
+  const currentPaymentRows = currentPayments ?? [];
+  const paymentRows = viewedPayment && !currentPaymentRows.some((row) => row.id === viewedPayment.id) ? [viewedPayment, ...currentPaymentRows] : currentPaymentRows;
   const expenseRows = currentExpenses ?? [];
-  const monthlyRevenue = paymentRows.filter(isIncomePayment).reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
-  const monthlyDeposit = paymentRows.filter((row) => noteRevenueType(row.notes) === 'deposit').reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
+  const monthlyRevenue = currentPaymentRows.filter(isIncomePayment).reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
+  const monthlyDeposit = currentPaymentRows.filter((row) => noteRevenueType(row.notes) === 'deposit').reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
   const previousRevenue = (previousPayments ?? []).filter(isIncomePayment).reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
   const monthlyExpenses = expenseRows.reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
   const revenueTrend = previousRevenue > 0 ? ((monthlyRevenue - previousRevenue) / previousRevenue) * 100 : null;
-  const combinedRows: TransactionOverviewRow[] = [
+  const sortedRows: TransactionOverviewRow[] = [
     ...paymentRows.map((row) => ({
       amount: Number(row.amount ?? 0),
       category: revenueCategory(noteRevenueType(row.notes), t),
@@ -193,9 +204,8 @@ export default async function TransactionsPage({searchParams}: TransactionsPageP
 	      type: 'expense' as const,
 	      vendor: row.vendor
     }))
-  ]
-    .sort((a, b) => b.date.localeCompare(a.date))
-    .slice(0, 10);
+  ].sort((a, b) => b.date.localeCompare(a.date));
+  const combinedRows = params.view ? sortedRows.filter((row, index) => index < 10 || row.id === params.view) : sortedRows.slice(0, 10);
   const stats: TransactionStat[] = [
     {
       filter: 'income',
@@ -230,7 +240,7 @@ export default async function TransactionsPage({searchParams}: TransactionsPageP
           <h1 className="text-3xl font-semibold tracking-normal text-[#171d1c]">{t('title')}</h1>
           <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{t('subtitle')}</p>
         </div>
-        <TransactionDrawer initialOpen={params.new === 'transaction'} initialTenantId={params.tenant_id} leases={leases ?? []} locale={locale} properties={properties ?? []} taxCategories={taxCategories ?? []} />
+        <TransactionDrawer initialOpen={params.new === 'transaction'} initialRentChargeId={params.rent_charge_id} initialTenantId={params.tenant_id} leases={leases ?? []} locale={locale} properties={properties ?? []} taxCategories={taxCategories ?? []} />
       </div>
 
       {params.error ? (
@@ -240,6 +250,7 @@ export default async function TransactionsPage({searchParams}: TransactionsPageP
       ) : null}
 
       <TransactionsOverview
+        initialViewId={params.view}
         locale={locale}
         properties={(properties ?? []).map((property) => ({id: property.id, label: property.name}))}
         rows={combinedRows}

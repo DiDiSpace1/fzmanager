@@ -88,12 +88,14 @@ function StatCard({active, stat, onClick}: {active: boolean; stat: TransactionSt
 }
 
 export function TransactionsOverview({
+  initialViewId,
   locale,
   properties,
   rows,
   stats,
   taxCategories
 }: {
+  initialViewId?: string;
   locale: string;
   properties: TransactionActionOption[];
   rows: TransactionOverviewRow[];
@@ -199,7 +201,7 @@ export function TransactionsOverview({
                         {formatMoney(row.amount, locale)}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <TransactionActionsMenu locale={locale} properties={properties} row={actionRow} taxCategories={taxCategories} />
+                        <TransactionActionsMenu initialViewOpen={row.id === initialViewId} locale={locale} properties={properties} row={actionRow} taxCategories={taxCategories} />
                       </td>
                     </tr>
                   );

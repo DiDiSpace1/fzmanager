@@ -23,6 +23,7 @@ export type LeaseOption = {
   id: string;
   monthly_rent: number | null;
   rent_charges: {
+    id: string;
     period_month: string;
     total_due: number | null;
     rent_payments: {
@@ -68,6 +69,7 @@ function Icon({children, className = ''}: {children: string; className?: string}
 
 export function TransactionDrawer({
   initialOpen = false,
+  initialRentChargeId,
   initialTenantId,
   leases,
   locale,
@@ -75,6 +77,7 @@ export function TransactionDrawer({
   taxCategories
 }: {
   initialOpen?: boolean;
+  initialRentChargeId?: string;
   initialTenantId?: string;
   leases: LeaseOption[];
   locale: string;
@@ -83,11 +86,13 @@ export function TransactionDrawer({
 }) {
   const t = useTranslations('transactions');
   const common = useTranslations('common');
-  const initialLeaseId = initialTenantId ? leases.find((lease) => lease.tenants?.id === initialTenantId)?.id : undefined;
+  const initialLeaseByCharge = initialRentChargeId ? leases.find((lease) => lease.rent_charges.some((charge) => charge.id === initialRentChargeId)) : undefined;
+  const initialCharge = initialLeaseByCharge?.rent_charges.find((charge) => charge.id === initialRentChargeId);
+  const initialLeaseId = initialLeaseByCharge?.id ?? (initialTenantId ? leases.find((lease) => lease.tenants?.id === initialTenantId)?.id : undefined);
   const [open, setOpen] = useState(initialOpen);
   const [mode, setMode] = useState<'expense' | 'revenue'>('revenue');
   const [revenueType, setRevenueType] = useState<'deposit' | 'other' | 'rent'>('rent');
-  const initialPeriodMonth = currentMonth();
+  const initialPeriodMonth = initialCharge?.period_month ?? currentMonth();
   const [periodMonth, setPeriodMonth] = useState(initialPeriodMonth);
   const [selectedLeaseId, setSelectedLeaseId] = useState(initialLeaseId ?? leases[0]?.id ?? '');
   const selectedLease = useMemo(() => leases.find((lease) => lease.id === selectedLeaseId), [leases, selectedLeaseId]);

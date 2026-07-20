@@ -35,8 +35,13 @@ type ExpenseRow = {
 type RentChargeRow = {
   charges_amount: number;
   due_date: string | null;
+  id: string;
   period_month: string;
   rent_amount: number;
+  rent_payments: {
+    id: string;
+    notes: string | null;
+  }[];
   status: string;
   total_due: number;
   leases: {
@@ -161,6 +166,14 @@ function StatusBadge({className, label}: {className: string; label: string}) {
   return <span className={`inline-flex rounded-md px-2.5 py-1 text-xs font-semibold ${className}`}>{label}</span>;
 }
 
+function TaxRowLink({children, className, href}: {children: ReactNode; className?: string; href: string}) {
+  return (
+    <Link className={`block h-full w-full px-6 py-4 ${className ?? ''}`} href={href}>
+      {children}
+    </Link>
+  );
+}
+
 function ReceiptIndicator({expense, missingLabel, viewLabel}: {expense: ExpenseRow & {viewUrl?: string | null}; missingLabel: string; viewLabel: string}) {
   if (expense.documents?.file_path && expense.viewUrl) {
     return (
@@ -190,7 +203,7 @@ export default async function TaxPage({searchParams}: TaxPageProps) {
 
   let rentQuery = supabase
     .from('rent_charges')
-    .select('period_month, due_date, rent_amount, charges_amount, total_due, status, leases!inner(property_id, start_date, end_date, properties(name), tenants(full_name))')
+    .select('id, period_month, due_date, rent_amount, charges_amount, total_due, status, rent_payments(id, notes), leases!inner(property_id, start_date, end_date, properties(name), tenants(full_name))')
     .eq('workspace_id', workspaceId)
     .gte('period_month', range.start)
     .lt('period_month', range.end);
@@ -411,21 +424,43 @@ export default async function TaxPage({searchParams}: TaxPageProps) {
                   {rentRows.length ? (
                     rentRows.map((charge) => {
                       const meta = statusMeta(charge.status, charge.due_date, today, {late: t('statusLate'), paid: t('statusPaid'), pending: t('statusPending'), unpaid: t('statusUnpaid'), waived: t('statusWaived')});
+                      const rentPayment = charge.rent_payments?.find((payment) => !payment.notes?.startsWith('[[loyelio:revenue_type=deposit]]') && !payment.notes?.startsWith('[[loyelio:revenue_type=other]]'));
+                      const transactionHref =
+                        charge.status === 'paid' && rentPayment?.id
+                          ? `${localizedPath(locale, '/transactions')}?view=${rentPayment.id}`
+                          : `${localizedPath(locale, '/transactions')}?new=transaction&rent_charge_id=${charge.id}`;
+
                       return (
-                        <tr className="hover:bg-[#f8fbfa]" key={`${charge.period_month}-${charge.leases?.tenants?.full_name ?? 'tenant'}-${charge.total_due}`}>
-                          <td className="px-6 py-4 tabular-nums">{charge.due_date ? formatDate(charge.due_date, locale) : formatDate(charge.period_month, locale)}</td>
-                          <td className="px-6 py-4">{charge.leases?.properties?.name ?? '-'}</td>
-                          <td className="px-6 py-4">{charge.leases?.tenants?.full_name ?? '-'}</td>
-                          <td className="px-6 py-4">{t('rentAndCharges')}</td>
-                          <td className="px-6 py-4 capitalize">{formatMonth(charge.period_month, locale)}</td>
-                          <td className="px-6 py-4 text-right font-semibold tabular-nums">{formatMoney(Number(charge.total_due ?? 0), locale)}</td>
-                          <td className="px-6 py-4">
-                            <StatusBadge className={meta.className} label={meta.label} />
+                        <tr className="cursor-pointer hover:bg-[#f8fbfa]" key={charge.id}>
+                          <td className="tabular-nums">
+                            <TaxRowLink href={transactionHref}>{charge.due_date ? formatDate(charge.due_date, locale) : formatDate(charge.period_month, locale)}</TaxRowLink>
                           </td>
-                          <td className="px-6 py-4 text-center">
-                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#e07a00]" title={t('unlinkedReceipt')}>
+                          <td>
+                            <TaxRowLink href={transactionHref}>{charge.leases?.properties?.name ?? '-'}</TaxRowLink>
+                          </td>
+                          <td>
+                            <TaxRowLink href={transactionHref}>{charge.leases?.tenants?.full_name ?? '-'}</TaxRowLink>
+                          </td>
+                          <td>
+                            <TaxRowLink href={transactionHref}>{t('rentAndCharges')}</TaxRowLink>
+                          </td>
+                          <td className="capitalize">
+                            <TaxRowLink href={transactionHref}>{formatMonth(charge.period_month, locale)}</TaxRowLink>
+                          </td>
+                          <td className="text-right font-semibold tabular-nums">
+                            <TaxRowLink className="text-right" href={transactionHref}>{formatMoney(Number(charge.total_due ?? 0), locale)}</TaxRowLink>
+                          </td>
+                          <td>
+                            <TaxRowLink href={transactionHref}>
+                              <StatusBadge className={meta.className} label={meta.label} />
+                            </TaxRowLink>
+                          </td>
+                          <td className="text-center">
+                            <Link className="inline-flex h-full w-full items-center justify-center px-6 py-4" href={transactionHref}>
+                              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#e07a00]" title={t('unlinkedReceipt')}>
                               <Icon>warning</Icon>
-                            </span>
+                              </span>
+                            </Link>
                           </td>
                         </tr>
                       );

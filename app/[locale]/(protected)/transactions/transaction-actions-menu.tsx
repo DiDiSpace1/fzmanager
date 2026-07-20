@@ -38,11 +38,13 @@ const MENU_WIDTH = 176;
 const MENU_HEIGHT_ESTIMATE = 132;
 
 export function TransactionActionsMenu({
+  initialViewOpen = false,
   locale,
   properties,
   row,
   taxCategories
 }: {
+  initialViewOpen?: boolean;
   locale: string;
   properties: TransactionActionOption[];
   row: TransactionActionRow;
@@ -52,7 +54,7 @@ export function TransactionActionsMenu({
   const t = useTranslations('transactions');
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const summaryRef = useRef<HTMLElement>(null);
-  const [viewOpen, setViewOpen] = useState(false);
+  const [viewOpen, setViewOpen] = useState(initialViewOpen);
   const [editOpen, setEditOpen] = useState(false);
   const [position, setPosition] = useState({left: 0, top: 0});
 
@@ -241,7 +243,7 @@ function Info({label, value}: {label: string; value: string}) {
 function Modal({children, onClose, title}: {children: ReactNode; onClose: () => void; title: string}) {
   return (
     <div className="fixed inset-0 z-[10001] flex items-center justify-center bg-black/35 p-4" role="dialog" aria-modal="true">
-      <div className="w-full max-w-lg rounded-lg bg-white shadow-xl">
+      <div className="w-full max-w-lg rounded-lg bg-white text-left shadow-xl">
         <div className="flex items-center justify-between border-b border-[var(--line-soft)] px-5 py-4">
           <h3 className="text-lg font-semibold">{title}</h3>
           <button className="focus-ring rounded-md p-2" onClick={onClose} type="button">
