@@ -7,7 +7,7 @@ import {useMemo, useState} from 'react';
 const PAID_PLANS = [
   {key: 'solo', monthly: 4.9, yearly: 39},
   {key: 'plus', monthly: 7.9, yearly: 59},
-  {key: 'portfolio', monthly: 11.9, yearly: 89}
+  {key: 'portfolio', monthly: 12.9, yearly: 89}
 ] as const;
 
 const ALL_PLANS = ['free', ...PAID_PLANS.map((plan) => plan.key), 'custom'] as const;
