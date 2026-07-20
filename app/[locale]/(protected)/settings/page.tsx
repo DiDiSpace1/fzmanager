@@ -292,16 +292,22 @@ function SubscriptionTab({
               <h3 className="mt-5 text-xl font-semibold">{t('plan', {plan: currentPlanLabel})}</h3>
               <p className="mt-4 max-w-md text-sm leading-6 text-[#33413f]">{t('currentPlanDescription')}</p>
               <div className="mt-6 flex flex-wrap gap-3">
-                {planCards.map((plan) => (
-                  <form action={createCheckoutSessionAction} key={plan.plan}>
-                    <input name="locale" type="hidden" value={locale} />
-                    <input name="plan" type="hidden" value={plan.plan} />
-                    <input name="return_path" type="hidden" value="/settings?tab=abonnement" />
-                    <button className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-4 text-sm font-semibold hover:bg-[#f0f5f2]" type="submit">
-                      {plan.plan === currentPlan ? t('currentPlanButton') : t('choosePlan', {plan: plan.label})}
+                {planCards.map((plan) =>
+                  plan.plan === currentPlan ? (
+                    <button className="min-h-11 cursor-not-allowed rounded-lg border border-[var(--line)] bg-[#f0f5f2] px-4 text-sm font-semibold text-[var(--muted)]" disabled key={plan.plan} type="button">
+                      {t('currentPlanButton')}
                     </button>
-                  </form>
-                ))}
+                  ) : (
+                    <form action={createCheckoutSessionAction} key={plan.plan}>
+                      <input name="locale" type="hidden" value={locale} />
+                      <input name="plan" type="hidden" value={plan.plan} />
+                      <input name="return_path" type="hidden" value="/settings?tab=abonnement" />
+                      <button className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-4 text-sm font-semibold hover:bg-[#f0f5f2]" type="submit">
+                        {t('choosePlan', {plan: plan.label})}
+                      </button>
+                    </form>
+                  )
+                )}
               </div>
             </div>
             <div className="rounded-lg border border-[var(--line)] p-5">
@@ -321,19 +327,43 @@ function SubscriptionTab({
             <h2 className="text-lg font-semibold">{t('comparePlans')}</h2>
           </div>
           <div className="grid gap-4 p-6 md:grid-cols-3">
-            {planCards.map((plan) => (
-              <form action={createCheckoutSessionAction} className="rounded-lg border border-[var(--line)] p-4" key={plan.plan}>
-                <input name="locale" type="hidden" value={locale} />
-                <input name="plan" type="hidden" value={plan.plan} />
-                <input name="return_path" type="hidden" value="/settings?tab=abonnement" />
+            {planCards.map((plan) => {
+              const isCurrent = plan.plan === currentPlan;
+              const cardContent = (
+                <>
+                  {!isCurrent ? (
+                    <>
+                      <input name="locale" type="hidden" value={locale} />
+                      <input name="plan" type="hidden" value={plan.plan} />
+                      <input name="return_path" type="hidden" value="/settings?tab=abonnement" />
+                    </>
+                  ) : null}
                 <h3 className="font-semibold">{plan.label}</h3>
                 <p className="mt-2 text-2xl font-semibold text-[var(--accent)]">{plan.price}</p>
                 <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{t('planSummary', {documents: plan.documents, properties: plan.properties, storage: plan.storage, tenants: plan.tenants})}</p>
-                <button className="focus-ring mt-5 min-h-10 w-full rounded-lg bg-[var(--accent)] px-4 text-sm font-semibold text-white" type="submit">
-                  {plan.plan === currentPlan ? t('currentPlanButton') : t('changePlan')}
+                <button
+                  className={[
+                    'mt-5 min-h-10 w-full rounded-lg px-4 text-sm font-semibold',
+                    isCurrent ? 'cursor-not-allowed bg-[#f0f5f2] text-[var(--muted)]' : 'focus-ring bg-[var(--accent)] text-white'
+                  ].join(' ')}
+                  disabled={isCurrent}
+                  type={isCurrent ? 'button' : 'submit'}
+                >
+                  {isCurrent ? t('currentPlanButton') : t('changePlan')}
                 </button>
-              </form>
-            ))}
+                </>
+              );
+
+              return isCurrent ? (
+                <div className="rounded-lg border border-[var(--line)] p-4" key={plan.plan}>
+                  {cardContent}
+                </div>
+              ) : (
+                <form action={createCheckoutSessionAction} className="rounded-lg border border-[var(--line)] p-4" key={plan.plan}>
+                  {cardContent}
+                </form>
+              );
+            })}
           </div>
         </section>
       </div>
@@ -479,7 +509,7 @@ function DataTab({locale, storageLimit, storageUsage}: {locale: string; storageL
 function FeatureItem({children}: {children: React.ReactNode}) {
   return (
     <li className="flex items-center gap-3">
-      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-[var(--accent)] text-xs text-[var(--accent)]">?</span>
+      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-[var(--accent)] text-xs font-bold text-[var(--accent)]">✓</span>
       <span>{children}</span>
     </li>
   );
