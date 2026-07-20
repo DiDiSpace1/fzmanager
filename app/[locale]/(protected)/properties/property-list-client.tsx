@@ -11,6 +11,8 @@ export type PropertyListRow = {
   city: string | null;
   id: string;
   leases: {
+    charges_amount: number;
+    id: string;
     monthly_rent: number;
     status: string;
     tenants: {full_name: string} | null;
@@ -160,9 +162,9 @@ export function PropertyListClient({
             <tbody className="divide-y divide-[var(--line-soft)]">
               {filteredRows.length ? (
                 filteredRows.map((property) => {
-                  const activeLease = property.leases.find((lease) => lease.status === 'active');
+                  const activeLeases = property.leases.filter((lease) => lease.status === 'active');
                   const status = statusFor(property);
-                  const displayedRent = activeLease?.monthly_rent ?? property.monthly_rent_estimate;
+                  const fallbackRent = property.monthly_rent_estimate;
 
                   return (
                     <tr className="transition hover:bg-[#f0f5f2]" key={property.id}>
@@ -183,8 +185,32 @@ export function PropertyListClient({
                         </div>
                       </td>
                       <td className="px-5 py-4 text-sm">{modeLabelKeys[property.rental_mode] ? t(`rentalModes.${modeLabelKeys[property.rental_mode]}`) : property.rental_mode}</td>
-                      <td className="px-5 py-4 text-sm text-[var(--muted)]">{activeLease?.tenants?.full_name ?? '-'}</td>
-                      <td className="px-5 py-4 text-sm tabular-nums">{displayedRent ? `${Number(displayedRent).toFixed(0)} EUR` : '-'}</td>
+                      <td className="px-5 py-4 text-sm text-[var(--muted)]">
+                        {activeLeases.length ? (
+                          <div className="grid gap-1.5">
+                            {activeLeases.map((lease) => (
+                              <div key={lease.id}>{lease.tenants?.full_name ?? '-'}</div>
+                            ))}
+                          </div>
+                        ) : (
+                          '-'
+                        )}
+                      </td>
+                      <td className="px-5 py-4 text-sm tabular-nums">
+                        {activeLeases.length ? (
+                          <div className="grid gap-1.5">
+                            {activeLeases.map((lease) => (
+                              <div key={lease.id}>
+                                {(Number(lease.monthly_rent ?? 0) + Number(lease.charges_amount ?? 0)).toFixed(0)} EUR
+                              </div>
+                            ))}
+                          </div>
+                        ) : fallbackRent ? (
+                          `${Number(fallbackRent).toFixed(0)} EUR`
+                        ) : (
+                          '-'
+                        )}
+                      </td>
                       <td className="px-5 py-4">
                         <span className={`inline-flex rounded px-2.5 py-1 text-xs font-semibold ${status.className}`}>{t(`status.${status.labelKey}`)}</span>
                       </td>

@@ -237,7 +237,7 @@
       "property": "房产与地址",
       "mode": "模式",
       "tenant": "租客",
-      "rent": "净租金"
+      "rent": "租金+杂费"
     },
     "summary": {
       "totalProperties": "房产总数",

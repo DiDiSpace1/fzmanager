@@ -237,7 +237,7 @@
       "property": "Property & address",
       "mode": "Mode",
       "tenant": "Tenant",
-      "rent": "Rent excl. charges"
+      "rent": "Rent + charges"
     },
     "summary": {
       "totalProperties": "Total properties",

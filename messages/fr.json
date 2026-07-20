@@ -237,7 +237,7 @@
       "property": "Bien & adresse",
       "mode": "Mode",
       "tenant": "Locataire",
-      "rent": "Loyer HC"
+      "rent": "Loyer + charges"
     },
     "summary": {
       "totalProperties": "Total biens",
