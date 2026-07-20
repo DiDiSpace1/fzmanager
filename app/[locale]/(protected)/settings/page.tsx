@@ -448,22 +448,19 @@ function DataTab({locale, storageLimit, storageUsage}: {locale: string; storageL
         <section className="rounded-xl border border-[var(--line-soft)] bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold">{t('exportTitle')}</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">{t('exportCopy')}</p>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <div className="rounded-lg border border-[var(--line)] p-4">
+          <div className="mt-6">
+            <div className="rounded-lg border border-[var(--line)] p-5">
               <p className="text-xs font-semibold uppercase text-[var(--muted)]">{t('jsonFormat')}</p>
               <h3 className="mt-3 font-semibold">{t('completeArchive')}</h3>
               <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{t('jsonCopy')}</p>
-              <Link className="focus-ring mt-5 inline-flex min-h-10 w-full items-center justify-center rounded-lg bg-[var(--accent)] px-4 text-sm font-semibold text-white"  style={{color: '#ffffff'}} href="/api/account/export">
+              <ul className="mt-5 grid gap-3 text-sm leading-5 text-[#33413f]">
+                <FeatureItem>{t('jsonIncludesBusinessData')}</FeatureItem>
+                <FeatureItem>{t('jsonIncludesDocumentIndex')}</FeatureItem>
+                <FeatureItem>{t('jsonExcludesSensitiveData')}</FeatureItem>
+              </ul>
+              <Link className="focus-ring mt-6 inline-flex min-h-10 w-full items-center justify-center rounded-lg bg-[var(--accent)] px-4 text-sm font-semibold text-white" style={{color: '#ffffff'}} href="/api/account/export">
                 {t('exportJson')}
               </Link>
-            </div>
-            <div className="rounded-lg border border-[var(--line)] p-4">
-              <p className="text-xs font-semibold uppercase text-[var(--muted)]">{t('csvFormat')}</p>
-              <h3 className="mt-3 font-semibold">{t('accountingReports')}</h3>
-              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{t('csvCopy')}</p>
-              <button className="focus-ring mt-5 min-h-10 w-full rounded-lg border border-[var(--line)] px-4 text-sm font-semibold text-[#171d1c]" type="button">
-                {t('exportCsv')}
-              </button>
             </div>
           </div>
         </section>

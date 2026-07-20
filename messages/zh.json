@@ -592,15 +592,11 @@
     },
     "data": {
       "exportTitle": "导出您的数据",
-      "exportCopy": "下载您的房产、租客和收据的完整存档。适用于个人存档或迁移至其他工具。",
+      "exportCopy": "?? Loyelio ??? JSON ???????????????",
       "jsonFormat": "JSON 格式",
-      "completeArchive": "完整存档",
-      "jsonCopy": "适合技术导入或原始数据备份。",
-      "exportJson": "导出为 .json",
-      "csvFormat": "CSV / Excel 格式",
-      "accountingReports": "会计报表",
-      "csvCopy": "适合在 Excel 或 Numbers 中分析数据。",
-      "exportCsv": "导出为 .csv",
+      "completeArchive": "?? JSON ??",
+      "jsonCopy": "????????????? PDF??????????????",
+      "exportJson": "?? JSON",
       "dangerZone": "危险区域",
       "deleteTitle": "删除我的账户和数据",
       "deleteCopy": "此操作不可逆。您所有的房产、租约、收据和文档将从我们的服务器上永久删除。",
@@ -616,7 +612,10 @@
       "privacyPolicy": "阅读隐私政策",
       "storageUsed": "已用存储空间",
       "documentsImages": "文档（PDF/图片）",
-      "storageCurrentPlan": "您当前的套餐允许存储最多 {value} 的扫描文档。"
+      "storageCurrentPlan": "您当前的套餐允许存储最多 {value} 的扫描文档。",
+      "jsonIncludesBusinessData": "??????????????????????",
+      "jsonIncludesDocumentIndex": "?????????????????????????",
+      "jsonExcludesSensitiveData": "????????Stripe ???????????"
     }
   },
   "shell": {

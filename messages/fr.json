@@ -592,15 +592,11 @@
     },
     "data": {
       "exportTitle": "Exporter vos données",
-      "exportCopy": "Téléchargez une archive complète de vos biens, locataires et quittances. Utile pour vos archives personnelles ou pour changer de logiciel.",
+      "exportCopy": "T?l?chargez une sauvegarde JSON de vos donn?es Loyelio pour vos archives personnelles ou une migration technique.",
       "jsonFormat": "Format JSON",
-      "completeArchive": "Archive complète",
-      "jsonCopy": "Idéal pour l'importation technique ou la sauvegarde brute.",
-      "exportJson": "Exporter en .json",
-      "csvFormat": "Format CSV / Excel",
-      "accountingReports": "Rapports comptables",
-      "csvCopy": "Idéal pour analyser vos chiffres sous Excel ou Numbers.",
-      "exportCsv": "Exporter en .csv",
+      "completeArchive": "Sauvegarde compl?te JSON",
+      "jsonCopy": "Contient vos donn?es m?tier structur?es. Les fichiers PDF, images, moyens de paiement et cl?s de connexion ne sont pas inclus.",
+      "exportJson": "Exporter le JSON",
       "dangerZone": "Zone de danger",
       "deleteTitle": "Supprimer mon compte et mes données",
       "deleteCopy": "Cette action est irréversible. Toutes vos propriétés, baux, quittances et documents seront supprimés définitivement de nos serveurs.",
@@ -616,7 +612,10 @@
       "privacyPolicy": "Consulter la Politique de Confidentialité",
       "storageUsed": "Stockage utilisé",
       "documentsImages": "Documents (PDF/Images)",
-      "storageCurrentPlan": "Votre forfait actuel permet de stocker jusqu'à {value} de documents numérisés."
+      "storageCurrentPlan": "Votre forfait actuel permet de stocker jusqu'à {value} de documents numérisés.",
+      "jsonIncludesBusinessData": "Inclut biens, locataires, baux, loyers, paiements et d?penses.",
+      "jsonIncludesDocumentIndex": "Inclut l?index des documents et photos avec leurs chemins de stockage, sans les fichiers binaires.",
+      "jsonExcludesSensitiveData": "Exclut les sessions, identifiants Stripe et donn?es de facturation sensibles."
     }
   },
   "shell": {

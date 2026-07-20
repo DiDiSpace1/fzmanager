@@ -592,15 +592,11 @@
     },
     "data": {
       "exportTitle": "Export your data",
-      "exportCopy": "Download a complete archive of your properties, tenants and receipts. Useful for personal records or moving to another tool.",
+      "exportCopy": "Download a JSON backup of your Loyelio data for personal records or technical migration.",
       "jsonFormat": "JSON format",
-      "completeArchive": "Complete archive",
-      "jsonCopy": "Ideal for technical import or raw backup.",
-      "exportJson": "Export as .json",
-      "csvFormat": "CSV / Excel format",
-      "accountingReports": "Accounting reports",
-      "csvCopy": "Ideal for analyzing numbers in Excel or Numbers.",
-      "exportCsv": "Export as .csv",
+      "completeArchive": "Complete JSON backup",
+      "jsonCopy": "Contains your structured business data. PDF files, images, payment methods and login keys are not included.",
+      "exportJson": "Export JSON",
       "dangerZone": "Danger zone",
       "deleteTitle": "Delete my account and data",
       "deleteCopy": "This action is irreversible. All your properties, leases, receipts and documents will be permanently deleted from our servers.",
@@ -616,7 +612,10 @@
       "privacyPolicy": "Read the Privacy Policy",
       "storageUsed": "Storage used",
       "documentsImages": "Documents (PDF/Images)",
-      "storageCurrentPlan": "Your current plan allows storing up to {value} of scanned documents."
+      "storageCurrentPlan": "Your current plan allows storing up to {value} of scanned documents.",
+      "jsonIncludesBusinessData": "Includes properties, tenants, leases, rent charges, payments and expenses.",
+      "jsonIncludesDocumentIndex": "Includes document and photo indexes with storage paths, without binary files.",
+      "jsonExcludesSensitiveData": "Excludes sessions, Stripe identifiers and sensitive billing records."
     }
   },
   "shell": {

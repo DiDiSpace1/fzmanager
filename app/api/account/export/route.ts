@@ -3,7 +3,19 @@ import {NextResponse} from 'next/server';
 import {createSupabaseServerClient} from '@/lib/supabase/server';
 import {getWorkspaceIdForUser} from '@/lib/tax/export';
 
-async function fetchTable(supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>, table: string, workspaceId: string) {
+const DATA_TABLES = [
+  'properties',
+  'property_photos',
+  'units',
+  'tenants',
+  'leases',
+  'rent_charges',
+  'rent_payments',
+  'expenses',
+  'documents'
+] as const;
+
+async function fetchTable(supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>, table: (typeof DATA_TABLES)[number], workspaceId: string) {
   const {data, error} = await supabase.from(table).select('*').eq('workspace_id', workspaceId);
 
   if (error) {
@@ -11,6 +23,38 @@ async function fetchTable(supabase: Awaited<ReturnType<typeof createSupabaseServ
   }
 
   return data ?? [];
+}
+
+function pickProfile(profile: Record<string, unknown> | null) {
+  if (!profile) {
+    return null;
+  }
+
+  return {
+    country_code: profile.country_code ?? null,
+    default_workspace_id: profile.default_workspace_id ?? null,
+    email: profile.email ?? null,
+    full_name: profile.full_name ?? null,
+    id: profile.id ?? null,
+    phone: profile.phone ?? null,
+    tax_regime: profile.tax_regime ?? null,
+    updated_at: profile.updated_at ?? null
+  };
+}
+
+function pickWorkspace(workspace: Record<string, unknown> | null) {
+  if (!workspace) {
+    return null;
+  }
+
+  return {
+    country_code: workspace.country_code ?? null,
+    created_at: workspace.created_at ?? null,
+    id: workspace.id ?? null,
+    name: workspace.name ?? null,
+    tax_regime: workspace.tax_regime ?? null,
+    updated_at: workspace.updated_at ?? null
+  };
 }
 
 export async function GET() {
@@ -32,27 +76,27 @@ export async function GET() {
   try {
     const {data: profile} = await supabase.from('profiles').select('*').eq('id', user.id).single();
     const {data: workspace} = await supabase.from('workspaces').select('*').eq('id', workspaceId).single();
+    const data = Object.fromEntries(await Promise.all(DATA_TABLES.map(async (table) => [table, await fetchTable(supabase, table, workspaceId)])));
     const payload = {
-      exportedAt: new Date().toISOString(),
-      profile,
-      tables: {
-        documents: await fetchTable(supabase, 'documents', workspaceId),
-        expenses: await fetchTable(supabase, 'expenses', workspaceId),
-        leases: await fetchTable(supabase, 'leases', workspaceId),
-        properties: await fetchTable(supabase, 'properties', workspaceId),
-        rent_charges: await fetchTable(supabase, 'rent_charges', workspaceId),
-        rent_payments: await fetchTable(supabase, 'rent_payments', workspaceId),
-        tax_exports: await fetchTable(supabase, 'tax_exports', workspaceId),
-        tenants: await fetchTable(supabase, 'tenants', workspaceId),
-        units: await fetchTable(supabase, 'units', workspaceId),
-        workspace_billing: await fetchTable(supabase, 'workspace_billing', workspaceId)
+      data,
+      export: {
+        exported_at: new Date().toISOString(),
+        format: 'loyelio_account_backup',
+        includes_binary_files: false,
+        notes: [
+          'Documents and property photos are exported as metadata and storage paths only.',
+          'Authentication sessions, payment provider identifiers, and raw billing records are not included.'
+        ],
+        version: 1,
+        workspace_id: workspaceId
       },
-      workspace
+      profile: pickProfile(profile),
+      workspace: pickWorkspace(workspace)
     };
 
     return NextResponse.json(payload, {
       headers: {
-        'Content-Disposition': 'attachment; filename="petit-bailleur-data-export.json"'
+        'Content-Disposition': `attachment; filename="loyelio-account-backup-${new Date().toISOString().slice(0, 10)}.json"`
       }
     });
   } catch (error) {
