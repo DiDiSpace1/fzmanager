@@ -69,45 +69,45 @@ function yearRange(year: number) {
   };
 }
 
-function formatMoney(value: number) {
-  return new Intl.NumberFormat('fr-FR', {
+function formatMoney(value: number, locale: string) {
+  return new Intl.NumberFormat(locale, {
     currency: 'EUR',
     style: 'currency'
   }).format(value);
 }
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat('fr-FR', {
+function formatDate(value: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric'
   }).format(new Date(value));
 }
 
-function formatMonth(value: string) {
-  return new Intl.DateTimeFormat('fr-FR', {
+function formatMonth(value: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     month: 'long',
     year: 'numeric'
   }).format(new Date(`${value.slice(0, 7)}-01T00:00:00.000Z`));
 }
 
-function statusMeta(status: string) {
+function statusMeta(status: string, labels: {late: string; paid: string; pending: string; waived: string}) {
   if (status === 'paid') {
-    return {className: 'bg-[#e8f8f2] text-[var(--accent)]', label: 'Pay¨¦'};
+    return {className: 'bg-[#e8f8f2] text-[var(--accent)]', label: labels.paid};
   }
 
   if (status === 'partial') {
-    return {className: 'bg-[#fff8ec] text-[#924628]', label: 'En attente'};
+    return {className: 'bg-[#fff8ec] text-[#924628]', label: labels.pending};
   }
 
   if (status === 'waived') {
-    return {className: 'bg-[#eef2f0] text-[#6d7a77]', label: 'Annul¨¦'};
+    return {className: 'bg-[#eef2f0] text-[#6d7a77]', label: labels.waived};
   }
 
-  return {className: 'bg-[#ffdad6] text-[#ba1a1a]', label: 'En retard'};
+  return {className: 'bg-[#ffdad6] text-[#ba1a1a]', label: labels.late};
 }
 
-function tabHref(input: {propertyId: string; tab: 'expenses' | 'revenues'; year: number}) {
+function tabHref(input: {locale: string; propertyId: string; tab: 'expenses' | 'revenues'; year: number}) {
   const params = new URLSearchParams({
     tab: input.tab,
     year: String(input.year)
@@ -117,7 +117,7 @@ function tabHref(input: {propertyId: string; tab: 'expenses' | 'revenues'; year:
     params.set('property_id', input.propertyId);
   }
 
-  return `/tax?${params.toString()}`;
+  return `${localizedPath(input.locale, '/tax')}?${params.toString()}`;
 }
 
 function Icon({children, className = ''}: {children: string; className?: string}) {
@@ -154,17 +154,17 @@ function StatusBadge({className, label}: {className: string; label: string}) {
   return <span className={`inline-flex rounded-md px-2.5 py-1 text-xs font-semibold ${className}`}>{label}</span>;
 }
 
-function ReceiptIndicator({expense}: {expense: ExpenseRow & {viewUrl?: string | null}}) {
+function ReceiptIndicator({expense, missingLabel, viewLabel}: {expense: ExpenseRow & {viewUrl?: string | null}; missingLabel: string; viewLabel: string}) {
   if (expense.documents?.file_path && expense.viewUrl) {
     return (
-      <a className="focus-ring inline-flex h-9 w-9 items-center justify-center rounded-full text-[var(--accent)] hover:bg-[#eef7f4]" href={expense.viewUrl} title="Voir le justificatif" target="_blank" rel="noreferrer">
+      <a className="focus-ring inline-flex h-9 w-9 items-center justify-center rounded-full text-[var(--accent)] hover:bg-[#eef7f4]" href={expense.viewUrl} title={viewLabel} target="_blank" rel="noreferrer">
         <Icon>check_circle</Icon>
       </a>
     );
   }
 
   return (
-    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#e07a00]" title="Justificatif manquant">
+    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#e07a00]" title={missingLabel}>
       <Icon>warning</Icon>
     </span>
   );
@@ -298,8 +298,8 @@ export default async function TaxPage({searchParams}: TaxPageProps) {
         </form>
 
         <section className="mb-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard label={t('revenueReceived')} note={t('revenueNote')} value={formatMoney(receivedRevenue)} />
-          <StatCard accent="expense" label={t('expensesRecorded')} note={t('expensesNote')} value={formatMoney(recordedExpenses)} />
+          <StatCard label={t('revenueReceived')} note={t('revenueNote')} value={formatMoney(receivedRevenue, locale)} />
+          <StatCard accent="expense" label={t('expensesRecorded')} note={t('expensesNote')} value={formatMoney(recordedExpenses, locale)} />
           <StatCard label={t('receiptsAvailable')} note={t('receiptsAvailableNote')} tone="primary" value={String(availableDocumentsCount ?? 0)} />
           <StatCard accent="missing" label={t('receiptsMissing')} note={t('receiptsMissingNote')} tone="danger" value={String(missingReceipts.length)} />
         </section>
@@ -311,15 +311,15 @@ export default async function TaxPage({searchParams}: TaxPageProps) {
           <div className="space-y-4 p-6">
             <div className="flex items-center justify-between gap-4">
               <span className="text-sm text-[#3d4947]">{t('revenueReceived')}</span>
-              <span className="font-semibold tabular-nums">{formatMoney(receivedRevenue)}</span>
+              <span className="font-semibold tabular-nums">{formatMoney(receivedRevenue, locale)}</span>
             </div>
             <div className="flex items-center justify-between gap-4">
               <span className="text-sm text-[#3d4947]">{t('expensesRecorded')}</span>
-              <span className="font-semibold text-[#ba1a1a] tabular-nums">- {formatMoney(recordedExpenses)}</span>
+              <span className="font-semibold text-[#ba1a1a] tabular-nums">- {formatMoney(recordedExpenses, locale)}</span>
             </div>
             <div className="flex items-center justify-between gap-4 border-t border-[var(--line-soft)] pt-4">
               <span className="text-base font-semibold">{t('cashBalance')}</span>
-              <span className={`text-xl font-semibold tabular-nums ${cashBalance < 0 ? 'text-[#ba1a1a]' : 'text-[var(--accent)]'}`}>{formatMoney(cashBalance)}</span>
+              <span className={`text-xl font-semibold tabular-nums ${cashBalance < 0 ? 'text-[#ba1a1a]' : 'text-[var(--accent)]'}`}>{formatMoney(cashBalance, locale)}</span>
             </div>
           </div>
           <div className="border-t border-[var(--line-soft)] bg-white px-6 py-3">
@@ -331,10 +331,10 @@ export default async function TaxPage({searchParams}: TaxPageProps) {
           <div className="flex flex-col gap-4 border-b border-[var(--line-soft)] p-5 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-base font-semibold">{t('operationDetail')}</h2>
             <div className="inline-flex w-fit rounded-lg bg-[#f0f5f2] p-1">
-              <Link className={`focus-ring rounded-md px-4 py-2 text-xs font-semibold ${selectedTab === 'revenues' ? 'bg-white text-[var(--accent)] shadow-sm' : 'text-[#3d4947]'}`} href={tabHref({propertyId, tab: 'revenues', year})}>
+              <Link className={`focus-ring rounded-md px-4 py-2 text-xs font-semibold ${selectedTab === 'revenues' ? 'bg-white text-[var(--accent)] shadow-sm' : 'text-[#3d4947]'}`} href={tabHref({locale, propertyId, tab: 'revenues', year})}>
                 {t('revenues')}
               </Link>
-              <Link className={`focus-ring rounded-md px-4 py-2 text-xs font-semibold ${selectedTab === 'expenses' ? 'bg-white text-[var(--accent)] shadow-sm' : 'text-[#3d4947]'}`} href={tabHref({propertyId, tab: 'expenses', year})}>
+              <Link className={`focus-ring rounded-md px-4 py-2 text-xs font-semibold ${selectedTab === 'expenses' ? 'bg-white text-[var(--accent)] shadow-sm' : 'text-[#3d4947]'}`} href={tabHref({locale, propertyId, tab: 'expenses', year})}>
                 {t('expenses')}
               </Link>
             </div>
@@ -360,16 +360,16 @@ export default async function TaxPage({searchParams}: TaxPageProps) {
                       const missing = expense.receipt_status === 'missing' || !expense.documents?.file_path;
                       return (
                         <tr className="hover:bg-[#f8fbfa]" key={expense.id}>
-                          <td className="px-6 py-4 tabular-nums">{formatDate(expense.expense_date)}</td>
+                          <td className="px-6 py-4 tabular-nums">{formatDate(expense.expense_date, locale)}</td>
                           <td className="px-6 py-4">{expense.properties?.name ?? t('global')}</td>
                           <td className="px-6 py-4">
                             <CategoryBadge>{expense.tax_categories?.label ?? t('otherFees')}</CategoryBadge>
                           </td>
                           <td className="px-6 py-4">{expense.description || t('expenseFallback')}</td>
                           <td className="px-6 py-4">{expense.vendor || '-'}</td>
-                          <td className={`px-6 py-4 text-right font-semibold tabular-nums ${missing ? 'text-[#ba1a1a]' : ''}`}>{formatMoney(Number(expense.amount ?? 0))}</td>
+                          <td className={`px-6 py-4 text-right font-semibold tabular-nums ${missing ? 'text-[#ba1a1a]' : ''}`}>{formatMoney(Number(expense.amount ?? 0), locale)}</td>
                           <td className="px-6 py-4 text-center">
-                            <ReceiptIndicator expense={expense} />
+                            <ReceiptIndicator expense={expense} missingLabel={t('missingReceipt')} viewLabel={t('viewReceipt')} />
                           </td>
                         </tr>
                       );
@@ -402,20 +402,20 @@ export default async function TaxPage({searchParams}: TaxPageProps) {
                 <tbody className="divide-y divide-[var(--line-soft)]">
                   {rentRows.length ? (
                     rentRows.map((charge) => {
-                      const meta = statusMeta(charge.status);
+                      const meta = statusMeta(charge.status, {late: t('statusLate'), paid: t('statusPaid'), pending: t('statusPending'), waived: t('statusWaived')});
                       return (
                         <tr className="hover:bg-[#f8fbfa]" key={`${charge.period_month}-${charge.leases?.tenants?.full_name ?? 'tenant'}-${charge.total_due}`}>
-                          <td className="px-6 py-4 tabular-nums">{charge.due_date ? formatDate(charge.due_date) : formatDate(charge.period_month)}</td>
+                          <td className="px-6 py-4 tabular-nums">{charge.due_date ? formatDate(charge.due_date, locale) : formatDate(charge.period_month, locale)}</td>
                           <td className="px-6 py-4">{charge.leases?.properties?.name ?? '-'}</td>
                           <td className="px-6 py-4">{charge.leases?.tenants?.full_name ?? '-'}</td>
                           <td className="px-6 py-4">{t('rentAndCharges')}</td>
-                          <td className="px-6 py-4 capitalize">{formatMonth(charge.period_month)}</td>
-                          <td className="px-6 py-4 text-right font-semibold tabular-nums">{formatMoney(Number(charge.total_due ?? 0))}</td>
+                          <td className="px-6 py-4 capitalize">{formatMonth(charge.period_month, locale)}</td>
+                          <td className="px-6 py-4 text-right font-semibold tabular-nums">{formatMoney(Number(charge.total_due ?? 0), locale)}</td>
                           <td className="px-6 py-4">
                             <StatusBadge className={meta.className} label={meta.label} />
                           </td>
                           <td className="px-6 py-4 text-center">
-                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#e07a00]" title="Quittance non liee">
+                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#e07a00]" title={t('unlinkedReceipt')}>
                               <Icon>warning</Icon>
                             </span>
                           </td>
@@ -453,10 +453,10 @@ export default async function TaxPage({searchParams}: TaxPageProps) {
                     </div>
                     <div className="min-w-0">
                       <p className="font-semibold text-[#171d1c]">
-                        {expense.description || expense.vendor || 'D¨¦pense'} - {formatMoney(Number(expense.amount ?? 0))}
+                        {expense.description || expense.vendor || t('expenseFallback')} - {formatMoney(Number(expense.amount ?? 0), locale)}
                       </p>
                       <p className="mt-1 text-sm text-[#3d4947]">
-                        {formatDate(expense.expense_date)} - {expense.properties?.name ?? t('global')} - {expense.tax_categories?.label ?? t('otherFees')}
+                        {formatDate(expense.expense_date, locale)} - {expense.properties?.name ?? t('global')} - {expense.tax_categories?.label ?? t('otherFees')}
                       </p>
                     </div>
                   </div>
@@ -467,7 +467,7 @@ export default async function TaxPage({searchParams}: TaxPageProps) {
           ) : (
             <div className="flex items-center gap-3 p-6 text-sm text-[var(--accent)]">
               <Icon>check_circle</Icon>
-              Aucune d¨¦pense sans justificatif pour le moment.
+              {t('noMissingExpenses')}
             </div>
           )}
         </section>

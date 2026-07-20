@@ -17,6 +17,7 @@ type TenantOption = {
 
 const DOCUMENT_TYPES = [
   {labelKey: 'rentReceipt', value: 'rent_receipt'},
+  {labelKey: 'lease', value: 'lease'},
   {labelKey: 'tax', value: 'tax'}
 ];
 
@@ -66,6 +67,8 @@ export function UploadDocumentModal({locale, properties, tenants}: {locale: stri
   const common = useTranslations('common');
   const [open, setOpen] = useState(false);
   const [documentType, setDocumentType] = useState('');
+  const requiresPropertyAndTenant = documentType === 'rent_receipt' || documentType === 'lease';
+  const showsTenant = documentType !== 'tax';
 
   return (
     <>
@@ -136,8 +139,8 @@ export function UploadDocumentModal({locale, properties, tenants}: {locale: stri
                 </label>
 
                 <label className="grid gap-2 text-xs font-medium text-[#33413f]">
-                  {modal('associatedProperty')}
-                  <select className="focus-ring min-h-10 rounded-lg border border-[var(--line)] bg-white px-3 text-sm font-normal" name="property_id">
+                  {requiresPropertyAndTenant ? modal('associatedPropertyRequired') : modal('associatedProperty')}
+                  <select className="focus-ring min-h-10 rounded-lg border border-[var(--line)] bg-white px-3 text-sm font-normal" name="property_id" required={requiresPropertyAndTenant}>
                     <option value="">{modal('chooseProperty')}</option>
                     {properties.map((property) => (
                       <option key={property.id} value={property.id}>
@@ -147,17 +150,19 @@ export function UploadDocumentModal({locale, properties, tenants}: {locale: stri
                   </select>
                 </label>
 
-                <label className="grid gap-2 text-xs font-medium text-[#33413f]">
-                  {modal('tenantOptional')}
-                  <select className="focus-ring min-h-10 rounded-lg border border-[var(--line)] bg-white px-3 text-sm font-normal" name="tenant_id">
-                    <option value="">{modal('noSpecificTenant')}</option>
-                    {tenants.map((tenant) => (
-                      <option key={tenant.id} value={tenant.id}>
-                        {tenant.full_name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                {showsTenant ? (
+                  <label className="grid gap-2 text-xs font-medium text-[#33413f]">
+                    {requiresPropertyAndTenant ? modal('tenantRequired') : modal('tenantOptional')}
+                    <select className="focus-ring min-h-10 rounded-lg border border-[var(--line)] bg-white px-3 text-sm font-normal" name="tenant_id" required={requiresPropertyAndTenant}>
+                      <option value="">{requiresPropertyAndTenant ? modal('chooseTenant') : modal('noSpecificTenant')}</option>
+                      {tenants.map((tenant) => (
+                        <option key={tenant.id} value={tenant.id}>
+                          {tenant.full_name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
               </div>
 
               <div className="mt-6 flex justify-end gap-3 border-t border-[var(--line-soft)] pt-5">

@@ -23,7 +23,8 @@ function safeFileName(name: string) {
   return name.replace(/[^a-zA-Z0-9.\-_]+/g, '-').replace(/-+/g, '-').slice(0, 120);
 }
 
-const ALLOWED_DOCUMENT_TYPES = new Set(['rent_receipt', 'tax']);
+const ALLOWED_DOCUMENT_TYPES = new Set(['lease', 'rent_receipt', 'tax']);
+const PROPERTY_AND_TENANT_REQUIRED_TYPES = new Set(['lease', 'rent_receipt']);
 export async function uploadDocumentAction(formData: FormData) {
   const locale = value(formData, 'locale') || 'fr';
   const file = formData.get('file');
@@ -63,8 +64,14 @@ export async function uploadDocumentAction(formData: FormData) {
   }
 
   const propertyId = value(formData, 'property_id') || null;
-  const tenantId = value(formData, 'tenant_id') || null;
+  const tenantId = documentType === 'tax' ? null : value(formData, 'tenant_id') || null;
   const unitId = value(formData, 'unit_id') || null;
+
+  if (PROPERTY_AND_TENANT_REQUIRED_TYPES.has(documentType) && (!propertyId || !tenantId)) {
+    await supabase.storage.from('documents').remove([filePath]);
+    redirect(`${localizedPath(locale, '/documents')}?error=document_relation_required`);
+  }
+
   const {error} = await supabase.from('documents').insert({
     document_type: documentType,
     extracted_amount: null,

@@ -261,6 +261,12 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
         </div>
       ) : null}
 
+      {params.error === 'document_relation_required' ? (
+        <div className="mb-6 rounded-md border border-[#f0d6b6] bg-[#fff8ec] p-4 text-sm leading-6 text-[#7a4a11]">
+          {t('errors.relationRequired')}
+        </div>
+      ) : null}
+
       <form className="mb-8 flex flex-wrap gap-3 border-b border-[var(--line-soft)] pb-5">
         <label className="relative min-w-0 flex-[1_1_240px]">
           <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]">

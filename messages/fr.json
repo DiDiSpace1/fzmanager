@@ -418,12 +418,13 @@
       "loadFailed": "Impossible de charger les documents. Lancez la migration Supabase de la phase documents.",
       "planLimit": "Votre forfait ne permet pas de téléverser plus de documents. Passez à un forfait supérieur depuis les paramètres.",
       "storageLimit": "Le stockage documents de votre forfait est atteint.",
-      "invoiceAmount": "Ajoutez un montant valide pour enregistrer une facture travaux dans les dépenses."
+      "invoiceAmount": "Ajoutez un montant valide pour enregistrer une facture travaux dans les dépenses.",
+      "relationRequired": "Veuillez choisir un bien et un locataire pour les quittances et les baux."
     },
     "upload": "Uploader",
     "uploadModal": {
-      "sideTitle": "Centralisez vos documents",
-      "sideCopy": "Ajoutez vos quittances et documents fiscaux pour une gestion simplifiée.",
+      "sideTitle": "Classer chaque document",
+      "sideCopy": "Ajoutez quittances, baux et documents fiscaux, puis reliez-les au bon bien pour garder un dossier clair.",
       "secureStorage": "Stockage sécurisé",
       "access": "Accès 24/7",
       "title": "Uploader un document",
@@ -435,7 +436,10 @@
       "associatedProperty": "Bien immobilier associé",
       "chooseProperty": "Choisir un bien",
       "tenantOptional": "Locataire (optionnel)",
-      "noSpecificTenant": "Aucun locataire spécifique"
+      "noSpecificTenant": "Aucun locataire spécifique",
+      "associatedPropertyRequired": "Bien associ? (obligatoire)",
+      "tenantRequired": "Locataire (obligatoire)",
+      "chooseTenant": "Choisir un locataire"
     },
     "receiptUpload": {
       "button": "Ajouter un justificatif",
@@ -718,21 +722,21 @@
       "title": "Bail de {tenant}",
       "tenantFallback": "Locataire",
       "typeBadge": "Type : {type}",
-      "startBadge": "D?but : {date}",
+      "startBadge": "Début : {date}",
       "monthlyRentWithCharges": "Loyer mensuel CC",
       "tenantInfo": "Informations du locataire",
       "primaryTenant": "Locataire principal",
-      "financialTerms": "Conditions financi?res",
+      "financialTerms": "Conditions financières",
       "rentExcludingCharges": "Loyer hors charges",
       "charges": "Charges",
-      "deposit": "D?p?t de garantie",
-      "calendarDuration": "Calendrier & dur?e",
-      "startDate": "Date de d?but",
-      "expectedEndDate": "Date de fin pr?visionnelle",
+      "deposit": "Dépôt de garantie",
+      "calendarDuration": "Calendrier & durée",
+      "startDate": "Date de début",
+      "expectedEndDate": "Date de fin prévisionnelle",
       "tacitRenewal": "Renouvellement tacite ({duration})",
       "durationYears": "{count, plural, one {# an} other {# ans}}",
       "leaseDocuments": "Documents du bail",
-      "noDocuments": "Aucun document associ? pour le moment.",
+      "noDocuments": "Aucun document associé pour le moment.",
       "addDocument": "Ajouter un document",
       "documentDate": "le {date}",
       "modes": {
@@ -743,8 +747,8 @@
       },
       "documentTypes": {
         "insurance": "Valide",
-        "lease": "Sign?",
-        "other": "Ajout?",
+        "lease": "Signé",
+        "other": "Ajouté",
         "rentReceipt": "Quittance",
         "tax": "Fiscal"
       }

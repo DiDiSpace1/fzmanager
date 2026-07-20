@@ -418,12 +418,13 @@
       "loadFailed": "Unable to load documents. Run the Supabase documents migration.",
       "planLimit": "Your plan does not allow uploading more documents. Upgrade from settings.",
       "storageLimit": "Your document storage limit has been reached.",
-      "invoiceAmount": "Add a valid amount to save a work invoice as an expense."
+      "invoiceAmount": "Add a valid amount to save a work invoice as an expense.",
+      "relationRequired": "Choose a property and tenant for receipts and leases."
     },
     "upload": "Upload",
     "uploadModal": {
-      "sideTitle": "Centralize your documents",
-      "sideCopy": "Add your receipts and tax documents for simpler management.",
+      "sideTitle": "File every document",
+      "sideCopy": "Add receipts, leases and tax documents, then link them to the right property to keep a clear record.",
       "secureStorage": "Secure storage",
       "access": "24/7 access",
       "title": "Upload a document",
@@ -435,7 +436,10 @@
       "associatedProperty": "Associated property",
       "chooseProperty": "Choose a property",
       "tenantOptional": "Tenant (optional)",
-      "noSpecificTenant": "No specific tenant"
+      "noSpecificTenant": "No specific tenant",
+      "associatedPropertyRequired": "Associated property (required)",
+      "tenantRequired": "Tenant (required)",
+      "chooseTenant": "Choose a tenant"
     },
     "receiptUpload": {
       "button": "Add receipt",
