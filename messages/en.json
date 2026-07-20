@@ -82,12 +82,22 @@
     "pricingCopy": "Start free, then choose the plan that matches your rental size.",
     "popular": "Popular",
     "startCta": "Start",
+    "billing": {
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "discountBadge": "Yearly saves up to {discount}",
+      "monthlyPrice": "{price}/month",
+      "yearlyPrice": "{price}/year",
+      "savePercent": "Save {discount} yearly",
+      "equivalentMonthly": "Equivalent to {price}/month"
+    },
     "pricing": {
       "free": {
         "name": "Free",
         "price": "EUR 0",
         "units": "1 property",
-        "description": "For trials or users managing one room."
+        "description": "For trials or users managing one room.",
+        "note": "Start with the essentials."
       },
       "solo": {
         "name": "Solo",
@@ -111,7 +121,8 @@
         "name": "Custom",
         "price": "Contact us",
         "units": "20+ units",
-        "description": "For large portfolios or special requirements."
+        "description": "For large portfolios or special requirements.",
+        "note": "A tailored offer for larger portfolios."
       }
     },
     "finalTitle": "Ready to simplify your management?",

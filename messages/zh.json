@@ -82,12 +82,22 @@
     "pricingCopy": "免费开始使用，然后选择适合您租赁组合的套餐。",
     "popular": "热门",
     "startCta": "开始使用",
+    "billing": {
+      "monthly": "月付",
+      "yearly": "年付",
+      "discountBadge": "年付最高可省 {discount}",
+      "monthlyPrice": "{price}/月",
+      "yearlyPrice": "{price}/年",
+      "savePercent": "年付节省 {discount}",
+      "equivalentMonthly": "等效 {price}/月"
+    },
     "pricing": {
       "free": {
         "name": "免费版",
         "price": "0 欧元",
         "units": "1 处房产",
-        "description": "适合试用 Loyelio 或管理单间房产。"
+        "description": "适合试用 Loyelio 或管理单间房产。",
+        "note": "从核心功能开始。"
       },
       "solo": {
         "name": "个人版",
@@ -111,7 +121,8 @@
         "name": "定制版",
         "price": "联系我们",
         "units": "20+ 处房产",
-        "description": "适合大型资产组合或特殊需求。"
+        "description": "适合大型资产组合或特殊需求。",
+        "note": "为大型资产组合定制方案。"
       }
     },
     "finalTitle": "准备好简化您的管理了吗？",

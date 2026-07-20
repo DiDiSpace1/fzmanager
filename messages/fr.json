@@ -82,12 +82,22 @@
     "pricingCopy": "Commencez gratuitement, puis choisissez l'offre adaptée à votre parc locatif.",
     "popular": "Populaire",
     "startCta": "Commencer",
+    "billing": {
+      "monthly": "Mensuel",
+      "yearly": "Annuel",
+      "discountBadge": "L'annuel permet d'économiser jusqu'à {discount}",
+      "monthlyPrice": "{price}/mois",
+      "yearlyPrice": "{price}/an",
+      "savePercent": "Économisez {discount} en annuel",
+      "equivalentMonthly": "Équivaut à {price}/mois"
+    },
     "pricing": {
       "free": {
         "name": "Free",
         "price": "0 EUR",
         "units": "1 bien",
-        "description": "Pour tester Loyelio ou suivre une seule chambre."
+        "description": "Pour tester Loyelio ou suivre une seule chambre.",
+        "note": "Démarrez avec l'essentiel."
       },
       "solo": {
         "name": "Solo",
@@ -111,7 +121,8 @@
         "name": "Custom",
         "price": "Contact",
         "units": "20+ lots",
-        "description": "Pour les grands portefeuilles ou les besoins spécifiques."
+        "description": "Pour les grands portefeuilles ou les besoins spécifiques.",
+        "note": "Une offre adaptée aux grands portefeuilles."
       }
     },
     "finalTitle": "Prêt à simplifier votre gestion ?",

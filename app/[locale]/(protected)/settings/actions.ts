@@ -19,6 +19,10 @@ function planValue(formData: FormData) {
   return ['solo', 'plus', 'portfolio'].includes(plan) ? plan : 'solo';
 }
 
+function billingIntervalValue(formData: FormData) {
+  return value(formData, 'billing_interval') === 'monthly' ? 'monthly' : 'yearly';
+}
+
 export async function updateAccountSettingsAction(formData: FormData) {
   const currentLocale = value(formData, 'current_locale') || 'fr';
   const nextLocale = ['fr', 'en', 'zh'].includes(value(formData, 'locale')) ? value(formData, 'locale') : currentLocale;
@@ -99,9 +103,10 @@ async function ensureStripeCustomer(locale: string) {
 export async function createCheckoutSessionAction(formData: FormData) {
   const locale = value(formData, 'locale') || 'fr';
   const plan = planValue(formData);
+  const billingInterval = billingIntervalValue(formData);
   const returnPath = value(formData, 'return_path');
   const safeReturnPath = returnPath.startsWith('/') && !returnPath.startsWith('//') ? returnPath : localizedPath(locale, '/settings');
-  const priceId = getStripePriceId(plan);
+  const priceId = getStripePriceId(plan, billingInterval);
 
   if (!priceId) {
     redirect(`${safeReturnPath}?error=stripe_price_missing`);
@@ -124,6 +129,7 @@ export async function createCheckoutSessionAction(formData: FormData) {
         }
       ],
       metadata: {
+        billing_interval: billingInterval,
         plan,
         user_id: user.id,
         workspace_id: workspaceId
@@ -131,6 +137,7 @@ export async function createCheckoutSessionAction(formData: FormData) {
       mode: 'subscription',
       subscription_data: {
         metadata: {
+          billing_interval: billingInterval,
           plan,
           workspace_id: workspaceId
         }

@@ -10,14 +10,16 @@ export function getStripe() {
   return new Stripe(secretKey);
 }
 
-export function getStripePriceId(plan: string) {
+export function getStripePriceId(plan: string, billingInterval: string = 'yearly') {
+  const monthly = billingInterval === 'monthly';
+
   if (plan === 'portfolio') {
-    return process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PORTFOLIO;
+    return monthly ? process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PORTFOLIO_MONTHLY : process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PORTFOLIO;
   }
 
   if (plan === 'plus') {
-    return process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PLUS;
+    return monthly ? process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PLUS_MONTHLY : process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PLUS;
   }
 
-  return process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_SOLO;
+  return monthly ? process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_SOLO_MONTHLY : process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_SOLO;
 }

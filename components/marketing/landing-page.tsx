@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {useLocale, useTranslations} from 'next-intl';
 
-const PRICING_PLANS = ['free', 'solo', 'plus', 'portfolio', 'custom'] as const;
+import {PricingSection} from './pricing-section';
 
 export function LandingPage() {
   const locale = useLocale();
@@ -222,27 +222,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="bg-[var(--panel-muted)] px-4 py-24 md:px-8" id="pricing">
-        <div className="mx-auto max-w-7xl text-center">
-          <h2 className="mb-4 text-[30px] font-semibold leading-[38px] tracking-[-0.02em]">{t('pricingTitle')}</h2>
-          <p className="mx-auto mb-12 max-w-2xl text-base leading-6 text-[var(--muted)]">{t('pricingCopy')}</p>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-            {PRICING_PLANS.map((plan) => (
-              <PricingCard
-                cta={plan === 'custom' ? t('contactCta') : t('startCta')}
-                description={t(`pricing.${plan}.description`)}
-                featured={plan === 'solo'}
-                href={plan === 'custom' ? localized('/contact') : localized('/login')}
-                key={plan}
-                name={t(`pricing.${plan}.name`)}
-                popularLabel={t('popular')}
-                price={t(`pricing.${plan}.price`)}
-                units={t(`pricing.${plan}.units`)}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
+      <PricingSection />
 
       <section className="px-4 py-24 md:px-8">
         <div className="mx-auto max-w-4xl rounded-3xl bg-[#2c3130] p-8 text-center !text-[#edf2f0] md:p-12">
@@ -330,56 +310,6 @@ function MiniAmount({label, value}: {label: string; value: string}) {
     <div className="flex justify-between text-[10px] font-bold">
       <span>{label}</span>
       <span>{value}</span>
-    </div>
-  );
-}
-
-function PricingCard({
-  cta,
-  description,
-  featured,
-  href,
-  name,
-  popularLabel,
-  price,
-  units
-}: {
-  cta: string;
-  description: string;
-  featured: boolean;
-  href: string;
-  name: string;
-  popularLabel: string;
-  price: string;
-  units: string;
-}) {
-  return (
-    <div
-      className={
-        featured
-          ? 'ui-card relative rounded-xl border-2 border-[var(--accent)] bg-white p-5 text-left'
-          : 'ui-card rounded-xl bg-white p-5 text-left'
-      }
-    >
-      {featured ? (
-        <span className="absolute right-4 top-4 rounded bg-[var(--accent)] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.08em] !text-white">
-          {popularLabel}
-        </span>
-      ) : null}
-      <h3 className="text-base font-semibold">{name}</h3>
-      <p className="mt-5 text-2xl font-semibold tabular-nums">{price}</p>
-      <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--accent)]">{units}</p>
-      <p className="mt-4 min-h-16 text-sm leading-6 text-[var(--muted)]">{description}</p>
-      <Link
-        className={
-          featured
-            ? 'focus-ring mt-6 inline-flex min-h-10 w-full items-center justify-center rounded-md bg-[var(--accent)] px-4 text-sm font-semibold !text-white transition-opacity hover:opacity-90'
-            : 'focus-ring mt-6 inline-flex min-h-10 w-full items-center justify-center rounded-md border border-[var(--line)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition-colors hover:bg-[var(--panel-muted)]'
-        }
-        href={href}
-      >
-        {cta}
-      </Link>
     </div>
   );
 }
