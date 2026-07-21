@@ -3,7 +3,8 @@ import Image from 'next/image';
 import {getLocale, getTranslations} from 'next-intl/server';
 import {redirect} from 'next/navigation';
 
-import {type BillingStatus, normalizeBillingPlan} from '@/lib/billing/config';
+import {type BillingStatus, hasPaidAccess, normalizeBillingPlan} from '@/lib/billing/config';
+import {syncWorkspaceBillingFromStripe} from '@/lib/billing/sync';
 import {localizedPath} from '@/lib/navigation';
 import {createSupabaseServerClient} from '@/lib/supabase/server';
 
@@ -21,7 +22,7 @@ const navItems = [
 ] as const;
 
 function forfaitLabel(billing: BillingStatus | null) {
-  if (!billing) {
+  if (!billing || !hasPaidAccess(billing)) {
     return 'Free';
   }
 
@@ -52,11 +53,26 @@ export async function AppShell({children}: {children: React.ReactNode}) {
     const {data: profile} = await supabase.from('profiles').select('default_workspace_id').eq('id', user.id).maybeSingle<{default_workspace_id: string | null}>();
 
     if (profile?.default_workspace_id) {
-      const {data: billing} = await supabase
+      let {data: billing} = await supabase
         .from('workspace_billing')
         .select('current_period_end, lifetime_access, plan, status, stripe_customer_id, stripe_subscription_id')
         .eq('workspace_id', profile.default_workspace_id)
         .maybeSingle<BillingStatus>();
+
+      if (billing?.stripe_subscription_id) {
+        try {
+          await syncWorkspaceBillingFromStripe(profile.default_workspace_id, billing.stripe_subscription_id);
+          const {data: refreshedBilling} = await supabase
+            .from('workspace_billing')
+            .select('current_period_end, lifetime_access, plan, status, stripe_customer_id, stripe_subscription_id')
+            .eq('workspace_id', profile.default_workspace_id)
+            .maybeSingle<BillingStatus>();
+
+          billing = refreshedBilling;
+        } catch (error) {
+          console.error('Stripe billing sync in app shell failed', error);
+        }
+      }
 
       userForfait = forfaitLabel(billing ?? null);
     }
