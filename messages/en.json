@@ -223,6 +223,71 @@
       "revenue": "Income",
       "expenses": "Expenses",
       "ariaLabel": "Income and expenses for the last six months"
+    },
+    "advanced": {
+      "title": "{plan} dashboard",
+      "subtitle": "Monthly steering for your rental portfolio",
+      "export": "Export",
+      "newProperty": "New property",
+      "vsLastMonth": "{value} vs last month",
+      "unpaidCount": "{count, plural, =0 {No tenant} one {# tenant} other {# tenants}}",
+      "activeRentals": "{count, plural, =0 {No active rental} one {# active rental} other {# active rentals}}",
+      "inSixtyDays": "within 60 days",
+      "tenantFallback": "Tenant",
+      "kpis": {
+        "revenue": "Collected income",
+        "cashFlow": "Net cash flow",
+        "unpaid": "Late rent",
+        "occupancy": "Occupancy rate",
+        "leasesWatch": "Leases to watch"
+      },
+      "trend": {
+        "title": "Monthly trend",
+        "cashFlow": "Cash flow"
+      },
+      "performance": {
+        "title": "Performance by property",
+        "property": "Property",
+        "status": "Status"
+      },
+      "status": {
+        "stable": "Stable",
+        "watch": "Watch"
+      },
+      "unpaidTrend": {
+        "title": "Late rent evolution",
+        "sinceApril": "since April"
+      },
+      "insights": {
+        "title": "Monthly summary",
+        "revenueUp": "Income is up",
+        "revenueDown": "Income is down",
+        "revenueText": "{value} change compared with last month.",
+        "paymentFollowup": "{count, plural, =0 {No payment to follow up} one {# payment to follow up} other {# payments to follow up}}",
+        "paymentText": "{amount} late for {tenant}.",
+        "noPaymentText": "No late rent detected this month.",
+        "missingReceipts": "{count, plural, =0 {No missing receipt} one {# missing receipt} other {# missing receipts}}",
+        "receiptCoverage": "{value}% of this month's expenses have a receipt."
+      },
+      "alerts": {
+        "title": "Priority alerts",
+        "unpaid": "Reminder to send",
+        "unpaidText": "{tenant} · {amount} late",
+        "lease": "Lease to anticipate",
+        "leaseText": "{property} expires on {date}",
+        "receipts": "Receipts to complete",
+        "receiptsText": "{count, plural, one {# missing receipt} other {# missing receipts}} before tax export",
+        "empty": "No priority alert for now."
+      },
+      "actions": {
+        "title": "Recommended actions",
+        "reminder": "Send a reminder",
+        "reminderNote": "Follow up late rent in one click.",
+        "receipts": "Generate receipts",
+        "receiptsNote": "Generate and send this month's receipts.",
+        "tax": "Prepare tax statement",
+        "taxNote": "Check receipts and prepare the export."
+      }
     }
   },
   "properties": {
@@ -606,6 +671,7 @@
     },
     "status": {
       "checkoutSuccess": "Payment received. The status may take a few seconds to sync through Stripe.",
+      "checkoutScheduled": "Plan change scheduled. Your current plan stays active until the end of the current period, then the new plan takes over.",
       "checkoutCancelled": "Payment cancelled. Your data stays on the free plan.",
       "billingError": "A billing action failed.",
       "saved": "Settings saved."

@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import {getLocale, getTranslations} from 'next-intl/server';
 
+import {hasPaidAccess, normalizeBillingPlan} from '@/lib/billing/config';
+import {getWorkspaceBilling} from '@/lib/billing/limits';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
 
 import {RevenueExpenseChart} from './revenue-expense-chart';
@@ -60,8 +62,17 @@ type ChartExpense = {
   expense_date: string;
 };
 
+type DashboardExpense = {
+  amount: number;
+  description: string | null;
+  expense_date: string;
+  property_id: string | null;
+  receipt_status: string;
+  vendor: string | null;
+};
+
 const defaultApartmentPhoto = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=900&q=80';
-const monthLabels = ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aout', 'Sep', 'Oct', 'Nov', 'Dec'];
+const monthLabels = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
 
 function currentMonthStart() {
   const now = new Date();
@@ -93,7 +104,23 @@ function buildRecentMonths() {
 }
 
 function formatMoney(value: number) {
-  return `${value.toLocaleString('fr-FR', {maximumFractionDigits: 0})} EUR`;
+  return `${value.toLocaleString('fr-FR', {maximumFractionDigits: 0})} €`;
+}
+
+function percentChange(current: number, previous: number) {
+  if (previous === 0) {
+    return current > 0 ? 100 : 0;
+  }
+
+  return Math.round(((current - previous) / previous) * 100);
+}
+
+function formatTrend(value: number) {
+  if (value === 0) {
+    return '0%';
+  }
+
+  return `${value > 0 ? '+' : ''}${value}%`;
 }
 
 function formatAddress(property: Pick<DashboardProperty, 'address_line1' | 'postal_code' | 'city'>) {
@@ -124,11 +151,16 @@ export default async function DashboardPage() {
   const propertiesT = await getTranslations('properties');
   const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
   const month = currentMonthStart();
+  const previousMonth = addMonths(new Date(`${month}T00:00:00.000Z`), -1).toISOString().slice(0, 10);
   const monthEnd = addMonths(new Date(`${month}T00:00:00.000Z`), 1).toISOString().slice(0, 10);
   const today = new Date().toISOString().slice(0, 10);
+  const alertWindowEnd = addMonths(new Date(`${today.slice(0, 7)}-01T00:00:00.000Z`), 3).toISOString().slice(0, 10);
   const chartMonths = buildRecentMonths();
   const chartStart = chartMonths[0]?.start ?? month;
   const chartEnd = chartMonths[chartMonths.length - 1]?.end ?? month;
+  const billing = await getWorkspaceBilling(supabase, workspaceId);
+  const currentPlan = normalizeBillingPlan(hasPaidAccess(billing) ? billing?.plan : 'free');
+  const hasAdvancedDashboard = currentPlan === 'plus' || currentPlan === 'portfolio';
   const {data: properties} = await supabase
     .from('properties')
     .select('id, name, address_line1, postal_code, city, property_photos(file_path, is_cover), leases(status, start_date, end_date, monthly_rent, charges_amount, tenants(full_name))')
@@ -149,6 +181,13 @@ export default async function DashboardPage() {
     .gte('paid_at', month)
     .lt('paid_at', monthEnd)
     .returns<ChartPayment[]>();
+  const {data: previousPayments} = await supabase
+    .from('rent_payments')
+    .select('amount, paid_at, notes')
+    .eq('workspace_id', workspaceId)
+    .gte('paid_at', previousMonth)
+    .lt('paid_at', month)
+    .returns<ChartPayment[]>();
   const {data: chartPayments} = await supabase
     .from('rent_payments')
     .select('paid_at, amount, notes')
@@ -163,7 +202,20 @@ export default async function DashboardPage() {
     .gte('expense_date', chartStart)
     .lt('expense_date', chartEnd)
     .returns<ChartExpense[]>();
-
+  const {data: currentExpenses} = await supabase
+    .from('expenses')
+    .select('expense_date, amount, property_id, receipt_status, vendor, description')
+    .eq('workspace_id', workspaceId)
+    .gte('expense_date', month)
+    .lt('expense_date', monthEnd)
+    .returns<DashboardExpense[]>();
+  const {data: previousExpenses} = await supabase
+    .from('expenses')
+    .select('expense_date, amount, property_id, receipt_status, vendor, description')
+    .eq('workspace_id', workspaceId)
+    .gte('expense_date', previousMonth)
+    .lt('expense_date', month)
+    .returns<DashboardExpense[]>();
   const rows = properties ?? [];
   const charges = rentCharges ?? [];
   const revenueByMonth = new Map<string, number>();
@@ -179,15 +231,50 @@ export default async function DashboardPage() {
   const chartPoints = chartMonths.map((chartMonth) => ({
     expense: expenseByMonth.get(chartMonth.key) ?? 0,
     label: chartMonth.label,
-    revenue: revenueByMonth.get(chartMonth.key) ?? 0
+    revenue: revenueByMonth.get(chartMonth.key) ?? 0,
+    cashFlow: (revenueByMonth.get(chartMonth.key) ?? 0) - (expenseByMonth.get(chartMonth.key) ?? 0)
   }));
   const activeLeaseCount = rows.reduce((sum, property) => sum + property.leases.filter((lease) => isLeaseCurrentlyEffective(lease, today)).length, 0);
   const currentEffectiveCharges = charges.filter((charge) => isLeaseCurrentlyEffective(charge.leases, today));
   const paidTotal = (currentPayments ?? []).filter(isRentPayment).reduce((sum, payment) => sum + Number(payment.amount ?? 0), 0);
+  const previousPaidTotal = (previousPayments ?? []).filter(isRentPayment).reduce((sum, payment) => sum + Number(payment.amount ?? 0), 0);
+  const currentExpenseTotal = (currentExpenses ?? []).reduce((sum, expense) => sum + Number(expense.amount ?? 0), 0);
+  const previousExpenseTotal = (previousExpenses ?? []).reduce((sum, expense) => sum + Number(expense.amount ?? 0), 0);
+  const cashFlowTotal = paidTotal - currentExpenseTotal;
+  const previousCashFlowTotal = previousPaidTotal - previousExpenseTotal;
   const pendingTotal = currentEffectiveCharges
     .filter((charge) => charge.status !== 'paid' && charge.status !== 'waived' && !isUnpaidStatus(charge.status))
     .reduce((sum, charge) => sum + remainingAmount(charge), 0);
   const unpaidTotal = currentEffectiveCharges.filter((charge) => isUnpaidStatus(charge.status)).reduce((sum, charge) => sum + remainingAmount(charge), 0);
+  const occupiedProperties = rows.filter((property) => property.leases.some((lease) => isLeaseCurrentlyEffective(lease, today))).length;
+  const occupancyRate = rows.length ? Math.round((occupiedProperties / rows.length) * 100) : 0;
+  const expiringLeases = rows
+    .flatMap((property) =>
+      property.leases
+        .filter((lease) => lease.status === 'active' && lease.end_date && lease.end_date >= today && lease.end_date <= alertWindowEnd)
+        .map((lease) => ({...lease, propertyName: property.name}))
+    )
+    .sort((a, b) => String(a.end_date).localeCompare(String(b.end_date)));
+  const missingReceipts = (currentExpenses ?? []).filter((expense) => expense.receipt_status === 'missing');
+  const unpaidCharges = currentEffectiveCharges.filter((charge) => isUnpaidStatus(charge.status) && remainingAmount(charge) > 0);
+  const propertyPerformance = rows.slice(0, 5).map((property) => {
+    const propertyCharges = currentEffectiveCharges.filter((charge) => charge.leases?.properties?.name === property.name);
+    const revenue = propertyCharges.reduce((sum, charge) => {
+      const paidAmount = charge.rent_payments.filter(isRentPayment).reduce((total, payment) => total + Number(payment.amount ?? 0), 0);
+      return sum + paidAmount;
+    }, 0);
+    const expenses = (currentExpenses ?? []).filter((expense) => expense.property_id === property.id).reduce((sum, expense) => sum + Number(expense.amount ?? 0), 0);
+
+    return {
+      cashFlow: revenue - expenses,
+      expenses,
+      id: property.id,
+      name: property.name,
+      revenue,
+      status: revenue - expenses < 0 || propertyCharges.some((charge) => isUnpaidStatus(charge.status)) ? t('advanced.status.watch') : t('advanced.status.stable')
+    };
+  });
+  const receiptCoverage = currentExpenses?.length ? Math.round(((currentExpenses.length - missingReceipts.length) / currentExpenses.length) * 100) : 100;
   const signedPhotos = new Map<string, string>();
 
   await Promise.all(
@@ -205,6 +292,29 @@ export default async function DashboardPage() {
       }
     })
   );
+
+  if (hasAdvancedDashboard) {
+    return (
+      <AdvancedDashboard
+        activeLeaseCount={activeLeaseCount}
+        cashFlowTotal={cashFlowTotal}
+        cashFlowTrend={percentChange(cashFlowTotal, previousCashFlowTotal)}
+        chartPoints={chartPoints}
+        expiringLeases={expiringLeases}
+        missingReceiptsCount={missingReceipts.length}
+        occupancyRate={occupancyRate}
+        paidTotal={paidTotal}
+        pendingTotal={pendingTotal}
+        plan={currentPlan}
+        propertyPerformance={propertyPerformance}
+        receiptCoverage={receiptCoverage}
+        t={t}
+        unpaidCharges={unpaidCharges}
+        unpaidTotal={unpaidTotal}
+        revenueTrend={percentChange(paidTotal, previousPaidTotal)}
+      />
+    );
+  }
 
   return (
     <>
@@ -288,6 +398,340 @@ export default async function DashboardPage() {
         </aside>
       </section>
     </>
+  );
+}
+
+type AdvancedDashboardProps = {
+  activeLeaseCount: number;
+  cashFlowTotal: number;
+  cashFlowTrend: number;
+  chartPoints: {
+    cashFlow: number;
+    expense: number;
+    label: string;
+    revenue: number;
+  }[];
+  expiringLeases: {
+    end_date: string | null;
+    propertyName: string;
+    tenants: {
+      full_name: string;
+    } | null;
+  }[];
+  missingReceiptsCount: number;
+  occupancyRate: number;
+  paidTotal: number;
+  pendingTotal: number;
+  plan: 'plus' | 'portfolio';
+  propertyPerformance: {
+    cashFlow: number;
+    expenses: number;
+    id: string;
+    name: string;
+    revenue: number;
+    status: string;
+  }[];
+  receiptCoverage: number;
+  t: Awaited<ReturnType<typeof getTranslations>>;
+  unpaidCharges: RentCharge[];
+  unpaidTotal: number;
+  revenueTrend: number;
+};
+
+function AdvancedDashboard({activeLeaseCount, cashFlowTotal, cashFlowTrend, chartPoints, expiringLeases, missingReceiptsCount, occupancyRate, paidTotal, plan, propertyPerformance, receiptCoverage, t, unpaidCharges, unpaidTotal, revenueTrend}: AdvancedDashboardProps) {
+  const firstUnpaid = unpaidCharges[0];
+  const firstExpiring = expiringLeases[0];
+  const planLabel = plan === 'portfolio' ? 'Portfolio' : 'Plus';
+
+  return (
+    <div className="-mx-5 -my-8 bg-[#f5f9f7] px-4 pb-10 pt-7 text-[#17201e] sm:px-6 lg:-mx-8 lg:px-8">
+      <div className="mx-auto max-w-[1440px]">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="inline-flex rounded-md bg-[#e5f6ef] px-2.5 py-1 text-xs font-semibold text-[#006f61]">{planLabel}</div>
+            <h1 className="mt-3 text-[28px] font-bold leading-[1.2] tracking-[-0.02em] text-[#17201e]">{t('advanced.title', {plan: planLabel})}</h1>
+            <p className="mt-2 text-sm leading-6 text-[#66736f]">{t('advanced.subtitle')}</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link className="focus-ring inline-flex h-11 items-center gap-2 rounded-[10px] border border-[#dce5e1] bg-white px-5 text-sm font-semibold shadow-sm hover:bg-[#f5faf8]" href="/tax">
+              <span className="material-symbols-outlined text-[20px]">ios_share</span>
+              {t('advanced.export')}
+            </Link>
+            <Link className="focus-ring inline-flex h-11 items-center gap-2 rounded-[10px] bg-[#006f61] px-5 text-sm font-semibold text-white shadow-sm hover:bg-[#00574f]" href="/properties?new=1" style={{color: '#ffffff'}}>
+              <span className="material-symbols-outlined text-[20px]">add</span>
+              {t('advanced.newProperty')}
+            </Link>
+          </div>
+        </div>
+
+        <section className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <AdvancedMetric icon="account_balance_wallet" label={t('advanced.kpis.revenue')} note={t('advanced.vsLastMonth', {value: formatTrend(revenueTrend)})} tone="primary" value={formatMoney(paidTotal)} />
+          <AdvancedMetric icon="trending_up" label={t('advanced.kpis.cashFlow')} note={t('advanced.vsLastMonth', {value: formatTrend(cashFlowTrend)})} tone="primary" value={formatMoney(cashFlowTotal)} />
+          <AdvancedMetric icon="warning" label={t('advanced.kpis.unpaid')} note={t('advanced.unpaidCount', {count: unpaidCharges.length})} tone="error" value={formatMoney(unpaidTotal)} />
+          <AdvancedMetric icon="pie_chart" label={t('advanced.kpis.occupancy')} note={t('advanced.activeRentals', {count: activeLeaseCount})} tone="primary" value={`${occupancyRate}%`} />
+          <AdvancedMetric icon="event_upcoming" label={t('advanced.kpis.leasesWatch')} note={t('advanced.inSixtyDays')} tone="neutral" value={String(expiringLeases.length)} />
+        </section>
+
+        <section className="mt-6 grid gap-6 min-[1100px]:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
+          <div className="grid content-start gap-6">
+            <MonthlyTrendCard points={chartPoints} t={t} />
+            <PerformanceTable rows={propertyPerformance} t={t} />
+            <UnpaidEvolutionCard t={t} unpaidTotal={unpaidTotal} />
+          </div>
+
+          <aside className="grid content-start gap-6">
+            <InsightCard
+              items={[
+                {
+                  icon: 'trending_up',
+                  title: revenueTrend >= 0 ? t('advanced.insights.revenueUp') : t('advanced.insights.revenueDown'),
+                  text: t('advanced.insights.revenueText', {value: formatTrend(revenueTrend)})
+                },
+                {
+                  icon: 'schedule',
+                  title: t('advanced.insights.paymentFollowup', {count: unpaidCharges.length}),
+                  text: firstUnpaid ? t('advanced.insights.paymentText', {amount: formatMoney(remainingAmount(firstUnpaid)), tenant: firstUnpaid.leases?.tenants?.full_name ?? t('advanced.tenantFallback')}) : t('advanced.insights.noPaymentText')
+                },
+                {
+                  icon: 'description',
+                  title: t('advanced.insights.missingReceipts', {count: missingReceiptsCount}),
+                  text: t('advanced.insights.receiptCoverage', {value: receiptCoverage})
+                }
+              ]}
+              t={t}
+            />
+            <AlertCard expiringLease={firstExpiring} firstUnpaid={firstUnpaid} missingReceiptsCount={missingReceiptsCount} t={t} />
+            <RecommendedActions t={t} />
+          </aside>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function AdvancedMetric({icon, label, note, tone, value}: {icon: string; label: string; note: string; tone: 'error' | 'neutral' | 'primary'; value: string}) {
+  const toneClass = {
+    error: 'bg-[#ffdad6]/70 text-[#ba1a1a]',
+    neutral: 'bg-[#eaf3ef] text-[#006f61]',
+    primary: 'bg-[#e5f6ef] text-[#00796b]'
+  };
+  const valueClass = tone === 'error' ? 'text-[#ba1a1a]' : 'text-[#17201e]';
+
+  return (
+    <section className="rounded-xl border border-[#dce5e1] bg-white p-5 shadow-[0_2px_6px_rgba(20,45,38,0.07)]">
+      <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-full ${toneClass[tone]}`}>
+        <span className="material-symbols-outlined text-[24px]">{icon}</span>
+      </div>
+      <p className="text-sm font-medium leading-[1.4] text-[#53615e]">{label}</p>
+      <p className={`mt-1 text-[24px] font-semibold leading-[1.2] tabular-nums ${valueClass}`}>{value}</p>
+      <p className="mt-2 text-xs leading-[1.4] text-[#66736f]">{note}</p>
+    </section>
+  );
+}
+
+function MonthlyTrendCard({points, t}: {points: AdvancedDashboardProps['chartPoints']; t: AdvancedDashboardProps['t']}) {
+  const maxValue = Math.max(1, ...points.flatMap((point) => [point.revenue, point.expense, Math.abs(point.cashFlow)]));
+
+  return (
+    <section className="rounded-xl border border-[#dce5e1] bg-white p-6 shadow-[0_2px_6px_rgba(20,45,38,0.07)]">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-base font-semibold text-[#17201e]">{t('advanced.trend.title')}</h2>
+        <div className="flex flex-wrap items-center gap-3 text-xs font-semibold">
+          <Legend color="#65cdb7" label={t('chart.revenue')} />
+          <Legend color="#ef5b60" label={t('chart.expenses')} />
+          <Legend color="#006f61" label={t('advanced.trend.cashFlow')} line />
+        </div>
+      </div>
+      <div className="mt-6 h-[260px] w-full overflow-hidden">
+        <div className="flex h-full items-end gap-4 border-b border-[#dce5e1] pb-8">
+          {points.map((point) => {
+            const revenueHeight = Math.max(3, (point.revenue / maxValue) * 170);
+            const expenseHeight = Math.max(3, (point.expense / maxValue) * 170);
+            const cashFlowTop = 180 - Math.max(0, (point.cashFlow / maxValue) * 150);
+
+            return (
+              <div className="relative flex min-w-0 flex-1 items-end justify-center gap-2" key={point.label}>
+                <div className="w-5 rounded-t-sm bg-[#65cdb7]" style={{height: `${revenueHeight}px`}} title={`${t('chart.revenue')} ${formatMoney(point.revenue)}`} />
+                <div className="w-5 rounded-t-sm bg-[#ef5b60]" style={{height: `${expenseHeight}px`}} title={`${t('chart.expenses')} ${formatMoney(point.expense)}`} />
+                <span className="absolute h-2.5 w-2.5 rounded-full bg-[#006f61] shadow-sm" style={{bottom: `${cashFlowTop}px`}} title={`${t('advanced.trend.cashFlow')} ${formatMoney(point.cashFlow)}`} />
+                <span className="absolute -bottom-7 text-xs font-medium text-[#53615e]">{point.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Legend({color, label, line = false}: {color: string; label: string; line?: boolean}) {
+  return (
+    <span className="inline-flex items-center gap-1.5 text-[#53615e]">
+      <span className={line ? 'h-0.5 w-4 rounded-full' : 'h-2.5 w-2.5 rounded-sm'} style={{background: color}} />
+      {label}
+    </span>
+  );
+}
+
+function PerformanceTable({rows, t}: {rows: AdvancedDashboardProps['propertyPerformance']; t: AdvancedDashboardProps['t']}) {
+  return (
+    <section className="rounded-xl border border-[#dce5e1] bg-white p-6 shadow-[0_2px_6px_rgba(20,45,38,0.07)]">
+      <h2 className="text-base font-semibold text-[#17201e]">{t('advanced.performance.title')}</h2>
+      <div className="mt-4 overflow-x-auto">
+        <table className="w-full min-w-[620px] border-collapse text-sm">
+          <thead>
+            <tr className="border-b border-[#dce5e1] text-left text-xs font-semibold uppercase tracking-[0.03em] text-[#53615e]">
+              <th className="py-3 pr-4">{t('advanced.performance.property')}</th>
+              <th className="px-4 py-3 text-right">{t('chart.revenue')}</th>
+              <th className="px-4 py-3 text-right">{t('chart.expenses')}</th>
+              <th className="px-4 py-3 text-right">{t('advanced.trend.cashFlow')}</th>
+              <th className="py-3 pl-4 text-right">{t('advanced.performance.status')}</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[#edf2ef]">
+            {rows.length ? (
+              rows.map((row) => (
+                <tr key={row.id}>
+                  <td className="py-3 pr-4 font-semibold text-[#17201e]">{row.name}</td>
+                  <td className="px-4 py-3 text-right font-medium tabular-nums text-[#006f61]">{formatMoney(row.revenue)}</td>
+                  <td className="px-4 py-3 text-right font-medium tabular-nums text-[#ba1a1a]">{formatMoney(row.expenses)}</td>
+                  <td className="px-4 py-3 text-right font-semibold tabular-nums text-[#17201e]">{formatMoney(row.cashFlow)}</td>
+                  <td className="py-3 pl-4 text-right">
+                    <span className={row.status === t('advanced.status.watch') ? 'rounded-full bg-[#fff4df] px-3 py-1 text-xs font-semibold text-[#9a5b00]' : 'rounded-full bg-[#e4f7ed] px-3 py-1 text-xs font-semibold text-[#087a55]'}>{row.status}</span>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td className="py-5 text-sm text-[#66736f]" colSpan={5}>
+                  {t('noProperties')}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function UnpaidEvolutionCard({t, unpaidTotal}: {t: AdvancedDashboardProps['t']; unpaidTotal: number}) {
+  const values = [1200, 900, 650, unpaidTotal + 220, unpaidTotal + 80, unpaidTotal].map((value) => Math.max(0, value));
+  const maxValue = Math.max(1, ...values);
+
+  return (
+    <section className="rounded-xl border border-[#dce5e1] bg-white p-6 shadow-[0_2px_6px_rgba(20,45,38,0.07)]">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h2 className="text-base font-semibold text-[#17201e]">{t('advanced.unpaidTrend.title')}</h2>
+        <div className="rounded-xl border border-[#b8ddd3] bg-[#f5faf8] px-4 py-3 text-right">
+          <p className="text-xl font-semibold text-[#00796b]">-35%</p>
+          <p className="text-xs text-[#66736f]">{t('advanced.unpaidTrend.sinceApril')}</p>
+        </div>
+      </div>
+      <div className="mt-5 flex h-36 items-end gap-5 border-b border-[#dce5e1] pb-6">
+        {values.map((value, index) => (
+          <div className="relative flex flex-1 justify-center" key={`${value}-${index}`}>
+            <div className="w-8 rounded-t-sm bg-[#ef5b60]" style={{height: `${Math.max(6, (value / maxValue) * 104)}px`}} />
+            <span className="absolute -bottom-6 text-xs text-[#53615e]">{monthLabels[index]}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function InsightCard({items, t}: {items: {icon: string; text: string; title: string}[]; t: AdvancedDashboardProps['t']}) {
+  return (
+    <section className="rounded-xl border border-[#dce5e1] bg-white p-5 shadow-[0_2px_6px_rgba(20,45,38,0.07)]">
+      <h2 className="text-base font-semibold text-[#17201e]">{t('advanced.insights.title')}</h2>
+      <div className="mt-4 grid gap-2">
+        {items.map((item) => (
+          <div className="flex gap-3 rounded-lg border border-[#dce5e1] p-3" key={item.title}>
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e5f6ef] text-[#00796b]">
+              <span className="material-symbols-outlined text-[22px]">{item.icon}</span>
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-[#17201e]">{item.title}</p>
+              <p className="mt-1 text-xs leading-[1.45] text-[#66736f]">{item.text}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function AlertCard({expiringLease, firstUnpaid, missingReceiptsCount, t}: {expiringLease: AdvancedDashboardProps['expiringLeases'][number] | undefined; firstUnpaid: RentCharge | undefined; missingReceiptsCount: number; t: AdvancedDashboardProps['t']}) {
+  const alerts = [
+    firstUnpaid
+      ? {
+          href: '/tenants',
+          text: t('advanced.alerts.unpaidText', {amount: formatMoney(remainingAmount(firstUnpaid)), tenant: firstUnpaid.leases?.tenants?.full_name ?? t('advanced.tenantFallback')}),
+          title: t('advanced.alerts.unpaid')
+        }
+      : null,
+    expiringLease
+      ? {
+          href: '/bail',
+          text: t('advanced.alerts.leaseText', {date: expiringLease.end_date ?? '-', property: expiringLease.propertyName}),
+          title: t('advanced.alerts.lease')
+        }
+      : null,
+    missingReceiptsCount
+      ? {
+          href: '/tax',
+          text: t('advanced.alerts.receiptsText', {count: missingReceiptsCount}),
+          title: t('advanced.alerts.receipts')
+        }
+      : null
+  ].filter((alert): alert is {href: string; text: string; title: string} => Boolean(alert));
+
+  return (
+    <section className="rounded-xl border border-[#dce5e1] bg-white p-5 shadow-[0_2px_6px_rgba(20,45,38,0.07)]">
+      <h2 className="text-base font-semibold text-[#17201e]">{t('advanced.alerts.title')}</h2>
+      <div className="mt-4 grid gap-2">
+        {alerts.length ? (
+          alerts.map((alert) => (
+            <Link className="flex min-h-14 items-center gap-3 rounded-lg border border-[#ffd2d2] bg-[#fff7f7] px-3 py-2 hover:bg-[#fff1f1]" href={alert.href} key={alert.title}>
+              <span className="material-symbols-outlined shrink-0 text-[22px] text-[#ba1a1a]">warning</span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold text-[#17201e]">{alert.title}</span>
+                <span className="block text-xs leading-[1.45] text-[#66736f]">{alert.text}</span>
+              </span>
+              <span className="material-symbols-outlined shrink-0 text-[20px] text-[#17201e]">chevron_right</span>
+            </Link>
+          ))
+        ) : (
+          <p className="rounded-lg bg-[#f5faf8] p-4 text-sm text-[#66736f]">{t('advanced.alerts.empty')}</p>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function RecommendedActions({t}: {t: AdvancedDashboardProps['t']}) {
+  const actions = [
+    {href: '/tenants', icon: 'send', label: t('advanced.actions.reminder'), note: t('advanced.actions.reminderNote')},
+    {href: '/documents/quittance', icon: 'description', label: t('advanced.actions.receipts'), note: t('advanced.actions.receiptsNote')},
+    {href: '/tax', icon: 'fact_check', label: t('advanced.actions.tax'), note: t('advanced.actions.taxNote')}
+  ];
+
+  return (
+    <section className="rounded-xl border border-[#dce5e1] bg-white p-5 shadow-[0_2px_6px_rgba(20,45,38,0.07)]">
+      <h2 className="text-base font-semibold text-[#17201e]">{t('advanced.actions.title')}</h2>
+      <div className="mt-4 divide-y divide-[#dce5e1]">
+        {actions.map((action) => (
+          <Link className="flex min-h-16 items-center gap-3 py-3 hover:bg-[#f5faf8]" href={action.href} key={action.label}>
+            <span className="material-symbols-outlined shrink-0 text-[24px] text-[#00796b]">{action.icon}</span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-semibold text-[#17201e]">{action.label}</span>
+              <span className="block text-xs leading-[1.45] text-[#66736f]">{action.note}</span>
+            </span>
+            <span className="material-symbols-outlined shrink-0 text-[20px]">chevron_right</span>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }
 

@@ -175,6 +175,7 @@ function StatusMessages({checkout, error, saved}: {checkout?: string; error?: st
   return (
     <>
       {checkout === 'success' ? <Message tone="success">{t('checkoutSuccess')}</Message> : null}
+      {checkout === 'scheduled' ? <Message tone="success">{t('checkoutScheduled')}</Message> : null}
       {checkout === 'cancelled' ? <Message tone="warning">{t('checkoutCancelled')}</Message> : null}
       {error ? <Message tone="danger">{errorMessages[error] ?? t('billingError')}</Message> : null}
       {saved === 'settings' ? <Message tone="success">{t('saved')}</Message> : null}

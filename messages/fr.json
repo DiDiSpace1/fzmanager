@@ -223,6 +223,71 @@
       "revenue": "Revenus",
       "expenses": "Dépenses",
       "ariaLabel": "Revenus et dépenses des six derniers mois"
+    },
+    "advanced": {
+      "title": "Tableau de bord {plan}",
+      "subtitle": "Pilotage mensuel de votre portefeuille locatif",
+      "export": "Exporter",
+      "newProperty": "Nouveau bien",
+      "vsLastMonth": "{value} vs mois dernier",
+      "unpaidCount": "{count, plural, =0 {Aucun locataire} one {# locataire} other {# locataires}}",
+      "activeRentals": "{count, plural, =0 {Aucune location active} one {# location active} other {# locations actives}}",
+      "inSixtyDays": "dans 60 jours",
+      "tenantFallback": "Locataire",
+      "kpis": {
+        "revenue": "Revenus encaissés",
+        "cashFlow": "Cash-flow net",
+        "unpaid": "Loyers en retard",
+        "occupancy": "Taux d'occupation",
+        "leasesWatch": "Baux à surveiller"
+      },
+      "trend": {
+        "title": "Tendance mensuelle",
+        "cashFlow": "Cash-flow"
+      },
+      "performance": {
+        "title": "Performance par bien",
+        "property": "Bien",
+        "status": "Statut"
+      },
+      "status": {
+        "stable": "Stable",
+        "watch": "À suivre"
+      },
+      "unpaidTrend": {
+        "title": "Évolution des impayés",
+        "sinceApril": "depuis avril"
+      },
+      "insights": {
+        "title": "Synthèse du mois",
+        "revenueUp": "Revenus en hausse",
+        "revenueDown": "Revenus en baisse",
+        "revenueText": "Variation de {value} par rapport au mois dernier.",
+        "paymentFollowup": "{count, plural, =0 {Aucun paiement à relancer} one {# paiement à relancer} other {# paiements à relancer}}",
+        "paymentText": "{amount} en retard pour {tenant}.",
+        "noPaymentText": "Aucun loyer en retard détecté ce mois-ci.",
+        "missingReceipts": "{count, plural, =0 {Aucun justificatif manquant} one {# justificatif manquant} other {# justificatifs manquants}}",
+        "receiptCoverage": "{value}% des dépenses du mois ont un justificatif."
+      },
+      "alerts": {
+        "title": "Alertes prioritaires",
+        "unpaid": "Relance à envoyer",
+        "unpaidText": "{tenant} · {amount} en retard",
+        "lease": "Bail à anticiper",
+        "leaseText": "{property} expire le {date}",
+        "receipts": "Justificatifs à compléter",
+        "receiptsText": "{count, plural, one {# justificatif manquant} other {# justificatifs manquants}} avant export fiscal",
+        "empty": "Aucune alerte prioritaire pour le moment."
+      },
+      "actions": {
+        "title": "Actions recommandées",
+        "reminder": "Envoyer une relance",
+        "reminderNote": "Relancez les loyers en retard en 1 clic.",
+        "receipts": "Générer les quittances",
+        "receiptsNote": "Générez et envoyez les quittances du mois.",
+        "tax": "Préparer le bordereau fiscal",
+        "taxNote": "Vérifiez vos justificatifs et préparez l'export."
+      }
     }
   },
   "properties": {
@@ -606,6 +671,7 @@
     },
     "status": {
       "checkoutSuccess": "Paiement reçu. Le statut peut prendre quelques secondes à se synchroniser via Stripe.",
+      "checkoutScheduled": "Changement planifié. Votre forfait actuel reste actif jusqu'à la fin de la période en cours, puis le nouveau forfait prendra le relais.",
       "checkoutCancelled": "Paiement annulé. Vos données restent sur le plan gratuit.",
       "billingError": "Une action de facturation a échoué.",
       "saved": "Paramètres enregistrés."

@@ -3,6 +3,7 @@ import {NextResponse} from 'next/server';
 
 import {createSupabaseAdminClient} from '@/lib/supabase/admin';
 import {getStripe} from '@/lib/billing/stripe';
+import {subscriptionPlan} from '@/lib/billing/sync';
 
 export const runtime = 'nodejs';
 
@@ -72,10 +73,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 async function handleSubscriptionChanged(subscription: Stripe.Subscription) {
   const customerId = typeof subscription.customer === 'string' ? subscription.customer : subscription.customer.id;
   const workspaceId = subscription.metadata?.workspace_id;
+  const currentPlan = subscriptionPlan(subscription);
   const values = {
     current_period_end: subscriptionPeriodEnd(subscription),
     lifetime_access: false,
-    plan: planValue(subscription.metadata?.plan),
+    plan: currentPlan.plan,
     status: subscription.status,
     stripe_customer_id: customerId,
     stripe_subscription_id: subscription.id

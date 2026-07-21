@@ -1,9 +1,11 @@
 'use server';
 
+import type Stripe from 'stripe';
 import {redirect} from 'next/navigation';
 
-import {getAppUrl} from '@/lib/billing/config';
+import {getAppUrl, hasPaidAccess} from '@/lib/billing/config';
 import {getWorkspaceBilling} from '@/lib/billing/limits';
+import {subscriptionPlan, syncWorkspaceBillingFromStripe} from '@/lib/billing/sync';
 import {getStripe, getStripePriceId} from '@/lib/billing/stripe';
 import {localizedPath} from '@/lib/navigation';
 import {createSupabaseAdminClient} from '@/lib/supabase/admin';
@@ -21,6 +23,10 @@ function planValue(formData: FormData) {
 
 function billingIntervalValue(formData: FormData) {
   return value(formData, 'billing_interval') === 'monthly' ? 'monthly' : 'yearly';
+}
+
+function subscriptionTimestamp(subscription: Stripe.Subscription, key: 'current_period_end' | 'current_period_start') {
+  return (subscription as Stripe.Subscription & Record<typeof key, number | undefined>)[key];
 }
 
 export async function updateAccountSettingsAction(formData: FormData) {
@@ -116,6 +122,27 @@ export async function createCheckoutSessionAction(formData: FormData) {
   const stripe = getStripe();
   const appUrl = getAppUrl();
   const returnUrl = `${appUrl}${safeReturnPath}`;
+  const billing = await getWorkspaceBilling(createSupabaseAdminClient(), workspaceId);
+
+  if (billing?.stripe_subscription_id && hasPaidAccess(billing)) {
+    try {
+      await scheduleSubscriptionChange({
+        billingInterval,
+        locale,
+        plan,
+        priceId,
+        returnPath: safeReturnPath,
+        subscriptionId: billing.stripe_subscription_id,
+        workspaceId
+      });
+    } catch (error) {
+      console.error('Stripe subscription schedule failed', error);
+      redirect(`${safeReturnPath}${safeReturnPath.includes('?') ? '&' : '?'}error=checkout_failed`);
+    }
+
+    redirect(`${safeReturnPath}${safeReturnPath.includes('?') ? '&' : '?'}checkout=scheduled`);
+  }
+
   let session;
 
   try {
@@ -154,6 +181,79 @@ export async function createCheckoutSessionAction(formData: FormData) {
   }
 
   redirect(session.url);
+}
+
+async function scheduleSubscriptionChange({
+  billingInterval,
+  plan,
+  priceId,
+  subscriptionId,
+  workspaceId
+}: {
+  billingInterval: string;
+  locale: string;
+  plan: string;
+  priceId: string;
+  returnPath: string;
+  subscriptionId: string;
+  workspaceId: string;
+}) {
+  const stripe = getStripe();
+  const subscription = await syncWorkspaceBillingFromStripe(workspaceId, subscriptionId);
+  const periodStart = subscriptionTimestamp(subscription, 'current_period_start');
+  const periodEnd = subscriptionTimestamp(subscription, 'current_period_end');
+  const currentItem = subscription.items.data[0];
+
+  if (!periodStart || !periodEnd || !currentItem) {
+    throw new Error('Subscription has no current period or item.');
+  }
+
+  const current = subscriptionPlan(subscription);
+  const scheduleValue = subscription.schedule;
+  const scheduleId = typeof scheduleValue === 'string' ? scheduleValue : scheduleValue?.id;
+  const schedule = scheduleId ? await stripe.subscriptionSchedules.retrieve(scheduleId) : await stripe.subscriptionSchedules.create({from_subscription: subscription.id});
+
+  await stripe.subscriptionSchedules.update(schedule.id, {
+    end_behavior: 'release',
+    metadata: {
+      pending_billing_interval: billingInterval,
+      pending_plan: plan,
+      workspace_id: workspaceId
+    },
+    phases: [
+      {
+        end_date: periodEnd,
+        items: [
+          {
+            price: currentItem.price.id,
+            quantity: currentItem.quantity ?? 1
+          }
+        ],
+        metadata: {
+          billing_interval: current.interval,
+          plan: current.plan,
+          workspace_id: workspaceId
+        },
+        start_date: periodStart
+      },
+      {
+        items: [
+          {
+            price: priceId,
+            quantity: currentItem.quantity ?? 1
+          }
+        ],
+        metadata: {
+          billing_interval: billingInterval,
+          plan,
+          workspace_id: workspaceId
+        },
+        proration_behavior: 'none',
+        start_date: periodEnd
+      }
+    ],
+    proration_behavior: 'none'
+  });
 }
 
 export async function createBillingPortalSessionAction(formData: FormData) {
