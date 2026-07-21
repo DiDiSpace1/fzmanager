@@ -234,6 +234,7 @@
       "activeRentals": "{count, plural, =0 {Aucune location active} one {# location active} other {# locations actives}}",
       "inSixtyDays": "dans 60 jours",
       "tenantFallback": "Locataire",
+      "noData": "Aucune donnée disponible",
       "kpis": {
         "revenue": "Revenus encaissés",
         "cashFlow": "Cash-flow net",
@@ -256,7 +257,8 @@
       },
       "unpaidTrend": {
         "title": "Évolution des impayés",
-        "sinceApril": "depuis avril"
+        "sinceApril": "depuis avril",
+        "vsFirstMonth": "vs premier mois affiché"
       },
       "insights": {
         "title": "Synthèse du mois",

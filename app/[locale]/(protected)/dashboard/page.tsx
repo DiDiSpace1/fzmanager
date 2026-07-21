@@ -92,7 +92,7 @@ function buildRecentMonths() {
   const currentMonth = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1));
 
   return Array.from({length: 6}, (_, index) => {
-    const date = addMonths(currentMonth, index - 6);
+    const date = addMonths(currentMonth, index - 5);
 
     return {
       end: addMonths(date, 1).toISOString().slice(0, 10),
@@ -174,6 +174,13 @@ export default async function DashboardPage() {
     .eq('period_month', month)
     .order('created_at', {ascending: false})
     .returns<RentCharge[]>();
+  const {data: trendRentCharges} = await supabase
+    .from('rent_charges')
+    .select('id, status, total_due, period_month, rent_payments(amount, notes), leases(status, start_date, end_date, tenants(full_name), properties(name))')
+    .eq('workspace_id', workspaceId)
+    .gte('period_month', chartStart)
+    .lt('period_month', chartEnd)
+    .returns<RentCharge[]>();
   const {data: currentPayments} = await supabase
     .from('rent_payments')
     .select('amount, paid_at, notes')
@@ -234,6 +241,26 @@ export default async function DashboardPage() {
     revenue: revenueByMonth.get(chartMonth.key) ?? 0,
     cashFlow: (revenueByMonth.get(chartMonth.key) ?? 0) - (expenseByMonth.get(chartMonth.key) ?? 0)
   }));
+  const advancedChartPoints = chartPoints.filter((point) => point.revenue > 0 || point.expense > 0);
+  const trendChargesByMonth = new Map<string, RentCharge[]>();
+  (trendRentCharges ?? []).forEach((charge) => {
+    const key = charge.period_month.slice(0, 7);
+    trendChargesByMonth.set(key, [...(trendChargesByMonth.get(key) ?? []), charge]);
+  });
+  const unpaidTrendPoints = chartMonths
+    .map((chartMonth) => {
+      const monthCharges = trendChargesByMonth.get(chartMonth.key) ?? [];
+
+      return {
+        label: chartMonth.label,
+        value: monthCharges.filter((charge) => isUnpaidStatus(charge.status)).reduce((sum, charge) => sum + remainingAmount(charge), 0),
+        hasData: monthCharges.length > 0
+      };
+    })
+    .filter((point) => point.hasData);
+  const firstUnpaidTrendValue = unpaidTrendPoints[0]?.value ?? 0;
+  const lastUnpaidTrendValue = unpaidTrendPoints[unpaidTrendPoints.length - 1]?.value ?? 0;
+  const unpaidTrendChange = unpaidTrendPoints.length > 1 ? percentChange(lastUnpaidTrendValue, firstUnpaidTrendValue) : 0;
   const activeLeaseCount = rows.reduce((sum, property) => sum + property.leases.filter((lease) => isLeaseCurrentlyEffective(lease, today)).length, 0);
   const currentEffectiveCharges = charges.filter((charge) => isLeaseCurrentlyEffective(charge.leases, today));
   const paidTotal = (currentPayments ?? []).filter(isRentPayment).reduce((sum, payment) => sum + Number(payment.amount ?? 0), 0);
@@ -299,7 +326,7 @@ export default async function DashboardPage() {
         activeLeaseCount={activeLeaseCount}
         cashFlowTotal={cashFlowTotal}
         cashFlowTrend={percentChange(cashFlowTotal, previousCashFlowTotal)}
-        chartPoints={chartPoints}
+        chartPoints={advancedChartPoints}
         expiringLeases={expiringLeases}
         missingReceiptsCount={missingReceipts.length}
         occupancyRate={occupancyRate}
@@ -311,6 +338,8 @@ export default async function DashboardPage() {
         t={t}
         unpaidCharges={unpaidCharges}
         unpaidTotal={unpaidTotal}
+        unpaidTrendChange={unpaidTrendChange}
+        unpaidTrendPoints={unpaidTrendPoints}
         revenueTrend={percentChange(paidTotal, previousPaidTotal)}
       />
     );
@@ -435,10 +464,16 @@ type AdvancedDashboardProps = {
   t: Awaited<ReturnType<typeof getTranslations>>;
   unpaidCharges: RentCharge[];
   unpaidTotal: number;
+  unpaidTrendChange: number;
+  unpaidTrendPoints: {
+    hasData: boolean;
+    label: string;
+    value: number;
+  }[];
   revenueTrend: number;
 };
 
-function AdvancedDashboard({activeLeaseCount, cashFlowTotal, cashFlowTrend, chartPoints, expiringLeases, missingReceiptsCount, occupancyRate, paidTotal, plan, propertyPerformance, receiptCoverage, t, unpaidCharges, unpaidTotal, revenueTrend}: AdvancedDashboardProps) {
+function AdvancedDashboard({activeLeaseCount, cashFlowTotal, cashFlowTrend, chartPoints, expiringLeases, missingReceiptsCount, occupancyRate, paidTotal, plan, propertyPerformance, receiptCoverage, t, unpaidCharges, unpaidTotal, unpaidTrendChange, unpaidTrendPoints, revenueTrend}: AdvancedDashboardProps) {
   const firstUnpaid = unpaidCharges[0];
   const firstExpiring = expiringLeases[0];
   const planLabel = plan === 'portfolio' ? 'Portfolio' : 'Plus';
@@ -476,7 +511,7 @@ function AdvancedDashboard({activeLeaseCount, cashFlowTotal, cashFlowTrend, char
           <div className="grid content-start gap-6">
             <MonthlyTrendCard points={chartPoints} t={t} />
             <PerformanceTable rows={propertyPerformance} t={t} />
-            <UnpaidEvolutionCard t={t} unpaidTotal={unpaidTotal} />
+            <UnpaidEvolutionCard points={unpaidTrendPoints} t={t} trendChange={unpaidTrendChange} />
           </div>
 
           <aside className="grid content-start gap-6">
@@ -542,26 +577,34 @@ function MonthlyTrendCard({points, t}: {points: AdvancedDashboardProps['chartPoi
           <Legend color="#006f61" label={t('advanced.trend.cashFlow')} line />
         </div>
       </div>
-      <div className="mt-6 h-[260px] w-full overflow-hidden">
-        <div className="flex h-full items-end gap-4 border-b border-[#dce5e1] pb-8">
-          {points.map((point) => {
-            const revenueHeight = Math.max(3, (point.revenue / maxValue) * 170);
-            const expenseHeight = Math.max(3, (point.expense / maxValue) * 170);
-            const cashFlowTop = 180 - Math.max(0, (point.cashFlow / maxValue) * 150);
+      {points.length ? (
+        <div className="mt-6 h-[260px] w-full overflow-hidden">
+          <div className="flex h-full items-end gap-4 border-b border-[#dce5e1] pb-8">
+            {points.map((point) => {
+              const revenueHeight = point.revenue > 0 ? Math.max(6, (point.revenue / maxValue) * 170) : 0;
+              const expenseHeight = point.expense > 0 ? Math.max(6, (point.expense / maxValue) * 170) : 0;
+              const cashFlowTop = 180 - Math.max(0, (point.cashFlow / maxValue) * 150);
 
-            return (
-              <div className="relative flex min-w-0 flex-1 items-end justify-center gap-2" key={point.label}>
-                <div className="w-5 rounded-t-sm bg-[#65cdb7]" style={{height: `${revenueHeight}px`}} title={`${t('chart.revenue')} ${formatMoney(point.revenue)}`} />
-                <div className="w-5 rounded-t-sm bg-[#ef5b60]" style={{height: `${expenseHeight}px`}} title={`${t('chart.expenses')} ${formatMoney(point.expense)}`} />
-                <span className="absolute h-2.5 w-2.5 rounded-full bg-[#006f61] shadow-sm" style={{bottom: `${cashFlowTop}px`}} title={`${t('advanced.trend.cashFlow')} ${formatMoney(point.cashFlow)}`} />
-                <span className="absolute -bottom-7 text-xs font-medium text-[#53615e]">{point.label}</span>
-              </div>
-            );
-          })}
+              return (
+                <div className="relative flex min-w-0 flex-1 items-end justify-center gap-2" key={point.label}>
+                  <div className="w-5 rounded-t-sm bg-[#65cdb7]" style={{height: `${revenueHeight}px`}} title={`${t('chart.revenue')} ${formatMoney(point.revenue)}`} />
+                  <div className="w-5 rounded-t-sm bg-[#ef5b60]" style={{height: `${expenseHeight}px`}} title={`${t('chart.expenses')} ${formatMoney(point.expense)}`} />
+                  <span className="absolute h-2.5 w-2.5 rounded-full bg-[#006f61] shadow-sm" style={{bottom: `${cashFlowTop}px`}} title={`${t('advanced.trend.cashFlow')} ${formatMoney(point.cashFlow)}`} />
+                  <span className="absolute -bottom-7 text-xs font-medium text-[#53615e]">{point.label}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      ) : (
+        <NoDataMessage label={t('advanced.noData')} />
+      )}
     </section>
   );
+}
+
+function NoDataMessage({label}: {label: string}) {
+  return <div className="mt-6 flex min-h-[220px] items-center justify-center rounded-lg border border-dashed border-[#dce5e1] bg-[#f8fbfa] text-sm font-medium text-[#66736f]">{label}</div>;
 }
 
 function Legend({color, label, line = false}: {color: string; label: string; line?: boolean}) {
@@ -615,27 +658,32 @@ function PerformanceTable({rows, t}: {rows: AdvancedDashboardProps['propertyPerf
   );
 }
 
-function UnpaidEvolutionCard({t, unpaidTotal}: {t: AdvancedDashboardProps['t']; unpaidTotal: number}) {
-  const values = [1200, 900, 650, unpaidTotal + 220, unpaidTotal + 80, unpaidTotal].map((value) => Math.max(0, value));
-  const maxValue = Math.max(1, ...values);
+function UnpaidEvolutionCard({points, t, trendChange}: {points: AdvancedDashboardProps['unpaidTrendPoints']; t: AdvancedDashboardProps['t']; trendChange: number}) {
+  const maxValue = Math.max(1, ...points.map((point) => point.value));
 
   return (
     <section className="rounded-xl border border-[#dce5e1] bg-white p-6 shadow-[0_2px_6px_rgba(20,45,38,0.07)]">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h2 className="text-base font-semibold text-[#17201e]">{t('advanced.unpaidTrend.title')}</h2>
-        <div className="rounded-xl border border-[#b8ddd3] bg-[#f5faf8] px-4 py-3 text-right">
-          <p className="text-xl font-semibold text-[#00796b]">-35%</p>
-          <p className="text-xs text-[#66736f]">{t('advanced.unpaidTrend.sinceApril')}</p>
-        </div>
-      </div>
-      <div className="mt-5 flex h-36 items-end gap-5 border-b border-[#dce5e1] pb-6">
-        {values.map((value, index) => (
-          <div className="relative flex flex-1 justify-center" key={`${value}-${index}`}>
-            <div className="w-8 rounded-t-sm bg-[#ef5b60]" style={{height: `${Math.max(6, (value / maxValue) * 104)}px`}} />
-            <span className="absolute -bottom-6 text-xs text-[#53615e]">{monthLabels[index]}</span>
+        {points.length > 1 ? (
+          <div className="rounded-xl border border-[#b8ddd3] bg-[#f5faf8] px-4 py-3 text-right">
+            <p className={trendChange > 0 ? 'text-xl font-semibold text-[#ba1a1a]' : 'text-xl font-semibold text-[#00796b]'}>{formatTrend(trendChange)}</p>
+            <p className="text-xs text-[#66736f]">{t('advanced.unpaidTrend.vsFirstMonth')}</p>
           </div>
-        ))}
+        ) : null}
       </div>
+      {points.length ? (
+        <div className="mt-5 flex h-36 items-end gap-5 border-b border-[#dce5e1] pb-6">
+          {points.map((point) => (
+            <div className="relative flex flex-1 justify-center" key={point.label}>
+              <div className="w-8 rounded-t-sm bg-[#ef5b60]" style={{height: `${point.value > 0 ? Math.max(6, (point.value / maxValue) * 104) : 0}px`}} title={formatMoney(point.value)} />
+              <span className="absolute -bottom-6 text-xs text-[#53615e]">{point.label}</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <NoDataMessage label={t('advanced.noData')} />
+      )}
     </section>
   );
 }
