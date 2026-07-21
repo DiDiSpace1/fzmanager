@@ -50,7 +50,7 @@ export async function signUpAction(formData: FormData) {
   const countryCode = getRequiredValue(formData, 'country');
   const locale = getRequiredValue(formData, 'locale');
   const supabase = await createSupabaseServerClient();
-  const appUrl = getAppOrigin();
+  const appUrl = await getAppOrigin();
 
   const {data, error} = await supabase.auth.signUp({
     email,
@@ -85,7 +85,7 @@ export async function requestPasswordResetAction(formData: FormData) {
   const email = getRequiredValue(formData, 'email');
   const locale = getOptionalValue(formData, 'locale') || 'fr';
   const supabase = await createSupabaseServerClient();
-  const appUrl = getAppOrigin();
+  const appUrl = await getAppOrigin();
   const redirectTo = `${appUrl}${localizedPath(locale, '/reset-password')}`;
 
   await supabase.auth.resetPasswordForEmail(email, {
