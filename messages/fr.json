@@ -306,17 +306,63 @@
       "deleteTitle": "Supprimer ce bien ?",
       "deleteDescription": "Cette action supprimera aussi les baux, échéances et données associées à ce bien."
     },
+    "detail": {
+      "backToProperties": "Retour aux biens",
+      "edit": "Modifier",
+      "addressMissing": "Adresse à compléter",
+      "overview": {
+        "mode": "Mode",
+        "type": "Type",
+        "surface": "Surface",
+        "status": "Statut"
+      },
+      "rentalModes": {
+        "sharedRooms": "colocation",
+        "entirePlace": "entier",
+        "mixed": "mixte",
+        "unknown": "-"
+      },
+      "status": {
+        "rented": "Loué",
+        "vacant": "Vacant"
+      },
+      "general": {
+        "title": "Informations générales",
+        "address": "Adresse",
+        "city": "Ville",
+        "taxRegime": "Régime fiscal",
+        "occupation": "Occupation"
+      },
+      "financial": {
+        "title": "Aspects financiers",
+        "monthlyRent": "Loyer mensuel HC",
+        "charges": "Charges",
+        "deposit": "Dépôt de garantie"
+      },
+      "leases": {
+        "title": "Baux",
+        "newLease": "Nouveau bail",
+        "tenantFallback": "Locataire",
+        "empty": "Aucun bail enregistré."
+      },
+      "quickActions": {
+        "title": "Actions rapides",
+        "tax": "Bordereau fiscal",
+        "manageLeases": "Gérer les baux"
+      }
+    },
     "photos": {
       "title": "Photos",
       "deletePhoto": "Supprimer la photo",
-      "empty": "Aucune photo pour ce bien.",
+      "empty": "Ce bien ne contient pas encore de photos.",
       "addPhotos": "Ajouter des photos",
+      "chooseFiles": "Choisir des fichiers",
       "uploading": "Envoi...",
       "uploadFailed": "Impossible d'envoyer cette photo. Réessayez avec une image plus légère.",
       "archiveFailed": "Photo envoyée, mais impossible de l'archiver. Réessayez.",
       "remainingLimit": "Vous pouvez ajouter encore {count} photo(s) maximum.",
       "fileTooLarge": "{name} dépasse la taille maximale de {size}.",
-      "selectionSummary": "{selected}/{max} photo(s) sélectionnée(s). Taille maximale par fichier: {size}."
+      "selectionSummary": "{selected, plural, =0 {0 photo sur {max} sélectionnée} one {# photo sur {max} sélectionnée} other {# photos sur {max} sélectionnées}} · Taille max. par fichier : {size}"
     }
   },
   "tenants": {

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
-import {getLocale} from 'next-intl/server';
+import {getLocale, getTranslations} from 'next-intl/server';
 
 import {getPlanLimits, getPropertyPhotoLimit} from '@/lib/billing/config';
 import {getWorkspaceBilling} from '@/lib/billing/limits';
@@ -49,9 +49,9 @@ type PropertyDetail = {
 };
 
 const modeLabels: Record<string, string> = {
-  entire_place: 'entier',
-  mixed: 'mixte',
-  shared_rooms: 'colocation'
+  entire_place: 'entirePlace',
+  mixed: 'mixed',
+  shared_rooms: 'sharedRooms'
 };
 
 const propertyTypeLabels: Record<string, string> = {
@@ -67,12 +67,18 @@ const propertyTypeLabels: Record<string, string> = {
 };
 
 function money(value: number | null | undefined) {
-  return value || value === 0 ? `${Number(value).toLocaleString('fr-FR')} EUR` : '-';
+  return value || value === 0 ? `${Number(value).toLocaleString('fr-FR')} €` : '-';
+}
+
+function surface(value: number | null | undefined) {
+  return value || value === 0 ? `${Number(value).toLocaleString('fr-FR')} m²` : '-';
 }
 
 export default async function PropertyDetailPage({params}: PropertyDetailPageProps) {
   const {id} = await params;
   const locale = await getLocale();
+  const t = await getTranslations('properties.detail');
+  const bailT = await getTranslations('bail.status');
   const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
   const {data, error} = await supabase
     .from('properties')
@@ -94,7 +100,8 @@ export default async function PropertyDetailPage({params}: PropertyDetailPagePro
   const address = [property.address_line1, property.postal_code, property.city].filter(Boolean).join(', ');
   const activeLeases = property.leases.filter((lease) => lease.status === 'active');
   const firstActiveLease = activeLeases[0];
-  const statusLabel = activeLeases.length || property.occupancy_status === 'rented' ? 'Loue' : 'Vacant';
+  const isRented = activeLeases.length || property.occupancy_status === 'rented';
+  const statusLabel = isRented ? t('status.rented') : t('status.vacant');
   const signedPhotos = await Promise.all(
     property.property_photos.map(async (photo) => {
       const {data: signed} = await supabase.storage.from('property-photos').createSignedUrl(photo.file_path, 60 * 5);
@@ -110,129 +117,172 @@ export default async function PropertyDetailPage({params}: PropertyDetailPagePro
   );
 
   return (
-    <>
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <Link className="inline-flex items-center text-sm font-semibold text-[var(--accent)]" href="/properties">
-            Retour aux biens
+    <div className="-mx-5 -my-8 bg-[#f5f9f7] px-4 pb-10 pt-6 font-[Inter,system-ui,-apple-system,BlinkMacSystemFont,'Segoe_UI',sans-serif] text-[#17201e] sm:px-6 lg:-mx-8 lg:px-8">
+      <div className="mx-auto max-w-[1440px]">
+        <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+          <div className="min-w-0">
+            <Link className="inline-flex items-center gap-2 text-sm font-semibold text-[#006f61] hover:text-[#00574f]" href="/properties">
+              <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+              {t('backToProperties')}
+            </Link>
+            <h1 className="mt-6 text-[24px] font-bold leading-[1.2] tracking-[-0.02em] text-[#17201e] md:text-[28px]">{property.name}</h1>
+            <p className="mt-4 flex min-w-0 items-start gap-2 text-[13px] font-normal leading-[1.45] text-[#66736f] md:text-sm">
+              <span className="material-symbols-outlined mt-0.5 shrink-0 text-[20px]">location_on</span>
+              <span className="min-w-0 break-words">{address || t('addressMissing')}</span>
+            </p>
+          </div>
+          <Link
+            className="focus-ring inline-flex h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-[#006f61] px-5 text-sm font-semibold text-white shadow-sm hover:bg-[#00574f]"
+            href={`/properties/${property.id}/edit`}
+            style={{color: '#ffffff'}}
+          >
+            <span className="material-symbols-outlined text-[20px]">edit</span>
+            {t('edit')}
           </Link>
-          <h1 className="mt-3 text-3xl font-semibold tracking-normal text-[#171d1c]">{property.name}</h1>
-          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{address || 'Adresse a completer'}</p>
         </div>
-        <Link className="focus-ring inline-flex min-h-11 items-center justify-center rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white cursor-pointer" href={`/properties/${property.id}/edit`} style={{color: '#ffffff'}}>
-          Modifier
-        </Link>
-      </div>
 
-      <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <InfoCard label="Mode" value={modeLabels[property.rental_mode] ?? property.rental_mode} />
-        <InfoCard label="Type" value={propertyTypeLabels[property.property_type] ?? property.property_type} />
-        <InfoCard label="Surface" value={property.surface_area ? `${Number(property.surface_area).toLocaleString('fr-FR')} m2` : '-'} />
-        <InfoCard label="Statut" value={statusLabel} />
-      </section>
+        <section className="mt-10 grid gap-4 sm:grid-cols-2 min-[1100px]:grid-cols-4">
+          <InfoCard icon="group" label={t('overview.mode')} value={t(`rentalModes.${modeLabels[property.rental_mode] ?? 'unknown'}`)} />
+          <InfoCard icon="home" label={t('overview.type')} value={propertyTypeLabels[property.property_type] ?? property.property_type} />
+          <InfoCard icon="straighten" label={t('overview.surface')} value={surface(property.surface_area)} />
+          <InfoCard icon="verified" label={t('overview.status')} value={statusLabel} />
+        </section>
 
-      <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
-        <div className="grid content-start gap-6">
-          <SectionCard title="Informations generales">
-            <div className="grid gap-5 md:grid-cols-2">
-              <DataRow label="Adresse" value={property.address_line1 ?? '-'} />
-              <DataRow label="Ville" value={[property.postal_code, property.city].filter(Boolean).join(' ') || '-'} />
-              <DataRow label="Regime fiscal" value={property.tax_regime} />
-              <DataRow label="Occupation" value={statusLabel} />
-            </div>
-          </SectionCard>
-
-          <SectionCard title="Aspects financiers">
-            <div className="grid gap-5 md:grid-cols-3">
-              <DataRow label="Loyer mensuel HC" value={money(firstActiveLease?.monthly_rent ?? property.monthly_rent_estimate)} valueClassName="text-[var(--accent)]" />
-              <DataRow label="Charges" value={money(firstActiveLease?.charges_amount ?? property.charges_estimate)} />
-              <DataRow label="Depot de garantie" value={money(firstActiveLease?.deposit_amount ?? property.deposit_estimate)} />
-            </div>
-          </SectionCard>
-
-          <section className="overflow-hidden rounded-lg border border-[var(--line-soft)] bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-[var(--line-soft)] bg-[#f0f5f2] px-5 py-4">
-              <h2 className="text-base font-semibold">Baux</h2>
-              <Link className="text-sm font-semibold text-[var(--accent)]" href={`/properties/${property.id}/tenants`}>
-                Nouveau bail
-              </Link>
-            </div>
-            {property.leases.length ? (
-              <div className="divide-y divide-[var(--line-soft)]">
-                {property.leases.map((lease) => (
-                  <div className="grid gap-3 p-5 transition hover:bg-[#f0f5f2] md:grid-cols-[1fr_auto]" key={lease.id}>
-                    <div>
-                      <p className="font-semibold">{lease.tenants?.full_name ?? 'Locataire'}</p>
-                      <p className="mt-1 text-sm text-[var(--muted)]">{[lease.start_date, lease.end_date].filter(Boolean).join(' - ')}</p>
-                    </div>
-                    <div className="text-left md:text-right">
-                      <p className="text-base font-semibold tabular-nums">{money(lease.monthly_rent)}</p>
-                      <span className={lease.status === 'active' ? 'rounded bg-[#ecfdf5] px-2 py-1 text-xs font-semibold text-[#047857]' : 'rounded bg-[#eef2ff] px-2 py-1 text-xs font-semibold text-[#3755c3]'}>
-                        {lease.status === 'active' ? 'Actif' : lease.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+        <section className="mt-8 grid gap-6 min-[1100px]:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
+          <div className="grid content-start gap-6">
+            <SectionCard icon="assignment" title={t('general.title')}>
+              <div className="grid gap-x-16 gap-y-6 md:grid-cols-2">
+                <DataRow label={t('general.address')} value={property.address_line1 ?? '-'} />
+                <DataRow label={t('general.city')} value={[property.postal_code, property.city].filter(Boolean).join(' ') || '-'} />
+                <DataRow label={t('general.taxRegime')} value={property.tax_regime} />
+                <DataRow label={t('general.occupation')} value={statusLabel} />
               </div>
-            ) : (
-              <div className="p-5 text-sm text-[var(--muted)]">Aucun bail enregistre.</div>
-            )}
-          </section>
-        </div>
+            </SectionCard>
 
-        <aside className="grid content-start gap-6">
-          <PropertyPhotoGallery
-            existingCount={property.property_photos.length}
-            locale={locale}
-            maxPhotoSizeBytes={planLimits.maxDocumentSizeBytes}
-            photoLimit={photoLimit}
-            photos={signedPhotos}
-            propertyId={property.id}
-            workspaceId={workspaceId}
-          />
+            <SectionCard icon="bar_chart" title={t('financial.title')}>
+              <div className="grid gap-5 md:grid-cols-3 md:divide-x md:divide-[#dce5e1]">
+                <FinancialRow accent label={t('financial.monthlyRent')} value={money(firstActiveLease?.monthly_rent ?? property.monthly_rent_estimate)} />
+                <FinancialRow label={t('financial.charges')} value={money(firstActiveLease?.charges_amount ?? property.charges_estimate)} />
+                <FinancialRow label={t('financial.deposit')} value={money(firstActiveLease?.deposit_amount ?? property.deposit_estimate)} />
+              </div>
+            </SectionCard>
 
-          <section className="rounded-lg border border-[var(--line-soft)] bg-white p-5 shadow-sm">
-            <h2 className="text-base font-semibold">Actions rapides</h2>
-            <div className="mt-3 grid gap-2">
-              <Link className="rounded-md px-3 py-3 text-sm font-medium hover:bg-[#f0f5f2]" href="/tax">
-                Bordereau fiscal
-              </Link>
-              <Link className="rounded-md px-3 py-3 text-sm font-medium hover:bg-[#f0f5f2]" href={`/bail?property_id=${property.id}`}>
-                Gerer les baux
-              </Link>
-            </div>
-          </section>
-        </aside>
-      </section>
-    </>
-  );
-}
+            <section className="overflow-hidden rounded-xl border border-[#dce5e1] bg-white p-6 shadow-[0_2px_6px_rgba(20,45,38,0.07)]">
+              <div className="flex items-center justify-between gap-4">
+                <CardTitle icon="description" title={t('leases.title')} />
+                <Link className="inline-flex items-center gap-2 text-sm font-semibold text-[#006f61] hover:text-[#00574f]" href={`/properties/${property.id}/tenants`}>
+                  <span className="material-symbols-outlined text-[20px]">add_circle</span>
+                  {t('leases.newLease')}
+                </Link>
+              </div>
+              {property.leases.length ? (
+                <div className="mt-6 divide-y divide-[#dce5e1]">
+                  {property.leases.map((lease) => (
+                    <Link className="grid gap-3 py-5 transition hover:bg-[#f5faf8] sm:grid-cols-[1fr_auto]" href={`/bail/${lease.id}`} key={lease.id}>
+                      <div className="min-w-0">
+                        <p className="break-words text-[15px] font-semibold leading-[1.4] text-[#17201e]">{lease.tenants?.full_name ?? t('leases.tenantFallback')}</p>
+                        <p className="mt-1 text-[13px] font-normal leading-[1.45] text-[#66736f]">{[lease.start_date, lease.end_date].filter(Boolean).join(' – ')}</p>
+                      </div>
+                      <div className="text-left sm:text-right">
+                        <p className="text-[15px] font-semibold tabular-nums text-[#17201e]">{money(lease.monthly_rent)}</p>
+                        <span className="mt-2 inline-flex rounded-md bg-[#e4f7ed] px-2 py-1 text-xs font-semibold text-[#087a55]">{lease.status === 'active' ? bailT('active') : lease.status}</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-6 text-[13px] font-normal leading-[1.45] text-[#66736f]">{t('leases.empty')}</div>
+              )}
+            </section>
+          </div>
 
-function InfoCard({label, value}: {label: string; value: string}) {
-  return (
-    <div className="rounded-lg border border-[var(--line-soft)] bg-white p-5 shadow-sm">
-      <p className="text-xs font-semibold uppercase text-[var(--muted)]">{label}</p>
-      <p className="mt-3 text-xl font-semibold">{value}</p>
+          <aside className="grid content-start gap-6">
+            <PropertyPhotoGallery
+              existingCount={property.property_photos.length}
+              locale={locale}
+              maxPhotoSizeBytes={planLimits.maxDocumentSizeBytes}
+              photoLimit={photoLimit}
+              photos={signedPhotos}
+              propertyId={property.id}
+              workspaceId={workspaceId}
+            />
+
+            <section className="overflow-hidden rounded-xl border border-[#dce5e1] bg-white p-6 shadow-[0_2px_6px_rgba(20,45,38,0.07)]">
+              <CardTitle icon="bolt" title={t('quickActions.title')} />
+              <div className="mt-5 divide-y divide-[#dce5e1]">
+                <QuickAction href="/tax" icon="description" label={t('quickActions.tax')} />
+                <QuickAction href={`/bail?property_id=${property.id}`} icon="group" label={t('quickActions.manageLeases')} />
+              </div>
+            </section>
+          </aside>
+        </section>
+      </div>
     </div>
   );
 }
 
-function SectionCard({children, title}: {children: React.ReactNode; title: string}) {
+function MaterialIcon({children, className = ''}: {children: string; className?: string}) {
+  return <span className={`material-symbols-outlined ${className}`}>{children}</span>;
+}
+
+function CardTitle({icon, title}: {icon: string; title: string}) {
   return (
-    <section className="overflow-hidden rounded-lg border border-[var(--line-soft)] bg-white shadow-sm">
-      <div className="border-b border-[var(--line-soft)] bg-[#f0f5f2] px-5 py-4">
-        <h2 className="text-base font-semibold">{title}</h2>
+    <div className="flex min-w-0 items-center gap-3">
+      <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-lg bg-[#e5f6ef] text-[#00796b]">
+        <MaterialIcon className="text-[20px]">{icon}</MaterialIcon>
+      </span>
+      <h2 className="min-w-0 text-base font-semibold leading-[1.4] text-[#17201e]">{title}</h2>
+    </div>
+  );
+}
+
+function InfoCard({icon, label, value}: {icon: string; label: string; value: string}) {
+  return (
+    <div className="flex min-h-[120px] items-center gap-5 rounded-xl border border-[#dce5e1] bg-white p-6 shadow-[0_2px_6px_rgba(20,45,38,0.08)]">
+      <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#eaf3ef] text-[#00796b]">
+        <MaterialIcon className="text-[34px]">{icon}</MaterialIcon>
+      </span>
+      <div className="min-w-0">
+        <p className="text-[11px] font-semibold uppercase leading-[1.4] tracking-[0.03em] text-[#53615e]">{label}</p>
+        <p className="mt-2 break-words text-[19px] font-semibold leading-[1.25] text-[#17201e]">{value}</p>
       </div>
-      <div className="p-5">{children}</div>
+    </div>
+  );
+}
+
+function SectionCard({children, icon, title}: {children: React.ReactNode; icon: string; title: string}) {
+  return (
+    <section className="overflow-hidden rounded-xl border border-[#dce5e1] bg-white p-6 shadow-[0_2px_6px_rgba(20,45,38,0.07)]">
+      <CardTitle icon={icon} title={title} />
+      <div className="mt-7">{children}</div>
     </section>
   );
 }
 
-function DataRow({label, value, valueClassName = ''}: {label: string; value: string; valueClassName?: string}) {
+function DataRow({label, value}: {label: string; value: string}) {
   return (
-    <div>
-      <dt className="text-xs font-semibold uppercase text-[var(--muted)]">{label}</dt>
-      <dd className={['mt-1 text-sm font-semibold tabular-nums', valueClassName].join(' ')}>{value}</dd>
+    <div className="min-w-0">
+      <dt className="text-[11px] font-semibold uppercase leading-[1.4] tracking-[0.03em] text-[#53615e]">{label}</dt>
+      <dd className="mt-2 break-words text-sm font-medium leading-[1.45] text-[#17201e]">{value}</dd>
     </div>
+  );
+}
+
+function FinancialRow({accent = false, label, value}: {accent?: boolean; label: string; value: string}) {
+  return (
+    <div className="min-w-0 md:px-8 first:md:pl-0 last:md:pr-0">
+      <dt className="text-[11px] font-semibold uppercase leading-[1.4] tracking-[0.03em] text-[#53615e]">{label}</dt>
+      <dd className={`mt-3 break-words text-[22px] font-semibold leading-[1.2] tabular-nums ${accent ? 'text-[#00796b]' : 'text-[#17201e]'}`}>{value}</dd>
+    </div>
+  );
+}
+
+function QuickAction({href, icon, label}: {href: string; icon: string; label: string}) {
+  return (
+    <Link className="-mx-3 flex min-h-14 items-center gap-3 rounded-lg px-3 text-sm font-medium text-[#006f61] transition hover:bg-[#f5faf8]" href={href}>
+      <MaterialIcon className="shrink-0 text-[24px]">{icon}</MaterialIcon>
+      <span className="min-w-0 flex-1 break-words">{label}</span>
+      <MaterialIcon className="shrink-0 text-[24px] text-[#33413f]">chevron_right</MaterialIcon>
+    </Link>
   );
 }

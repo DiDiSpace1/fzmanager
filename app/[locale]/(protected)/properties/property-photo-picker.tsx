@@ -13,10 +13,10 @@ type PropertyPhotoPickerProps = {
 
 function formatSize(bytes: number) {
   if (bytes >= 1024 * 1024) {
-    return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+    return `${Number(bytes / 1024 / 1024).toLocaleString('fr-FR', {maximumFractionDigits: 1})} Mo`;
   }
 
-  return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${Math.max(1, Math.round(bytes / 1024)).toLocaleString('fr-FR')} Ko`;
 }
 
 function fileKey(file: File) {
@@ -47,11 +47,11 @@ export function PropertyPhotoPicker({disabled = false, existingCount = 0, maxFil
   }
 
   return (
-    <div className="mt-4 grid gap-3 text-left">
+    <div className="mt-4 grid gap-3 text-center">
       <input
         ref={inputRef}
         accept="image/*"
-        className="focus-ring w-full rounded-md border border-[var(--line-soft)] bg-white px-3 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+        className="sr-only"
         disabled={disabled || remainingSlots === 0}
         multiple
         name="photos"
@@ -85,7 +85,15 @@ export function PropertyPhotoPicker({disabled = false, existingCount = 0, maxFil
         }}
         type="file"
       />
-      <p className="text-xs text-[var(--muted)]">
+      <button
+        className="focus-ring mx-auto inline-flex min-h-14 w-full items-center justify-start rounded-lg border border-[#dce5e1] bg-white px-4 text-sm font-medium text-[#53615e] disabled:cursor-not-allowed disabled:opacity-60"
+        disabled={disabled || remainingSlots === 0}
+        onClick={() => inputRef.current?.click()}
+        type="button"
+      >
+        {t('chooseFiles')}
+      </button>
+      <p className="text-left text-xs font-normal leading-[1.45] text-[#66736f]">
         {t('selectionSummary', {selected: existingCount + files.length, max: maxFiles, size: formatSize(maxSizeBytes)})}
       </p>
       {error ? <p className="text-sm font-semibold text-[#ba1a1a]">{error}</p> : null}

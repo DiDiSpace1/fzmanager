@@ -85,10 +85,15 @@ export function PropertyPhotoGallery({existingCount, locale, maxPhotoSizeBytes, 
   }
 
   return (
-    <section className="rounded-lg border border-[var(--line-soft)] bg-white p-5 shadow-sm">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold">{t('title')}</h2>
-        <span className="text-xs font-semibold text-[var(--muted)]">
+    <section className="overflow-hidden rounded-xl border border-[#dce5e1] bg-white p-6 shadow-[0_2px_6px_rgba(20,45,38,0.07)]">
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-lg bg-[#e5f6ef] text-[#00796b]">
+            <span className="material-symbols-outlined text-[20px]">photo_camera</span>
+          </span>
+          <h2 className="min-w-0 text-base font-semibold leading-[1.4] text-[#17201e]">{t('title')}</h2>
+        </div>
+        <span className="shrink-0 text-sm font-medium tabular-nums text-[#17201e]">
           {existingCount}/{photoLimit}
         </span>
       </div>
@@ -118,11 +123,12 @@ export function PropertyPhotoGallery({existingCount, locale, maxPhotoSizeBytes, 
           ))}
         </div>
       ) : (
-        <p className="text-sm text-[var(--muted)]">{t('empty')}</p>
+        <p className="text-sm font-normal leading-[1.45] text-[#66736f]">{t('empty')}</p>
       )}
 
-      <div className="mt-4 rounded-lg border border-dashed border-[var(--line)] bg-[#fbfdfc] p-4">
-        <p className="text-sm font-semibold">{t('addPhotos')}</p>
+      <div className="mt-6 rounded-xl border border-dashed border-[#74938b] bg-[#fbfdfc] px-5 py-7 text-center">
+        <span className="material-symbols-outlined text-[36px] text-[#00796b]">cloud_upload</span>
+        <p className="mt-3 text-sm font-semibold text-[#17201e]">{t('addPhotos')}</p>
         <PropertyPhotoPicker disabled={existingCount >= photoLimit || isPending} existingCount={existingCount} maxFiles={photoLimit} maxSizeBytes={maxPhotoSizeBytes} onFilesChange={setFiles} />
         {files.length ? (
           <button className="focus-ring mt-3 min-h-10 rounded-md bg-[var(--accent)] px-4 text-sm font-semibold text-white disabled:opacity-60" disabled={isPending} onClick={uploadSelectedPhotos} type="button">

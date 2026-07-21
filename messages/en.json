@@ -306,17 +306,63 @@
       "deleteTitle": "Delete this property?",
       "deleteDescription": "This action will also delete leases, rent charges and data associated with this property."
     },
+    "detail": {
+      "backToProperties": "Back to properties",
+      "edit": "Edit",
+      "addressMissing": "Address to complete",
+      "overview": {
+        "mode": "Mode",
+        "type": "Type",
+        "surface": "Surface",
+        "status": "Status"
+      },
+      "rentalModes": {
+        "sharedRooms": "shared rental",
+        "entirePlace": "entire place",
+        "mixed": "mixed",
+        "unknown": "-"
+      },
+      "status": {
+        "rented": "Rented",
+        "vacant": "Vacant"
+      },
+      "general": {
+        "title": "General information",
+        "address": "Address",
+        "city": "City",
+        "taxRegime": "Tax regime",
+        "occupation": "Occupation"
+      },
+      "financial": {
+        "title": "Financial aspects",
+        "monthlyRent": "Monthly rent excl. charges",
+        "charges": "Charges",
+        "deposit": "Security deposit"
+      },
+      "leases": {
+        "title": "Leases",
+        "newLease": "New lease",
+        "tenantFallback": "Tenant",
+        "empty": "No lease registered."
+      },
+      "quickActions": {
+        "title": "Quick actions",
+        "tax": "Tax statement",
+        "manageLeases": "Manage leases"
+      }
+    },
     "photos": {
       "title": "Photos",
       "deletePhoto": "Delete photo",
-      "empty": "No photos for this property.",
+      "empty": "This property does not contain any photos yet.",
       "addPhotos": "Add photos",
+      "chooseFiles": "Choose files",
       "uploading": "Uploading...",
       "uploadFailed": "Unable to upload this photo. Try again with a lighter image.",
       "archiveFailed": "Photo uploaded, but it could not be archived. Try again.",
       "remainingLimit": "You can add up to {count} more photo(s).",
       "fileTooLarge": "{name} exceeds the maximum size of {size}.",
-      "selectionSummary": "{selected}/{max} photo(s) selected. Maximum file size: {size}."
+      "selectionSummary": "{selected, plural, =0 {0 photo out of {max} selected} one {# photo out of {max} selected} other {# photos out of {max} selected}} · Max. file size: {size}"
     }
   },
   "tenants": {

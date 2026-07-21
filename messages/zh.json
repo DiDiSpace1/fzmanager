@@ -306,17 +306,63 @@
       "deleteTitle": "确定删除此房产？",
       "deleteDescription": "此操作也将删除与该房产关联的租约、账单及相关数据。"
     },
+    "detail": {
+      "backToProperties": "返回房产",
+      "edit": "编辑",
+      "addressMissing": "地址待完善",
+      "overview": {
+        "mode": "模式",
+        "type": "类型",
+        "surface": "面积",
+        "status": "状态"
+      },
+      "rentalModes": {
+        "sharedRooms": "合租",
+        "entirePlace": "整租",
+        "mixed": "混合",
+        "unknown": "-"
+      },
+      "status": {
+        "rented": "已出租",
+        "vacant": "空置"
+      },
+      "general": {
+        "title": "基本信息",
+        "address": "地址",
+        "city": "城市",
+        "taxRegime": "税务制度",
+        "occupation": "出租状态"
+      },
+      "financial": {
+        "title": "财务信息",
+        "monthlyRent": "月租金（不含杂费）",
+        "charges": "杂费",
+        "deposit": "押金"
+      },
+      "leases": {
+        "title": "租约",
+        "newLease": "新建租约",
+        "tenantFallback": "租客",
+        "empty": "暂无已登记租约。"
+      },
+      "quickActions": {
+        "title": "快捷操作",
+        "tax": "税务汇总",
+        "manageLeases": "管理租约"
+      }
+    },
     "photos": {
       "title": "照片",
       "deletePhoto": "删除照片",
-      "empty": "该房产暂无照片。",
+      "empty": "该房产目前还没有照片。",
       "addPhotos": "添加照片",
+      "chooseFiles": "选择文件",
       "uploading": "上传中...",
       "uploadFailed": "无法上传该照片。请尝试更小的图片文件。",
       "archiveFailed": "照片已上传，但归档失败。请重试。",
       "remainingLimit": "您还可以添加最多 {count} 张照片。",
       "fileTooLarge": "{name} 超过了 {size} 的最大文件大小限制。",
-      "selectionSummary": "已选择 {selected}/{max} 张照片。单文件最大限制：{size}。"
+      "selectionSummary": "{selected, plural, =0 {已选择 0/{max} 张照片} other {已选择 #/{max} 张照片}} · 单文件最大限制：{size}"
     }
   },
   "tenants": {

@@ -107,7 +107,7 @@ export async function AppShell({children}: {children: React.ReactNode}) {
             ))}
           </nav>
         </header>
-        <main className="mx-auto max-w-6xl px-5 py-8 lg:px-8">{children}</main>
+        <main className="mx-auto max-w-[1440px] px-5 py-8 lg:px-8">{children}</main>
       </div>
     </div>
   );
