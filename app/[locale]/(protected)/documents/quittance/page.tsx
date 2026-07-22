@@ -1,5 +1,7 @@
 import {getLocale} from 'next-intl/server';
 
+import {hasPaidAccess, normalizeBillingPlan} from '@/lib/billing/config';
+import {getWorkspaceBilling} from '@/lib/billing/limits';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
 
 import {QuittanceForm, type QuittancePropertyOption, type QuittanceTenantOption, type RecentReceipt} from './quittance-form';
@@ -9,6 +11,8 @@ export const runtime = 'nodejs';
 export default async function QuittancePage() {
   const locale = await getLocale();
   const {profile, supabase, workspaceId} = await getCurrentUserWorkspace(locale);
+  const billing = await getWorkspaceBilling(supabase, workspaceId);
+  const currentPlan = hasPaidAccess(billing) ? normalizeBillingPlan(billing?.plan) : 'free';
   const {data: properties} = await supabase
     .from('properties')
     .select('id, name, address_line1, postal_code, city, monthly_rent_estimate, charges_estimate')
@@ -47,7 +51,7 @@ export default async function QuittancePage() {
 
   return (
     <>
-      <QuittanceForm locale={locale} ownerName={profile.email ?? ''} properties={properties ?? []} recentReceipts={recentReceipts} tenants={tenants ?? []} />
+      <QuittanceForm currentPlan={currentPlan} locale={locale} ownerName={profile.email ?? ''} properties={properties ?? []} recentReceipts={recentReceipts} tenants={tenants ?? []} />
     </>
   );
 }
