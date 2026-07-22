@@ -5,6 +5,7 @@ import {getLocale, getTranslations} from 'next-intl/server';
 import {getPlanLimits, hasPaidAccess, normalizeBillingPlan} from '@/lib/billing/config';
 import {getDocumentStorageUsage, getPlanUsage, getWorkspaceBilling} from '@/lib/billing/limits';
 import {syncWorkspaceBillingFromStripe, syncWorkspaceBillingFromStripeCustomer} from '@/lib/billing/sync';
+import {localizedPath} from '@/lib/navigation';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
 
 import {createBillingPortalSessionAction, createCheckoutSessionAction, deleteAccountAction, updateAccountSettingsAction} from './actions';
@@ -377,7 +378,7 @@ function SubscriptionTab({
                     <>
                       <input name="locale" type="hidden" value={locale} />
                       <input name="plan" type="hidden" value={plan.plan} />
-                      <input name="return_path" type="hidden" value="/settings?tab=abonnement" />
+                      <input name="return_path" type="hidden" value={`${localizedPath(locale, '/settings')}?tab=abonnement`} />
                     </>
                   ) : null}
                 <h3 className="font-semibold">{plan.label}</h3>
