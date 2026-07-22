@@ -25,8 +25,10 @@ function billingIntervalValue(formData: FormData) {
   return value(formData, 'billing_interval') === 'monthly' ? 'monthly' : 'yearly';
 }
 
-function subscriptionTimestamp(subscription: Stripe.Subscription, key: 'current_period_end') {
-  return (subscription as Stripe.Subscription & Record<typeof key, number | undefined>)[key];
+function subscriptionPeriodEndTimestamp(subscription: Stripe.Subscription) {
+  const subscriptionPeriodEnd = (subscription as Stripe.Subscription & {current_period_end?: number}).current_period_end;
+  const itemPeriodEnd = (subscription.items.data[0] as Stripe.SubscriptionItem & {current_period_end?: number} | undefined)?.current_period_end;
+  return subscriptionPeriodEnd ?? itemPeriodEnd ?? null;
 }
 
 function subscriptionCustomerId(subscription: Stripe.Subscription) {
@@ -295,11 +297,15 @@ async function scheduleSubscriptionChange({
 }) {
   const stripe = getStripe();
   const subscription = await syncWorkspaceBillingFromStripe(workspaceId, subscriptionId);
-  const periodEnd = subscriptionTimestamp(subscription, 'current_period_end');
+  const periodEnd = subscriptionPeriodEndTimestamp(subscription);
   const currentItem = subscription.items.data[0];
 
-  if (!periodEnd || !currentItem) {
-    throw new Error('Subscription has no current period or item.');
+  if (!currentItem) {
+    throw new Error('Subscription has no subscription item.');
+  }
+
+  if (!periodEnd) {
+    throw new Error('Subscription has no current period end.');
   }
 
   const customerId = subscriptionCustomerId(subscription);

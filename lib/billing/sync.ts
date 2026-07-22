@@ -23,7 +23,9 @@ type PlanKey = keyof typeof planPriceEnv;
 type BillingInterval = keyof (typeof planPriceEnv)['solo'];
 
 function subscriptionPeriodEnd(subscription: Stripe.Subscription) {
-  const value = (subscription as Stripe.Subscription & {current_period_end?: number}).current_period_end;
+  const value =
+    (subscription as Stripe.Subscription & {current_period_end?: number}).current_period_end ??
+    (subscription.items.data[0] as Stripe.SubscriptionItem & {current_period_end?: number} | undefined)?.current_period_end;
   return value ? new Date(value * 1000).toISOString() : null;
 }
 
@@ -160,7 +162,9 @@ export async function pendingPlanFromSchedule(subscription: Stripe.Subscription)
     return null;
   }
 
-  const periodEnd = (subscription as Stripe.Subscription & {current_period_end?: number}).current_period_end;
+  const periodEnd =
+    (subscription as Stripe.Subscription & {current_period_end?: number}).current_period_end ??
+    (subscription.items.data[0] as Stripe.SubscriptionItem & {current_period_end?: number} | undefined)?.current_period_end;
   const futurePhase = schedule.phases.find((phase) => phase.start_date && periodEnd && phase.start_date >= periodEnd);
   const futurePrice = futurePhase?.items[0]?.price;
   const futurePriceId = typeof futurePrice === 'string' ? futurePrice : futurePrice?.id;
