@@ -677,6 +677,7 @@
       "checkoutScheduledWithDate": "套餐切换已安排。当前套餐会持续到 {date}，之后自动切换为 {plan} 套餐。",
       "checkoutCancelled": "付款已取消。您的数据仍保留在免费套餐中。",
       "billingError": "账单操作失败。",
+      "debugId": "诊断编号：{id}。",
       "errors": {
         "billing_customer_missing": "此工作区尚未关联 Stripe 客户。",
         "checkout_failed": "无法创建 Stripe 会话。请稍后重试。",

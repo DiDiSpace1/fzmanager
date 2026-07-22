@@ -677,6 +677,7 @@
       "checkoutScheduledWithDate": "Changement planifié. Votre forfait actuel reste actif jusqu'au {date}, puis le forfait {plan} prendra le relais.",
       "checkoutCancelled": "Paiement annulé. Vos données restent sur le plan gratuit.",
       "billingError": "Une action de facturation a échoué.",
+      "debugId": "Référence de diagnostic : {id}.",
       "errors": {
         "billing_customer_missing": "Aucun client Stripe n'est encore associé à cet espace.",
         "checkout_failed": "Impossible de créer la session Stripe. Réessayez dans un instant.",

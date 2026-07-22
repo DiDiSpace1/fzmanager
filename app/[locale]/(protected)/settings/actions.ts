@@ -34,6 +34,44 @@ function appendParams(path: string, params: Record<string, string>) {
   return `${path}${separator}${new URLSearchParams(params).toString()}`;
 }
 
+function billingDebugId() {
+  return `bill_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function stripeErrorDetails(error: unknown) {
+  if (error && typeof error === 'object') {
+    const stripeError = error as Stripe.StripeRawError & {
+      code?: string;
+      decline_code?: string;
+      param?: string;
+      raw?: Stripe.StripeRawError;
+      requestId?: string;
+      statusCode?: number;
+      type?: string;
+    };
+
+    return {
+      code: stripeError.code,
+      declineCode: stripeError.decline_code,
+      message: stripeError.message,
+      param: stripeError.param,
+      raw: stripeError.raw
+        ? {
+            code: stripeError.raw.code,
+            message: stripeError.raw.message,
+            param: stripeError.raw.param,
+            type: stripeError.raw.type
+          }
+        : undefined,
+      requestId: stripeError.requestId,
+      statusCode: stripeError.statusCode,
+      type: stripeError.type
+    };
+  }
+
+  return {message: String(error)};
+}
+
 export async function updateAccountSettingsAction(formData: FormData) {
   const currentLocale = value(formData, 'current_locale') || 'fr';
   const nextLocale = ['fr', 'en', 'zh'].includes(value(formData, 'locale')) ? value(formData, 'locale') : currentLocale;
@@ -129,6 +167,7 @@ export async function createCheckoutSessionAction(formData: FormData) {
   const returnUrl = `${appUrl}${safeReturnPath}`;
   const admin = createSupabaseAdminClient();
   let billing = await getWorkspaceBilling(admin, workspaceId);
+  const debugId = billingDebugId();
 
   try {
     if (customerId) {
@@ -139,7 +178,12 @@ export async function createCheckoutSessionAction(formData: FormData) {
 
     billing = await getWorkspaceBilling(admin, workspaceId);
   } catch (error) {
-    console.error('Stripe billing sync before checkout failed', error);
+    console.error('Stripe billing sync before checkout failed', {
+      debugId,
+      details: stripeErrorDetails(error),
+      stage: 'sync_before_checkout',
+      workspaceId
+    });
   }
 
   if (billing?.stripe_subscription_id && hasPaidAccess(billing)) {
@@ -156,8 +200,16 @@ export async function createCheckoutSessionAction(formData: FormData) {
         workspaceId
       });
     } catch (error) {
-      console.error('Stripe subscription schedule failed', error);
-      redirect(appendParams(safeReturnPath, {error: 'plan_change_failed'}));
+      console.error('Stripe subscription schedule failed', {
+        debugId,
+        details: stripeErrorDetails(error),
+        plan,
+        priceId,
+        stage: 'schedule_subscription_change',
+        subscriptionId: billing.stripe_subscription_id,
+        workspaceId
+      });
+      redirect(appendParams(safeReturnPath, {debug: debugId, error: 'plan_change_failed'}));
     }
 
     redirect(appendParams(safeReturnPath, {checkout: 'scheduled', scheduled_at: String(scheduledAt), scheduled_plan: plan}));
@@ -192,12 +244,26 @@ export async function createCheckoutSessionAction(formData: FormData) {
       success_url: `${returnUrl}${safeReturnPath.includes('?') ? '&' : '?'}checkout=success`
     });
   } catch (error) {
-    console.error('Stripe checkout session failed', error);
-    redirect(`${safeReturnPath}${safeReturnPath.includes('?') ? '&' : '?'}error=checkout_failed`);
+    console.error('Stripe checkout session failed', {
+      debugId,
+      details: stripeErrorDetails(error),
+      plan,
+      priceId,
+      stage: 'create_checkout_session',
+      workspaceId
+    });
+    redirect(appendParams(safeReturnPath, {debug: debugId, error: 'checkout_failed'}));
   }
 
   if (!session.url) {
-    redirect(`${safeReturnPath}${safeReturnPath.includes('?') ? '&' : '?'}error=checkout_failed`);
+    console.error('Stripe checkout session returned no url', {
+      debugId,
+      plan,
+      priceId,
+      stage: 'checkout_session_missing_url',
+      workspaceId
+    });
+    redirect(appendParams(safeReturnPath, {debug: debugId, error: 'checkout_failed'}));
   }
 
   redirect(session.url);
@@ -230,7 +296,34 @@ async function scheduleSubscriptionChange({
   const current = subscriptionPlan(subscription);
   const scheduleValue = subscription.schedule;
   const scheduleId = typeof scheduleValue === 'string' ? scheduleValue : scheduleValue?.id;
-  const schedule = scheduleId ? await stripe.subscriptionSchedules.retrieve(scheduleId) : await stripe.subscriptionSchedules.create({from_subscription: subscription.id});
+  let schedule: Stripe.SubscriptionSchedule;
+
+  try {
+    schedule = scheduleId ? await stripe.subscriptionSchedules.retrieve(scheduleId) : await stripe.subscriptionSchedules.create({from_subscription: subscription.id});
+  } catch (error) {
+    console.error('Stripe subscription schedule retrieve/create failed', {
+      details: stripeErrorDetails(error),
+      existingScheduleId: scheduleId,
+      stage: 'retrieve_or_create_schedule',
+      subscriptionId: subscription.id,
+      workspaceId
+    });
+    throw error;
+  }
+
+  console.info('Stripe subscription schedule change requested', {
+    billingInterval,
+    currentPlan: current.plan,
+    currentPriceId: currentItem.price.id,
+    periodEnd,
+    plan,
+    priceId,
+    scheduleId: schedule.id,
+    subscriptionId: subscription.id,
+    subscriptionStatus: subscription.status,
+    workspaceId
+  });
+
   await updateSubscriptionSchedule({
     billingInterval,
     currentInterval: current.interval,
@@ -246,9 +339,41 @@ async function scheduleSubscriptionChange({
       throw error;
     }
 
-    console.error('Stripe subscription schedule update failed, recreating schedule', error);
-    await stripe.subscriptionSchedules.release(scheduleId);
-    const nextSchedule = await stripe.subscriptionSchedules.create({from_subscription: subscription.id});
+    console.error('Stripe subscription schedule update failed, recreating schedule', {
+      details: stripeErrorDetails(error),
+      scheduleId,
+      stage: 'recreate_schedule_after_update_failure',
+      subscriptionId: subscription.id,
+      workspaceId
+    });
+
+    try {
+      await stripe.subscriptionSchedules.release(scheduleId);
+    } catch (releaseError) {
+      console.error('Stripe subscription schedule release failed', {
+        details: stripeErrorDetails(releaseError),
+        scheduleId,
+        stage: 'release_existing_schedule',
+        subscriptionId: subscription.id,
+        workspaceId
+      });
+      throw releaseError;
+    }
+
+    let nextSchedule: Stripe.SubscriptionSchedule;
+
+    try {
+      nextSchedule = await stripe.subscriptionSchedules.create({from_subscription: subscription.id});
+    } catch (createError) {
+      console.error('Stripe subscription schedule recreate failed', {
+        details: stripeErrorDetails(createError),
+        stage: 'recreate_schedule',
+        subscriptionId: subscription.id,
+        workspaceId
+      });
+      throw createError;
+    }
+
     await updateSubscriptionSchedule({
       billingInterval,
       currentInterval: current.interval,
@@ -340,8 +465,27 @@ async function updateSubscriptionSchedule({
   try {
     await stripe.subscriptionSchedules.update(schedule.id, updateParams(currentPhaseStart));
   } catch (error) {
-    console.error('Stripe subscription schedule update with current phase start failed, retrying from now', error);
-    await stripe.subscriptionSchedules.update(schedule.id, updateParams('now'));
+    console.error('Stripe subscription schedule update with current phase start failed, retrying from now', {
+      currentPhaseStart,
+      details: stripeErrorDetails(error),
+      periodEnd,
+      scheduleId: schedule.id,
+      stage: 'update_schedule_current_start',
+      workspaceId
+    });
+
+    try {
+      await stripe.subscriptionSchedules.update(schedule.id, updateParams('now'));
+    } catch (retryError) {
+      console.error('Stripe subscription schedule update from now failed', {
+        details: stripeErrorDetails(retryError),
+        periodEnd,
+        scheduleId: schedule.id,
+        stage: 'update_schedule_now',
+        workspaceId
+      });
+      throw retryError;
+    }
   }
 }
 

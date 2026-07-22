@@ -677,6 +677,7 @@
       "checkoutScheduledWithDate": "Plan change scheduled. Your current plan stays active until {date}, then the {plan} plan takes over.",
       "checkoutCancelled": "Payment cancelled. Your data stays on the free plan.",
       "billingError": "A billing action failed.",
+      "debugId": "Diagnostic reference: {id}.",
       "errors": {
         "billing_customer_missing": "No Stripe customer is associated with this workspace yet.",
         "checkout_failed": "Unable to create the Stripe session. Please try again in a moment.",

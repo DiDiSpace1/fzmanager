@@ -13,6 +13,7 @@ import {PlanChangeForm} from './PlanChangeForm';
 type SettingsPageProps = {
   searchParams: Promise<{
     checkout?: string;
+    debug?: string;
     error?: string;
     saved?: string;
     scheduled_at?: string;
@@ -128,7 +129,7 @@ export default async function SettingsPage({searchParams}: SettingsPageProps) {
 
       <SettingsTabs activeTab={activeTab} labels={{abonnement: t('tabs.abonnement'), donnees: t('tabs.donnees'), profil: t('tabs.profil'), securite: t('tabs.securite')}} />
 
-      <StatusMessages checkout={params.checkout} error={params.error} locale={locale} saved={params.saved} scheduledAt={params.scheduled_at} scheduledPlan={params.scheduled_plan} />
+      <StatusMessages checkout={params.checkout} debug={params.debug} error={params.error} locale={locale} saved={params.saved} scheduledAt={params.scheduled_at} scheduledPlan={params.scheduled_plan} />
 
       {activeTab === 'profil' ? (
         <ProfileTab
@@ -192,6 +193,7 @@ function SettingsTabs({activeTab, labels}: {activeTab: SettingsTab; labels: Reco
 
 function StatusMessages({
   checkout,
+  debug,
   error,
   locale,
   saved,
@@ -199,6 +201,7 @@ function StatusMessages({
   scheduledPlan
 }: {
   checkout?: string;
+  debug?: string;
   error?: string;
   locale: string;
   saved?: string;
@@ -220,7 +223,7 @@ function StatusMessages({
         </Message>
       ) : null}
       {checkout === 'cancelled' ? <Message tone="warning">{t('checkoutCancelled')}</Message> : null}
-      {error ? <Message tone="danger">{errorMessage}</Message> : null}
+      {error ? <Message tone="danger">{debug ? `${errorMessage} ${t('debugId', {id: debug})}` : errorMessage}</Message> : null}
       {saved === 'settings' ? <Message tone="success">{t('saved')}</Message> : null}
     </>
   );
