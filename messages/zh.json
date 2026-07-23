@@ -453,9 +453,12 @@
       "test_reminder_missing_email": "该租客没有邮箱地址。",
       "test_reminder_missing_lease": "未找到该租客的有效租约。"
     },
-    "success": {
-      "test_reminder_sent": "测试提醒邮件已发送给租客。"
-    },
+      "success": {
+        "rent_status_updated_receipt_created": "已标记为已付款。收据已自动生成并归档。",
+        "rent_status_updated_receipt_exists": "已标记为已付款。该租客本月已有收据，未重复生成。",
+        "rent_status_updated_receipt_failed": "已标记为已付款，但自动生成收据失败。",
+        "test_reminder_sent": "测试提醒邮件已发送给租客。"
+      },
     "summary": {
       "unassigned": "未分配",
       "unassignedNote": "待关联房产",

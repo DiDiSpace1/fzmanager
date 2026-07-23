@@ -453,9 +453,12 @@
       "test_reminder_missing_email": "Ce locataire n'a pas d'adresse email.",
       "test_reminder_missing_lease": "Aucun bail actif n'a été trouvé pour ce locataire."
     },
-    "success": {
-      "test_reminder_sent": "Email de rappel test envoyé au locataire."
-    },
+      "success": {
+        "rent_status_updated_receipt_created": "Loyer marqué comme payé. La quittance a été générée et archivée automatiquement.",
+        "rent_status_updated_receipt_exists": "Loyer marqué comme payé. Une quittance existe déjà pour ce locataire et ce mois.",
+        "rent_status_updated_receipt_failed": "Loyer marqué comme payé, mais la quittance automatique n'a pas pu être générée.",
+        "test_reminder_sent": "Email de rappel test envoyé au locataire."
+      },
     "summary": {
       "unassigned": "Non assignés",
       "unassignedNote": "À rattacher à un bien",

@@ -26,6 +26,14 @@ export function canUseRentReminders(billing: BillingStatus | null | undefined) {
   return ['plus', 'portfolio'].includes(normalizeBillingPlan(billing?.plan));
 }
 
+export function canUseAutoQuittance(billing: BillingStatus | null | undefined) {
+  if (!hasPaidAccess(billing)) {
+    return false;
+  }
+
+  return normalizeBillingPlan(billing?.plan) === 'portfolio';
+}
+
 export async function getPlanUsage(supabase: SupabaseClient, workspaceId: string, resource: BillableResource) {
   const {count} = await supabase
     .from(resourceTables[resource])

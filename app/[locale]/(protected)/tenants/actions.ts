@@ -3,8 +3,9 @@
 import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
 
-import {canCreateResource, canUseRentReminders, getWorkspaceBilling} from '@/lib/billing/limits';
+import {canCreateResource, canUseAutoQuittance, canUseRentReminders, getWorkspaceBilling} from '@/lib/billing/limits';
 import {localizedPath} from '@/lib/navigation';
+import {createQuittanceDocument} from '@/lib/quittance/service';
 import {sendRentReminderEmail} from '@/lib/reminders/email';
 import {createSupabaseAdminClient} from '@/lib/supabase/admin';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
@@ -377,10 +378,10 @@ export async function updateRentStatusAction(formData: FormData) {
     redirect(`${localizedPath(locale, '/tenants')}?error=partial_amount_missing`);
   }
 
-  const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
+  const {profile, supabase, workspaceId} = await getCurrentUserWorkspace(locale);
   const {data: lease, error: leaseError} = await supabase
     .from('leases')
-    .select('id, monthly_rent, charges_amount')
+    .select('id, tenant_id, property_id, monthly_rent, charges_amount')
     .eq('id', leaseId)
     .eq('workspace_id', workspaceId)
     .single();
@@ -411,17 +412,57 @@ export async function updateRentStatusAction(formData: FormData) {
     redirect(`${localizedPath(locale, '/tenants')}?error=rent_status_failed`);
   }
 
+  let successStatus = 'rent_status_updated';
+
   if (status === 'partial' || status === 'paid') {
     const amount = status === 'paid' ? totalDue : paidAmount;
+    const paidAt = new Date().toISOString().slice(0, 10);
+
     await supabase.from('rent_payments').insert({
       amount,
-      paid_at: new Date().toISOString().slice(0, 10),
+      paid_at: paidAt,
       payment_method: 'bank_transfer',
       rent_charge_id: rentCharge.id,
       workspace_id: workspaceId
     });
+
+    if (status === 'paid' && lease.property_id && lease.tenant_id) {
+      const billing = await getWorkspaceBilling(supabase, workspaceId);
+
+      if (canUseAutoQuittance(billing)) {
+        try {
+          const receipt = await createQuittanceDocument(
+            supabase,
+            workspaceId,
+            {
+              amount: Number(lease.monthly_rent ?? 0),
+              charges: Number(lease.charges_amount ?? 0),
+              ownerName: profile.full_name || profile.email || 'Proprietaire',
+              paidAt,
+              paymentMethod: 'bank_transfer',
+              periodMonth: periodMonth.slice(0, 7),
+              propertyId: lease.property_id,
+              tenantId: lease.tenant_id
+            },
+            {skipIfExists: true}
+          );
+
+          successStatus = receipt.skipped ? 'rent_status_updated_receipt_exists' : 'rent_status_updated_receipt_created';
+          revalidatePath(localizedPath(locale, '/documents'));
+          revalidatePath(localizedPath(locale, '/documents/quittance'));
+        } catch (error) {
+          console.error('Auto quittance generation failed', {
+            error,
+            leaseId,
+            periodMonth,
+            workspaceId
+          });
+          successStatus = 'rent_status_updated_receipt_failed';
+        }
+      }
+    }
   }
 
   revalidatePath(localizedPath(locale, '/tenants'));
-  redirect(localizedPath(locale, `/tenants?month=${periodMonth.slice(0, 7)}&success=rent_status_updated`));
+  redirect(localizedPath(locale, `/tenants?month=${periodMonth.slice(0, 7)}&success=${successStatus}`));
 }

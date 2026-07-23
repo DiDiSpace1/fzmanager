@@ -453,9 +453,12 @@
       "test_reminder_missing_email": "This tenant does not have an email address.",
       "test_reminder_missing_lease": "No active lease was found for this tenant."
     },
-    "success": {
-      "test_reminder_sent": "Test reminder email sent to the tenant."
-    },
+      "success": {
+        "rent_status_updated_receipt_created": "Rent marked as paid. The receipt was generated and archived automatically.",
+        "rent_status_updated_receipt_exists": "Rent marked as paid. A receipt already exists for this tenant and month.",
+        "rent_status_updated_receipt_failed": "Rent marked as paid, but the automatic receipt could not be generated.",
+        "test_reminder_sent": "Test reminder email sent to the tenant."
+      },
     "summary": {
       "unassigned": "Unassigned",
       "unassignedNote": "Link to a property",
