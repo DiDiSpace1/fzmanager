@@ -15,7 +15,17 @@ type ReceiptDocument = {
   file_path: string;
   id: string;
   period_month: string | null;
+  tenant_id: string | null;
   tenants: Relation<{email: string | null; full_name: string}>;
+};
+
+type DeliveryStatus = 'failed' | 'missing_email' | 'not_found' | 'sent';
+
+type DeliveryDetail = {
+  documentId: string;
+  email: string | null;
+  status: DeliveryStatus;
+  tenantName: string | null;
 };
 
 function relationOne<T>(value: Relation<T>) {
@@ -72,10 +82,46 @@ async function sendReceiptEmail(input: {attachmentBase64: string; fileName: stri
     },
     method: 'POST'
   });
-  const result = (await response.json().catch(() => ({}))) as {message?: string};
+  const result = (await response.json().catch(() => ({}))) as {id?: string; message?: string};
 
   if (!response.ok) {
     throw new Error(result.message || `Resend returned ${response.status}.`);
+  }
+
+  return result.id ?? null;
+}
+
+async function recordDeliveryAttempt(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  input: {
+    attemptedBy: string;
+    documentId: string | null;
+    email: string | null;
+    errorMessage?: string | null;
+    providerMessageId?: string | null;
+    status: DeliveryStatus;
+    tenantId: string | null;
+    workspaceId: string;
+  }
+) {
+  const {error} = await supabase.from('receipt_delivery_logs').insert({
+    attempted_by: input.attemptedBy,
+    document_id: input.documentId,
+    email_to: input.email,
+    error_message: input.errorMessage ?? null,
+    provider_message_id: input.providerMessageId ?? null,
+    status: input.status,
+    tenant_id: input.tenantId,
+    workspace_id: input.workspaceId
+  });
+
+  if (error) {
+    console.error('Receipt delivery log insert failed', {
+      documentId: input.documentId,
+      message: error.message,
+      status: input.status,
+      workspaceId: input.workspaceId
+    });
   }
 }
 
@@ -112,7 +158,7 @@ export async function POST(request: Request) {
 
     const {data: documents, error: documentsError} = await supabase
       .from('documents')
-      .select('id, file_name, file_path, period_month, tenants(full_name, email)')
+      .select('id, file_name, file_path, period_month, tenant_id, tenants(full_name, email)')
       .eq('workspace_id', workspaceId)
       .eq('document_type', 'rent_receipt')
       .in('id', documentIds)
@@ -124,6 +170,7 @@ export async function POST(request: Request) {
 
     const documentById = new Map((documents ?? []).map((document) => [document.id, document]));
     const result = {
+      details: [] as DeliveryDetail[],
       failed: 0,
       missingEmail: 0,
       notFound: 0,
@@ -135,6 +182,15 @@ export async function POST(request: Request) {
 
       if (!document) {
         result.notFound += 1;
+        result.details.push({documentId, email: null, status: 'not_found', tenantName: null});
+        await recordDeliveryAttempt(supabase, {
+          attemptedBy: user.id,
+          documentId: null,
+          email: null,
+          status: 'not_found',
+          tenantId: null,
+          workspaceId
+        });
         continue;
       }
 
@@ -142,6 +198,15 @@ export async function POST(request: Request) {
 
       if (!tenant?.email) {
         result.missingEmail += 1;
+        result.details.push({documentId, email: null, status: 'missing_email', tenantName: tenant?.full_name ?? null});
+        await recordDeliveryAttempt(supabase, {
+          attemptedBy: user.id,
+          documentId,
+          email: null,
+          status: 'missing_email',
+          tenantId: document.tenant_id,
+          workspaceId
+        });
         continue;
       }
 
@@ -149,12 +214,22 @@ export async function POST(request: Request) {
 
       if (error || !data) {
         result.failed += 1;
+        result.details.push({documentId, email: tenant.email, status: 'failed', tenantName: tenant.full_name});
+        await recordDeliveryAttempt(supabase, {
+          attemptedBy: user.id,
+          documentId,
+          email: tenant.email,
+          errorMessage: error?.message ?? 'Document download failed.',
+          status: 'failed',
+          tenantId: document.tenant_id,
+          workspaceId
+        });
         continue;
       }
 
       try {
         const buffer = Buffer.from(await data.arrayBuffer());
-        await sendReceiptEmail({
+        const providerMessageId = await sendReceiptEmail({
           attachmentBase64: buffer.toString('base64'),
           fileName: document.file_name,
           periodMonth: document.period_month,
@@ -162,9 +237,29 @@ export async function POST(request: Request) {
           tenantName: tenant.full_name
         });
         result.sent += 1;
+        result.details.push({documentId, email: tenant.email, status: 'sent', tenantName: tenant.full_name});
+        await recordDeliveryAttempt(supabase, {
+          attemptedBy: user.id,
+          documentId,
+          email: tenant.email,
+          providerMessageId,
+          status: 'sent',
+          tenantId: document.tenant_id,
+          workspaceId
+        });
       } catch (error) {
         console.error('Receipt email send failed', {documentId: document.id, error, workspaceId});
         result.failed += 1;
+        result.details.push({documentId, email: tenant.email, status: 'failed', tenantName: tenant.full_name});
+        await recordDeliveryAttempt(supabase, {
+          attemptedBy: user.id,
+          documentId,
+          email: tenant.email,
+          errorMessage: error instanceof Error ? error.message : 'Unknown delivery error.',
+          status: 'failed',
+          tenantId: document.tenant_id,
+          workspaceId
+        });
       }
     }
 

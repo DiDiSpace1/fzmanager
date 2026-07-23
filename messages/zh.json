@@ -1348,6 +1348,15 @@
       "sendError": "无法发送收据。",
       "sendFinished": "发送完成：{sent} 份已发送，{missingEmail} 位缺少邮箱，{failed} 份失败。",
       "sendResult": "{sent} 份已发送 · {missingEmail} 位缺少邮箱 · {failed} 份失败 · {notFound} 份未找到",
+      "unknownTenant": "未知租客",
+      "missingEmail": "缺少邮箱",
+      "retryDelivery": "重试",
+      "deliveryStatus": {
+        "sent": "已发送",
+        "failed": "发送失败",
+        "missing_email": "缺少邮箱",
+        "not_found": "未找到"
+      },
       "viewDocuments": "查看文档",
     "generated": "已生成",
     "needsFix": "需要处理",

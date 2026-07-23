@@ -1348,6 +1348,15 @@
       "sendError": "Unable to send receipts.",
       "sendFinished": "Sending finished: {sent} sent, {missingEmail} missing email, {failed} failed.",
       "sendResult": "{sent} sent · {missingEmail} missing email · {failed} failed · {notFound} not found",
+      "unknownTenant": "Unknown tenant",
+      "missingEmail": "Email missing",
+      "retryDelivery": "Retry",
+      "deliveryStatus": {
+        "sent": "Sent",
+        "failed": "Failed",
+        "missing_email": "Missing email",
+        "not_found": "Not found"
+      },
       "viewDocuments": "View documents",
     "generated": "Generated",
     "needsFix": "Needs fix",

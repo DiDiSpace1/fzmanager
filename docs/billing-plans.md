@@ -335,7 +335,7 @@ Status meanings:
 | Portfolio reminder center | Complete | Consider saved batch selections later |
 | Plus batch quittance generation | Complete | Continue PDF and email regression testing |
 | Portfolio automatic quittance after paid rent | Complete | Add durable automation history later |
-| Portfolio receipt ZIP and batch email | Complete | Add per-recipient delivery reporting later |
+| Portfolio receipt ZIP and batch email | Complete | Per-recipient delivery results, durable attempt logs and failed-send retry are implemented |
 | Portfolio task center | Complete | Add task completion history later |
 | Portfolio monthly collection center | Complete | Core workflow, filters, single and batch updates, CSV and result details are implemented |
 | Collection audit history | Complete | Migration, event recording and monthly history display are implemented |
@@ -344,10 +344,9 @@ Status meanings:
 
 Recommended implementation order:
 
-1. Add receipt email delivery results per tenant.
-2. Add broader Portfolio tenant batch operations.
-3. Add the in-app priority support entry point.
-4. Add saved views, monthly PDF reports and broader activity history.
+1. Add broader Portfolio tenant batch operations.
+2. Add the in-app priority support entry point.
+3. Add saved views, monthly PDF reports and broader activity history.
 
 ## Stripe Mapping
 

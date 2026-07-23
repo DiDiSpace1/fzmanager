@@ -1348,6 +1348,15 @@
       "sendError": "Impossible d'envoyer les quittances.",
       "sendFinished": "Envoi terminé : {sent} envoyé(s), {missingEmail} sans email, {failed} échec(s).",
       "sendResult": "{sent} envoyé(s) · {missingEmail} sans email · {failed} échec(s) · {notFound} introuvable(s)",
+      "unknownTenant": "Locataire inconnu",
+      "missingEmail": "Adresse email manquante",
+      "retryDelivery": "Réessayer",
+      "deliveryStatus": {
+        "sent": "Envoyée",
+        "failed": "Échec",
+        "missing_email": "Email manquant",
+        "not_found": "Introuvable"
+      },
       "viewDocuments": "Voir les documents",
     "generated": "Générée",
     "needsFix": "À corriger",

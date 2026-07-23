@@ -76,6 +76,12 @@ type BatchResult = {
 };
 
 type BatchSendResult = {
+  details: {
+    documentId: string;
+    email: string | null;
+    status: 'failed' | 'missing_email' | 'not_found' | 'sent';
+    tenantName: string | null;
+  }[];
   failed: number;
   missingEmail: number;
   notFound: number;
@@ -598,13 +604,13 @@ export function QuittanceForm({
     }
   }
 
-  async function sendBatchReceipts() {
+  async function sendBatchReceipts(retryDocumentIds?: string[]) {
     if (currentPlan !== 'portfolio') {
       setShowUpgrade(true);
       return;
     }
 
-    const documentIds = successfulDocumentIds();
+    const documentIds = retryDocumentIds ?? successfulDocumentIds();
 
     if (!documentIds.length) {
       message.error(t('sendNoDocuments'));
@@ -627,14 +633,32 @@ export function QuittanceForm({
       }
 
       const normalizedResult = {
+        details: Array.isArray(result.details) ? result.details : [],
         failed: Number(result.failed ?? 0),
         missingEmail: Number(result.missingEmail ?? 0),
         notFound: Number(result.notFound ?? 0),
         sent: Number(result.sent ?? 0)
       };
 
-      setBatchSendResult(normalizedResult);
-      message.success(t('sendFinished', normalizedResult));
+      setBatchSendResult((current) => {
+        if (!retryDocumentIds || !current) {
+          return normalizedResult;
+        }
+
+        const retriedIds = new Set(retryDocumentIds);
+        return {
+          details: [...current.details.filter((detail) => !retriedIds.has(detail.documentId)), ...normalizedResult.details],
+          failed: current.details.filter((detail) => !retriedIds.has(detail.documentId) && detail.status === 'failed').length + normalizedResult.failed,
+          missingEmail: current.details.filter((detail) => !retriedIds.has(detail.documentId) && detail.status === 'missing_email').length + normalizedResult.missingEmail,
+          notFound: current.details.filter((detail) => !retriedIds.has(detail.documentId) && detail.status === 'not_found').length + normalizedResult.notFound,
+          sent: current.details.filter((detail) => !retriedIds.has(detail.documentId) && detail.status === 'sent').length + normalizedResult.sent
+        };
+      });
+      message.success(t('sendFinished', {
+        failed: normalizedResult.failed,
+        missingEmail: normalizedResult.missingEmail,
+        sent: normalizedResult.sent
+      }));
     } finally {
       setIsSendPending(false);
     }
@@ -915,14 +939,37 @@ export function QuittanceForm({
                     {isZipPending ? t('zipPreparing') : t('downloadZip')}
                   </button>
                   {currentPlan !== 'portfolio' && successfulResults.length ? <p className="text-xs leading-5 text-[var(--muted)]">{t('zipPortfolioOnly')}</p> : null}
-                  <button className="min-h-10 rounded-lg border border-[var(--line)] px-3 text-sm font-semibold hover:bg-[#f0f5f2] disabled:opacity-50" disabled={isSendPending || !successfulResults.length} onClick={sendBatchReceipts} type="button">
+                  <button className="min-h-10 rounded-lg border border-[var(--line)] px-3 text-sm font-semibold hover:bg-[#f0f5f2] disabled:opacity-50" disabled={isSendPending || !successfulResults.length} onClick={() => sendBatchReceipts()} type="button">
                     {isSendPending ? t('sendingTenants') : t('sendTenants')}
                   </button>
                   {currentPlan !== 'portfolio' && successfulResults.length ? <p className="text-xs leading-5 text-[var(--muted)]">{t('sendPortfolioOnly')}</p> : null}
                   {batchSendResult ? (
-                    <p className="rounded-lg bg-[#f8fbfa] px-3 py-2 text-xs leading-5 text-[var(--muted)]">
-                      {t('sendResult', batchSendResult)}
-                    </p>
+                    <div className="rounded-lg bg-[#f8fbfa] px-3 py-3">
+                      <p className="text-xs leading-5 text-[var(--muted)]">{t('sendResult', {
+                        failed: batchSendResult.failed,
+                        missingEmail: batchSendResult.missingEmail,
+                        notFound: batchSendResult.notFound,
+                        sent: batchSendResult.sent
+                      })}</p>
+                      <div className="mt-3 grid gap-2">
+                        {batchSendResult.details.map((detail) => (
+                          <div className="flex min-w-0 items-center justify-between gap-3 rounded-lg border border-[var(--line-soft)] bg-white px-3 py-2" key={detail.documentId}>
+                            <div className="min-w-0">
+                              <p className="truncate text-xs font-semibold text-[#171d1c]">{detail.tenantName ?? t('unknownTenant')}</p>
+                              <p className="truncate text-xs text-[var(--muted)]">{detail.email ?? t('missingEmail')}</p>
+                            </div>
+                            <div className="flex shrink-0 items-center gap-2">
+                              <span className={`text-xs font-semibold ${detail.status === 'sent' ? 'text-[#087a55]' : 'text-[#a15c00]'}`}>{t(`deliveryStatus.${detail.status}`)}</span>
+                              {detail.status === 'failed' ? (
+                                <button className="rounded-md border border-[var(--line)] px-2 py-1 text-xs font-semibold hover:bg-[#eef7f3] disabled:opacity-50" disabled={isSendPending} onClick={() => sendBatchReceipts([detail.documentId])} type="button">
+                                  {t('retryDelivery')}
+                                </button>
+                              ) : null}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   ) : null}
                   <Link className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[var(--line)] px-3 text-sm font-semibold hover:bg-[#f0f5f2]" href="/documents">{t('viewDocuments')}</Link>
                 </div>
