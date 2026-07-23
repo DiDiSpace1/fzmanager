@@ -420,6 +420,7 @@ export function QuittanceForm({
   const [batchPreviewOpen, setBatchPreviewOpen] = useState(false);
   const [batchPreviewIndex, setBatchPreviewIndex] = useState(0);
   const [batchResults, setBatchResults] = useState<BatchResult[] | null>(null);
+  const [isZipPending, setIsZipPending] = useState(false);
   const [isPending, startTransition] = useTransition();
   const selectedProperty = useMemo(() => properties.find((property) => property.id === state.propertyId) ?? null, [properties, state.propertyId]);
   const selectedTenant = useMemo(() => tenants.find((tenant) => tenant.id === state.tenantId) ?? null, [tenants, state.tenantId]);
@@ -585,6 +586,52 @@ export function QuittanceForm({
       setBatchResults(results);
       message.success(t('batchFinished'));
     });
+  }
+
+  async function downloadBatchZip() {
+    if (currentPlan !== 'portfolio') {
+      setShowUpgrade(true);
+      return;
+    }
+
+    const documentIds = successfulResults.map((result) => result.documentId).filter((id): id is string => Boolean(id));
+
+    if (!documentIds.length) {
+      message.error(t('zipNoDocuments'));
+      return;
+    }
+
+    setIsZipPending(true);
+
+    try {
+      const response = await fetch('/api/documents/quittance.zip', {
+        body: JSON.stringify({
+          documentIds,
+          periodMonth: batchPeriodMonth
+        }),
+        headers: {'Content-Type': 'application/json'},
+        method: 'POST'
+      });
+
+      if (!response.ok) {
+        const result = (await response.json().catch(() => ({}))) as {error?: string};
+        message.error(result.error ?? t('zipError'));
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `loyelio-quittances-${batchPeriodMonth}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      message.success(t('zipReady'));
+    } finally {
+      setIsZipPending(false);
+    }
   }
 
   const filteredBatchRows = selectableBatchRows();
@@ -858,7 +905,10 @@ export function QuittanceForm({
                 <p className="mt-2 text-sm text-[#087a55]">{t('batchSuccessCount', {count: successfulResults.length})}</p>
                 <p className="text-sm text-[#a15c00]">{t('batchFailedCount', {count: failedResults.length})}</p>
                 <div className="mt-4 grid gap-2">
-                  <button className="min-h-10 rounded-lg border border-[var(--line)] px-3 text-sm font-semibold hover:bg-[#f0f5f2]" type="button">{t('downloadZip')}</button>
+                  <button className="min-h-10 rounded-lg border border-[var(--line)] px-3 text-sm font-semibold hover:bg-[#f0f5f2] disabled:opacity-50" disabled={isZipPending || !successfulResults.length} onClick={downloadBatchZip} type="button">
+                    {isZipPending ? t('zipPreparing') : t('downloadZip')}
+                  </button>
+                  {currentPlan !== 'portfolio' && successfulResults.length ? <p className="text-xs leading-5 text-[var(--muted)]">{t('zipPortfolioOnly')}</p> : null}
                   <button className="min-h-10 rounded-lg border border-[var(--line)] px-3 text-sm font-semibold hover:bg-[#f0f5f2]" type="button">{t('sendTenants')}</button>
                   <Link className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[var(--line)] px-3 text-sm font-semibold hover:bg-[#f0f5f2]" href="/documents">{t('viewDocuments')}</Link>
                 </div>

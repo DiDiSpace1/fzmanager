@@ -176,11 +176,11 @@ Currently implemented:
 - Portfolio has a reminder center for batch reminder management
 - Portfolio can retry failed reminder sends from the reminder center
 - Portfolio automatically generates a quittance when a rent month is marked as paid
+- Portfolio can download successful batch-generated quittances as a ZIP archive
 - Portfolio has the highest limits
 
 Planned Portfolio-only differentiation:
 
-- batch document download ZIP
 - portfolio-level task center
 
 Product logic:
