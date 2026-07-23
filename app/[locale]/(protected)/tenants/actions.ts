@@ -4,6 +4,7 @@ import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
 
 import {hasPaidAccess, normalizeBillingPlan} from '@/lib/billing/config';
+import {recordAutoQuittanceEvent} from '@/lib/automation/events';
 import {canCreateResource, canUseAutoQuittance, canUseRentReminders, getWorkspaceBilling} from '@/lib/billing/limits';
 import {normalizedCollectionStatus, recordRentCollectionEvent} from '@/lib/collections/audit';
 import {localizedPath} from '@/lib/navigation';
@@ -364,6 +365,15 @@ export async function updateRentStatusAction(formData: FormData) {
           );
 
           successStatus = receipt.skipped ? 'rent_status_updated_receipt_exists' : 'rent_status_updated_receipt_created';
+          await recordAutoQuittanceEvent(supabase, {
+            documentId: receipt.documentId,
+            leaseId,
+            message: receipt.skipped ? 'Existing receipt reused.' : 'Receipt created after rent was marked paid.',
+            periodMonth,
+            status: receipt.skipped ? 'skipped' : 'created',
+            tenantId: lease.tenant_id,
+            workspaceId
+          });
           revalidatePath(localizedPath(locale, '/documents'));
           revalidatePath(localizedPath(locale, '/documents/quittance'));
         } catch (error) {
@@ -374,6 +384,14 @@ export async function updateRentStatusAction(formData: FormData) {
             workspaceId
           });
           successStatus = 'rent_status_updated_receipt_failed';
+          await recordAutoQuittanceEvent(supabase, {
+            leaseId,
+            message: error instanceof Error ? error.message : 'Unknown automatic receipt error.',
+            periodMonth,
+            status: 'failed',
+            tenantId: lease.tenant_id,
+            workspaceId
+          });
         }
       }
     }

@@ -4,6 +4,7 @@ import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
 
 import {hasPaidAccess, normalizeBillingPlan} from '@/lib/billing/config';
+import {recordAutoQuittanceEvent} from '@/lib/automation/events';
 import {getWorkspaceBilling} from '@/lib/billing/limits';
 import {normalizedCollectionStatus, recordRentCollectionEvent} from '@/lib/collections/audit';
 import {localizedPath} from '@/lib/navigation';
@@ -269,11 +270,28 @@ export async function updateCollectionsAction(formData: FormData) {
         if (!receipt.skipped) {
           receipts += 1;
         }
+        await recordAutoQuittanceEvent(supabase, {
+          documentId: receipt.documentId,
+          leaseId: lease.id,
+          message: receipt.skipped ? 'Existing receipt reused.' : 'Receipt created after rent was marked paid.',
+          periodMonth,
+          status: receipt.skipped ? 'skipped' : 'created',
+          tenantId: lease.tenant_id,
+          workspaceId
+        });
       } catch (error) {
         console.error('Batch collection quittance generation failed', {
           error,
           leaseId: lease.id,
           periodMonth,
+          workspaceId
+        });
+        await recordAutoQuittanceEvent(supabase, {
+          leaseId: lease.id,
+          message: error instanceof Error ? error.message : 'Unknown automatic receipt error.',
+          periodMonth,
+          status: 'failed',
+          tenantId: lease.tenant_id,
           workspaceId
         });
       }

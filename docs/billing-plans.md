@@ -205,12 +205,12 @@ Currently implemented:
 - Portfolio has tax ZIP export with PDF summary and supporting receipts
 - Portfolio has the highest limits
 
-Remaining Portfolio roadmap:
+Completed Portfolio roadmap:
 
-1. Add batch tenant operations beyond reminders, such as assigning tags, updating contact completeness and archiving ended occupancies.
-2. Add saved collection views and reusable filters for larger portfolios.
-3. Add an optional monthly collection report PDF in addition to CSV.
-4. Add a dedicated in-app priority support entry point for Plus and Portfolio.
+1. Batch tenant activation and deactivation with confirmation and preserved history.
+2. Saved monthly collection views and reusable status filters.
+3. Monthly collection report PDF in addition to CSV.
+4. Dedicated in-app priority support for Plus and Portfolio.
 
 Product logic:
 
@@ -334,17 +334,15 @@ Status meanings:
 | Plus tenant rent reminders | Complete | Continue monitoring scheduled delivery and provider failures |
 | Portfolio reminder center | Complete | Consider saved batch selections later |
 | Plus batch quittance generation | Complete | Continue PDF and email regression testing |
-| Portfolio automatic quittance after paid rent | Complete | Add durable automation history later |
+| Portfolio automatic quittance after paid rent | Complete | Durable created, skipped and failed automation history is displayed in the task center |
 | Portfolio receipt ZIP and batch email | Complete | Per-recipient delivery results, durable attempt logs and failed-send retry are implemented |
-| Portfolio task center | Complete | Add task completion history later |
-| Portfolio monthly collection center | Complete | Core workflow, filters, single and batch updates, CSV and result details are implemented |
+| Portfolio task center | Complete | Task completion history is persisted and displayed |
+| Portfolio monthly collection center | Complete | Core workflow, saved views, filters, single and batch updates, CSV, PDF and result details are implemented |
 | Collection audit history | Complete | Migration, event recording and monthly history display are implemented |
 | Broader Portfolio tenant batch management | Complete | Visible-row selection, confirmed batch activation/deactivation and reminder-center handoff are implemented; destructive batch deletion is intentionally excluded |
 | In-app priority support workflow | Complete | Plus and Portfolio can create durable in-app tickets with email routing, visible history and tier-specific response targets |
 
-Recommended implementation order:
-
-1. Add saved views, monthly PDF reports and broader activity history.
+The planned value-differentiation backlog in this document is now implemented. Saved collection views, monthly PDF reports, task completion history and automatic receipt history are available to Portfolio.
 
 ## Stripe Mapping
 

@@ -636,6 +636,21 @@
     "month": "Month",
     "refresh": "Refresh",
     "export": "Export CSV",
+    "pdfReport": "Monthly PDF",
+    "savedViews": {
+      "title": "Saved views",
+      "empty": "No saved view",
+      "name": "View name",
+      "save": "Save current view",
+      "delete": "Delete saved view",
+      "status": {
+        "saved": "The current month and filter were saved.",
+        "deleted": "Saved view deleted.",
+        "invalid": "Enter a valid view name.",
+        "failed": "Unable to save this view. Apply the latest database migration.",
+        "portfolio_required": "Portfolio is required for saved collection views."
+      }
+    },
     "success": "{updated} leases updated. {receipts} receipts generated. {skipped} rows skipped.",
     "skipReasonLine": "{count} skipped: {reason}",
     "skipReasons": {
@@ -752,6 +767,21 @@
     "lockedCopy": "The task center is included in Portfolio. It groups failed reminders, late rents, leases to watch and missing documents.",
     "upgradeAction": "View plans",
     "openReminders": "Open reminders",
+    "complete": "Mark complete",
+    "history": {"title": "Completion history", "copy": "Tasks marked as handled remain traceable here.", "empty": "No completed task yet."},
+    "automation": {
+      "title": "Automation history",
+      "copy": "Automatic receipt results after paid-rent updates.",
+      "empty": "No automatic receipt event yet.",
+      "defaultMessage": "Automatic receipt processed.",
+      "status": {"created": "Created", "skipped": "Already existed", "failed": "Failed"}
+    },
+    "success": {"completed": "The task was marked as complete."},
+    "errors": {
+      "portfolio_required": "Portfolio is required for task history.",
+      "invalid_task": "This task cannot be completed.",
+      "complete_failed": "Unable to save task completion. Apply the latest database migration."
+    },
     "loadFailed": "Some tasks could not be loaded.",
     "unknownTenant": "Tenant",
     "unknownProperty": "Property",

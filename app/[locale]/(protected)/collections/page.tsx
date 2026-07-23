@@ -10,6 +10,7 @@ import {CollectionSelectionControls} from './collection-selection-controls';
 import {CollectionRowActions} from './collection-row-actions';
 import {CollectionSubmitConfirmation} from './collection-submit-confirmation';
 import {updateCollectionsAction} from './actions';
+import {deleteCollectionViewAction, saveCollectionViewAction} from './saved-view-actions';
 
 type Relation<T> = T | T[] | null;
 
@@ -48,6 +49,13 @@ type CollectionEventRow = {
   source: string;
 };
 
+type SavedViewRow = {
+  id: string;
+  month: string;
+  name: string;
+  view: CollectionView;
+};
+
 type CollectionsPageProps = {
   searchParams: Promise<{
     collection_error?: string;
@@ -57,6 +65,7 @@ type CollectionsPageProps = {
     result_skipped?: string;
     result_status?: string;
     result_updated_ids?: string;
+    saved_view?: string;
     skipped?: string;
     skipped_existing_paid?: string;
     skipped_invalid_amount?: string;
@@ -118,6 +127,11 @@ function exportHref(locale: string, month: string, view: CollectionView) {
   return `/api/collections/export?${query.toString()}`;
 }
 
+function reportHref(locale: string, month: string, view: CollectionView) {
+  const query = new URLSearchParams({locale, month, view});
+  return `/api/collections/report?${query.toString()}`;
+}
+
 function leaseCoversMonth(lease: LeaseRow, month: string) {
   const start = monthStart(month);
   const nextMonth = monthStart(addMonths(month, 1));
@@ -176,7 +190,7 @@ export default async function CollectionsPage({searchParams}: CollectionsPagePro
   const month = selectedMonth(params.month);
   const view = selectedView(params.view);
   const periodMonth = monthStart(month);
-  const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
+  const {supabase, user, workspaceId} = await getCurrentUserWorkspace(locale);
   const billing = await getWorkspaceBilling(supabase, workspaceId);
   const hasPortfolioAccess = hasPaidAccess(billing) && normalizeBillingPlan(billing?.plan) === 'portfolio';
 
@@ -208,6 +222,14 @@ export default async function CollectionsPage({searchParams}: CollectionsPagePro
     .order('created_at', {ascending: false})
     .limit(50)
     .returns<CollectionEventRow[]>();
+  const {data: savedViews} = await supabase
+    .from('collection_saved_views')
+    .select('id, name, month, view')
+    .eq('workspace_id', workspaceId)
+    .eq('user_id', user.id)
+    .order('created_at', {ascending: false})
+    .limit(12)
+    .returns<SavedViewRow[]>();
 
   const rows = (leases ?? [])
     .filter((lease) => leaseCoversMonth(lease, month))
@@ -287,8 +309,43 @@ export default async function CollectionsPage({searchParams}: CollectionsPagePro
             <span className="material-symbols-outlined text-[20px]">download</span>
             {t('export')}
           </Link>
+          <Link className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--line)] bg-white px-5 text-sm font-semibold hover:bg-[#f5faf8]" href={reportHref(locale, month, view)}>
+            <span className="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+            {t('pdfReport')}
+          </Link>
         </div>
       </div>
+
+      <section className="mt-6 rounded-xl border border-[var(--line-soft)] bg-white p-4 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <span className="text-sm font-semibold text-[#171d1c]">{t('savedViews.title')}</span>
+            {(savedViews ?? []).map((saved) => (
+              <div className="inline-flex items-center rounded-lg border border-[var(--line)] bg-[#f8fbfa]" key={saved.id}>
+                <Link className="px-3 py-2 text-sm font-semibold text-[var(--accent)]" href={viewHref(locale, saved.month, saved.view)}>{saved.name}</Link>
+                <form action={deleteCollectionViewAction}>
+                  <input name="locale" type="hidden" value={locale} />
+                  <input name="id" type="hidden" value={saved.id} />
+                  <input name="month" type="hidden" value={month} />
+                  <input name="view" type="hidden" value={view} />
+                  <button aria-label={t('savedViews.delete')} className="flex h-9 w-9 items-center justify-center border-l border-[var(--line)] text-[var(--muted)] hover:bg-[#eef7f4]" type="submit">
+                    <span className="material-symbols-outlined text-[18px]">close</span>
+                  </button>
+                </form>
+              </div>
+            ))}
+            {!(savedViews ?? []).length ? <span className="text-sm text-[var(--muted)]">{t('savedViews.empty')}</span> : null}
+          </div>
+          <form action={saveCollectionViewAction} className="flex flex-wrap gap-2">
+            <input name="locale" type="hidden" value={locale} />
+            <input name="month" type="hidden" value={month} />
+            <input name="view" type="hidden" value={view} />
+            <input className="focus-ring min-h-10 rounded-md border border-[var(--line)] px-3 text-sm" maxLength={60} name="name" placeholder={t('savedViews.name')} required />
+            <button className="min-h-10 rounded-md border border-[var(--line)] px-4 text-sm font-semibold hover:bg-[#f0f5f2]" type="submit">{t('savedViews.save')}</button>
+          </form>
+        </div>
+        {params.saved_view ? <p className="mt-3 text-xs text-[var(--muted)]">{t(`savedViews.status.${params.saved_view}`)}</p> : null}
+      </section>
 
       {success ? (
         <div className="mt-6 rounded-lg border border-[#b8e5cf] bg-[#edf8f1] p-4 text-sm leading-6 text-[#087a55]">

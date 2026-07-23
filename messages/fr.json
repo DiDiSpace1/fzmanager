@@ -636,6 +636,21 @@
     "month": "Mois",
     "refresh": "Actualiser",
     "export": "Exporter en CSV",
+    "pdfReport": "PDF mensuel",
+    "savedViews": {
+      "title": "Vues enregistrées",
+      "empty": "Aucune vue enregistrée",
+      "name": "Nom de la vue",
+      "save": "Enregistrer la vue",
+      "delete": "Supprimer la vue",
+      "status": {
+        "saved": "Le mois et le filtre actuels ont été enregistrés.",
+        "deleted": "Vue enregistrée supprimée.",
+        "invalid": "Saisissez un nom de vue valide.",
+        "failed": "Impossible d'enregistrer cette vue. Appliquez la dernière migration.",
+        "portfolio_required": "Portfolio est requis pour enregistrer des vues d'encaissement."
+      }
+    },
     "success": "{updated} baux mis à jour. {receipts} quittances générées. {skipped} lignes ignorées.",
     "skipReasonLine": "{count} ignoré(s) : {reason}",
     "skipReasons": {
@@ -752,6 +767,21 @@
     "lockedCopy": "Le centre de tâches est disponible avec Portfolio. Il regroupe les relances échouées, loyers en retard, baux à surveiller et documents manquants.",
     "upgradeAction": "Voir les forfaits",
     "openReminders": "Ouvrir les rappels",
+    "complete": "Marquer comme traitée",
+    "history": {"title": "Historique des tâches traitées", "copy": "Les tâches marquées comme traitées restent consultables ici.", "empty": "Aucune tâche traitée."},
+    "automation": {
+      "title": "Historique des automatisations",
+      "copy": "Résultats des quittances automatiques après validation des loyers.",
+      "empty": "Aucun événement de quittance automatique.",
+      "defaultMessage": "Quittance automatique traitée.",
+      "status": {"created": "Créée", "skipped": "Déjà existante", "failed": "Échec"}
+    },
+    "success": {"completed": "La tâche a été marquée comme traitée."},
+    "errors": {
+      "portfolio_required": "Portfolio est requis pour l'historique des tâches.",
+      "invalid_task": "Cette tâche ne peut pas être terminée.",
+      "complete_failed": "Impossible d'enregistrer la tâche. Appliquez la dernière migration."
+    },
     "loadFailed": "Impossible de charger certaines tâches.",
     "unknownTenant": "Locataire",
     "unknownProperty": "Bien",
