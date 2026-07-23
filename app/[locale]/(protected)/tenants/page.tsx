@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import {getLocale, getTranslations} from 'next-intl/server';
 
+import {canUseRentReminders, getWorkspaceBilling} from '@/lib/billing/limits';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
 
 import {createTenantAction} from './actions';
@@ -23,6 +24,9 @@ type TenantRow = {
     properties: {name: string} | null;
     units: {name: string} | null;
     rent_charges: {status: string; period_month: string}[];
+    rent_reminder_day: number | null;
+    rent_reminder_days_before: number;
+    rent_reminder_enabled: boolean;
   }[];
 };
 
@@ -130,12 +134,14 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
   const query = supabase
     .from('tenants')
     .select(
-      'id, full_name, email, is_active, phone, notes, leases(id, status, start_date, end_date, monthly_rent, charges_amount, properties(name), units(name), rent_charges(status, period_month))'
+      'id, full_name, email, is_active, phone, notes, leases(id, status, start_date, end_date, monthly_rent, charges_amount, rent_reminder_enabled, rent_reminder_day, rent_reminder_days_before, properties(name), units(name), rent_charges(status, period_month))'
     )
     .eq('workspace_id', workspaceId)
     .order('created_at', {ascending: false});
 
   const {data: tenants, error} = await query.returns<TenantRow[]>();
+  const billing = await getWorkspaceBilling(supabase, workspaceId);
+  const hasReminderAccess = canUseRentReminders(billing);
   const allRows = tenants ?? [];
   const activeTenantRows = allRows.filter((tenant) => tenant.is_active);
   const summaryMonth = isoMonth(new Date());
@@ -217,7 +223,7 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
             </div>
           </section>
 
-          <TenantTableClient initialMonth={selectedMonth} initialQuery={queryText} initialView={selectedView} locale={locale} tenants={allRows} />
+          <TenantTableClient hasReminderAccess={hasReminderAccess} initialMonth={selectedMonth} initialQuery={queryText} initialView={selectedView} locale={locale} tenants={allRows} />
         </>
       )}
     </>

@@ -3,7 +3,7 @@
 import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
 
-import {canCreateResource} from '@/lib/billing/limits';
+import {canCreateResource, canUseRentReminders, getWorkspaceBilling} from '@/lib/billing/limits';
 import {localizedPath} from '@/lib/navigation';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
 
@@ -15,6 +15,16 @@ function value(formData: FormData, key: string) {
 function moneyValue(formData: FormData, key: string) {
   const parsed = Number.parseFloat(value(formData, key).replace(',', '.'));
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function reminderDayValue(formData: FormData, key: string) {
+  const parsed = Number.parseInt(value(formData, key), 10);
+  return Number.isInteger(parsed) && parsed >= 1 && parsed <= 31 ? parsed : null;
+}
+
+function reminderDaysBeforeValue(formData: FormData, key: string) {
+  const parsed = Number.parseInt(value(formData, key), 10);
+  return [0, 1, 3, 7].includes(parsed) ? parsed : 0;
 }
 
 function tenantsHref(locale: string, formData: FormData) {
@@ -100,9 +110,91 @@ export async function updateTenantAction(formData: FormData) {
     redirect(`${localizedPath(locale, `/tenants/${tenantId}/edit`)}?error=update_failed`);
   }
 
+  const leaseId = value(formData, 'lease_id');
+
+  if (leaseId) {
+    const billing = await getWorkspaceBilling(supabase, workspaceId);
+
+    if (canUseRentReminders(billing)) {
+      const reminderDay = reminderDayValue(formData, 'rent_reminder_day');
+      const {error: reminderError} = await supabase
+        .from('leases')
+        .update({
+          rent_reminder_day: reminderDay,
+          rent_reminder_days_before: reminderDaysBeforeValue(formData, 'rent_reminder_days_before'),
+          rent_reminder_enabled: value(formData, 'rent_reminder_enabled') === 'on'
+        })
+        .eq('id', leaseId)
+        .eq('tenant_id', tenantId)
+        .eq('workspace_id', workspaceId);
+
+      if (reminderError) {
+        redirect(`${localizedPath(locale, `/tenants/${tenantId}/edit`)}?error=reminder_update_failed`);
+      }
+    }
+  }
+
   revalidatePath(localizedPath(locale, '/tenants'));
   revalidatePath(localizedPath(locale, `/tenants/${tenantId}`));
   redirect(`${localizedPath(locale, `/tenants/${tenantId}`)}?success=tenant_updated`);
+}
+
+export async function updateLeaseReminderAction(formData: FormData) {
+  const locale = value(formData, 'locale') || 'fr';
+  const leaseId = value(formData, 'lease_id');
+  const enabled = value(formData, 'enabled') === 'true';
+  const month = value(formData, 'month');
+  const view = value(formData, 'view') || 'active';
+  const query = value(formData, 'q');
+
+  if (!leaseId) {
+    redirect(`${localizedPath(locale, '/tenants')}?error=missing_lease`);
+  }
+
+  const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
+  const billing = await getWorkspaceBilling(supabase, workspaceId);
+
+  if (!canUseRentReminders(billing)) {
+    redirect(withStatus(tenantsHref(locale, formData), 'error', 'reminder_upgrade_required'));
+  }
+
+  const {data: lease, error: leaseError} = await supabase
+    .from('leases')
+    .select('id, start_date, rent_reminder_day')
+    .eq('id', leaseId)
+    .eq('workspace_id', workspaceId)
+    .single();
+
+  if (leaseError || !lease) {
+    redirect(`${localizedPath(locale, '/tenants')}?error=missing_lease`);
+  }
+
+  const fallbackDay = Number(lease.rent_reminder_day ?? lease.start_date.slice(8, 10));
+  const {error} = await supabase
+    .from('leases')
+    .update({
+      rent_reminder_day: Number.isInteger(fallbackDay) && fallbackDay >= 1 && fallbackDay <= 31 ? fallbackDay : 1,
+      rent_reminder_enabled: enabled
+    })
+    .eq('id', leaseId)
+    .eq('workspace_id', workspaceId);
+
+  if (error) {
+    const params = new URLSearchParams({error: 'reminder_update_failed', view});
+
+    if (month) {
+      params.set('month', month);
+    }
+
+    if (query) {
+      params.set('q', query);
+    }
+
+    redirect(`${localizedPath(locale, '/tenants')}?${params.toString()}`);
+  }
+
+  revalidatePath(localizedPath(locale, '/tenants'));
+  redirect(withStatus(tenantsHref(locale, formData), 'success', enabled ? 'reminder_enabled' : 'reminder_disabled'));
 }
 
 export async function deleteTenantAction(formData: FormData) {

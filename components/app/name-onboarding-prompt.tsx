@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 
 type NameOnboardingPromptProps = {
   copy: string;
@@ -15,22 +15,14 @@ type NameOnboardingPromptProps = {
 const DISMISS_KEY = 'loyelio:name-onboarding-dismissed';
 
 export function NameOnboardingPrompt({copy, cta, dismiss, href, shouldShow, title}: NameOnboardingPromptProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(() => (typeof sessionStorage === 'undefined' ? false : sessionStorage.getItem(DISMISS_KEY) === 'true'));
 
   const dismissForSession = () => {
     sessionStorage.setItem(DISMISS_KEY, 'true');
-    setIsOpen(false);
+    setIsDismissed(true);
   };
 
-  useEffect(() => {
-    if (!shouldShow) {
-      return;
-    }
-
-    setIsOpen(sessionStorage.getItem(DISMISS_KEY) !== 'true');
-  }, [shouldShow]);
-
-  if (!isOpen) {
+  if (!shouldShow || isDismissed) {
     return null;
   }
 

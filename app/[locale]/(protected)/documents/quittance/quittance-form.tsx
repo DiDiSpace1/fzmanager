@@ -368,6 +368,35 @@ export function QuittanceForm({
   const initialProperty = properties[0] ?? null;
   const initialPaidAt = today();
   const initialPeriodMonth = currentMonth();
+
+  function buildBatchRows(sourceTenants: QuittanceTenantOption[], sourceProperties: QuittancePropertyOption[], paidAt: string) {
+    return sourceTenants.flatMap((tenant) => {
+      const activeLeases = tenant.leases?.filter((lease) => lease.status === 'active') ?? [];
+
+      return activeLeases.map((lease) => {
+        const property = sourceProperties.find((item) => item.id === lease.property_id) ?? null;
+        const amount = lease.monthly_rent != null ? String(Number(lease.monthly_rent)) : property?.monthly_rent_estimate != null ? String(Number(property.monthly_rent_estimate)) : '';
+        const charges = lease.charges_amount != null ? String(Number(lease.charges_amount)) : property?.charges_estimate != null ? String(Number(property.charges_estimate)) : '0';
+        const issue = !property ? t('missingProperty') : !amount ? t('missingAmount') : null;
+
+        return {
+          amount,
+          charges,
+          id: lease.id,
+          issue,
+          leaseId: lease.id,
+          paidAt,
+          property,
+          propertyId: lease.property_id ?? '',
+          selected: Boolean(property && amount),
+          status: 'paid' as const,
+          tenant,
+          tenantId: tenant.id
+        };
+      });
+    });
+  }
+
   const [state, setState] = useState<FormState>({
     amount: initialProperty?.monthly_rent_estimate ? String(Number(initialProperty.monthly_rent_estimate)) : '',
     charges: initialProperty?.charges_estimate ? String(Number(initialProperty.charges_estimate)) : '',
@@ -479,34 +508,6 @@ export function QuittanceForm({
       if (result.downloadUrl) {
         window.location.href = result.downloadUrl;
       }
-    });
-  }
-
-  function buildBatchRows(sourceTenants: QuittanceTenantOption[], sourceProperties: QuittancePropertyOption[], paidAt: string) {
-    return sourceTenants.flatMap((tenant) => {
-      const activeLeases = tenant.leases?.filter((lease) => lease.status === 'active') ?? [];
-
-      return activeLeases.map((lease) => {
-        const property = sourceProperties.find((item) => item.id === lease.property_id) ?? null;
-        const amount = lease.monthly_rent != null ? String(Number(lease.monthly_rent)) : property?.monthly_rent_estimate != null ? String(Number(property.monthly_rent_estimate)) : '';
-        const charges = lease.charges_amount != null ? String(Number(lease.charges_amount)) : property?.charges_estimate != null ? String(Number(property.charges_estimate)) : '0';
-        const issue = !property ? t('missingProperty') : !amount ? t('missingAmount') : null;
-
-        return {
-          amount,
-          charges,
-          id: lease.id,
-          issue,
-          leaseId: lease.id,
-          paidAt,
-          property,
-          propertyId: lease.property_id ?? '',
-          selected: Boolean(property && amount),
-          status: 'paid' as const,
-          tenant,
-          tenantId: tenant.id
-        };
-      });
     });
   }
 

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import {useTranslations} from 'next-intl';
 import {useMemo, useState} from 'react';
 
-import {deleteTenantAction, updateTenantActiveAction} from './actions';
+import {deleteTenantAction, updateLeaseReminderAction, updateTenantActiveAction} from './actions';
 import {DeleteTenantButton} from './delete-tenant-button';
 import {TenantActionDetails} from './tenant-action-details';
 
@@ -20,6 +20,9 @@ export type TenantTableRow = {
     monthly_rent: number;
     properties: {name: string} | null;
     rent_charges: {period_month: string; status: string}[];
+    rent_reminder_day: number | null;
+    rent_reminder_days_before: number;
+    rent_reminder_enabled: boolean;
     start_date: string;
     status: string;
     units: {name: string} | null;
@@ -146,12 +149,14 @@ function sanitizeMonth(month: string) {
 }
 
 export function TenantTableClient({
+  hasReminderAccess,
   initialMonth,
   initialQuery,
   initialView,
   locale,
   tenants
 }: {
+  hasReminderAccess: boolean;
   initialMonth: string;
   initialQuery: string;
   initialView: string;
@@ -163,6 +168,7 @@ export function TenantTableClient({
   const [selectedMonth, setSelectedMonth] = useState(sanitizeMonth(initialMonth));
   const [queryInput, setQueryInput] = useState(initialQuery);
   const [appliedQuery, setAppliedQuery] = useState(initialQuery);
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const selectedView = initialView;
 
   const rows = useMemo(() => {
@@ -241,13 +247,14 @@ export function TenantTableClient({
       </div>
 
       <div className="overflow-x-auto overflow-y-visible">
-        <table className="w-full min-w-[920px] border-collapse text-left">
+        <table className="w-full min-w-[1020px] border-collapse text-left">
           <thead className="border-b border-[var(--line-soft)] bg-[#eaefed] text-[11px] font-semibold uppercase text-[var(--muted)]">
             <tr>
               <th className="px-5 py-4">{t('table.name')}</th>
               <th className="px-5 py-4">{t('table.property')}</th>
               <th className="px-5 py-4">{t('table.startDate')}</th>
               <th className="px-5 py-4">{t('table.endDate')}</th>
+              <th className="px-5 py-4">{t('reminders.column')}</th>
               <th className="px-5 py-4">{common('status')}</th>
               <th className="px-5 py-4 text-right">{common('actions')}</th>
             </tr>
@@ -278,6 +285,19 @@ export function TenantTableClient({
                     </td>
                     <td className="px-5 py-4 text-sm tabular-nums">{lease?.start_date ?? '-'}</td>
                     <td className="px-5 py-4 text-sm tabular-nums">{lease?.end_date ?? '-'}</td>
+                    <td className="px-5 py-4">
+                      <ReminderSwitch
+                        enabled={Boolean(lease?.rent_reminder_enabled)}
+                        hasAccess={hasReminderAccess}
+                        leaseId={lease?.id ?? null}
+                        locale={locale}
+                        month={selectedMonth}
+                        query={appliedQuery}
+                        reminderDay={lease?.rent_reminder_day ?? null}
+                        setShowUpgrade={setShowUpgrade}
+                        view={selectedView}
+                      />
+                    </td>
                     <td className="px-5 py-4">
                       <span className={`inline-flex rounded px-2.5 py-1 text-xs font-semibold ${status.className}`}>{status.labelKey === 'raw' ? status.rawLabel : t(`paymentStatus.${status.labelKey}`)}</span>
                     </td>
@@ -321,7 +341,7 @@ export function TenantTableClient({
               })
             ) : (
               <tr>
-                <td className="px-5 py-10 text-center text-sm text-[var(--muted)]" colSpan={6}>
+                <td className="px-5 py-10 text-center text-sm text-[var(--muted)]" colSpan={7}>
                   {t('empty')}
                 </td>
               </tr>
@@ -332,6 +352,103 @@ export function TenantTableClient({
       <div className="border-t border-[var(--line-soft)] px-5 py-4 text-sm text-[var(--muted)]">
         {t('pagination', {range: rows.length ? `1-${rows.length}` : '0', count: rows.length})}
       </div>
+      {showUpgrade ? (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 px-4 py-6" role="dialog" aria-modal="true">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 text-[#17201e] shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold">{t('reminders.upgradeTitle')}</h2>
+                <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{t('reminders.upgradeCopy')}</p>
+              </div>
+              <button
+                aria-label={common('close')}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#17201e] text-xl leading-none text-[#17201e] hover:bg-[#f0f5f2]"
+                onClick={() => setShowUpgrade(false)}
+                type="button"
+              >
+                x
+              </button>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button className="min-h-10 rounded-lg border border-[var(--line)] px-4 text-sm font-semibold hover:bg-[#f0f5f2]" onClick={() => setShowUpgrade(false)} type="button">
+                {t('reminders.upgradeLater')}
+              </button>
+              <Link className="inline-flex min-h-10 items-center rounded-lg bg-[var(--accent)] px-4 text-sm font-semibold text-white" href={`/${locale}/settings?tab=abonnement`} style={{color: '#ffffff'}}>
+                {t('reminders.upgradeAction')}
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
+  );
+}
+
+function ReminderSwitch({
+  enabled,
+  hasAccess,
+  leaseId,
+  locale,
+  month,
+  query,
+  reminderDay,
+  setShowUpgrade,
+  view
+}: {
+  enabled: boolean;
+  hasAccess: boolean;
+  leaseId: string | null;
+  locale: string;
+  month: string;
+  query: string;
+  reminderDay: number | null;
+  setShowUpgrade: (value: boolean) => void;
+  view: string;
+}) {
+  const t = useTranslations('tenants');
+
+  if (!leaseId) {
+    return <span className="text-sm text-[var(--muted)]">-</span>;
+  }
+
+  const label = enabled ? t('reminders.enabledWithDay', {day: reminderDay ?? '-'}) : t('reminders.disabled');
+
+  if (!hasAccess) {
+    return (
+      <button
+        aria-label={t('reminders.upgradeTitle')}
+        className="focus-ring inline-flex items-center gap-2 rounded-full bg-[#e5e7eb] px-1 py-1 text-xs font-semibold text-[#4b5563]"
+        onClick={() => setShowUpgrade(true)}
+        title={t('reminders.lockedTooltip')}
+        type="button"
+      >
+        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white text-[var(--muted)]">
+          <span className="material-symbols-outlined text-[15px]">lock</span>
+        </span>
+        <span className="pr-2">{t('reminders.locked')}</span>
+      </button>
+    );
+  }
+
+  return (
+    <form action={updateLeaseReminderAction}>
+      <input name="locale" type="hidden" value={locale} />
+      <input name="lease_id" type="hidden" value={leaseId} />
+      <input name="enabled" type="hidden" value={enabled ? 'false' : 'true'} />
+      <input name="month" type="hidden" value={month} />
+      <input name="view" type="hidden" value={view} />
+      <input name="q" type="hidden" value={query} />
+      <button
+        aria-label={label}
+        className={[
+          'focus-ring inline-flex h-7 w-12 items-center rounded-full px-1 transition',
+          enabled ? 'justify-end bg-[var(--accent)]' : 'justify-start bg-[#d1d5db]'
+        ].join(' ')}
+        title={label}
+        type="submit"
+      >
+        <span className="h-5 w-5 rounded-full bg-white shadow-sm" />
+      </button>
+    </form>
   );
 }

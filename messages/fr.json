@@ -464,7 +464,8 @@
       "name": "Nom & prénom",
       "property": "Bien occupé",
       "startDate": "Date entrée",
-      "endDate": "Fin du contrat"
+      "endDate": "Fin du contrat",
+      "reminder": "Rappel"
     },
     "paymentStatus": {
       "noLease": "Sans bail",
@@ -481,6 +482,26 @@
       "activate": "Activer",
       "deleteTitle": "Supprimer ce locataire ?",
       "deleteDescription": "Supprimer ce locataire supprimera aussi ses données historiques liées aux baux, loyers et documents."
+    },
+    "reminders": {
+      "column": "Rappel",
+      "locked": "Plus",
+      "lockedTooltip": "Les rappels de loyer sont inclus dans Plus et Portfolio.",
+      "disabled": "Rappel de loyer désactivé",
+      "enabledWithDay": "Rappel de loyer activé, chaque mois le {day}",
+      "upgradeTitle": "Passez à Plus pour les rappels de loyer",
+      "upgradeCopy": "Les rappels de loyer sont inclus dans Plus et Portfolio. Envoyez automatiquement un email aux locataires autour de la date de paiement et réduisez les relances manuelles.",
+      "upgradeLater": "Plus tard",
+      "upgradeAction": "Voir les forfaits",
+      "editTitle": "4. Rappel de loyer",
+      "editCopy": "Le bail actif permet de déterminer quand ce locataire doit être rappelé pour payer son loyer.",
+      "enableLabel": "Activer le rappel mensuel de loyer",
+      "dayLabel": "Jour de paiement mensuel",
+      "dayOption": "Jour {day}",
+      "daysBeforeLabel": "Envoyer le rappel",
+      "daysBeforeOption": "{days, plural, =0 {Le jour du paiement} one {# jour avant} other {# jours avant}}",
+      "leaseFallback": "Bail actif",
+      "noLease": "Créez un bail actif avant de configurer les rappels de loyer."
     },
     "form": {
       "identityTitle": "1. Identité du locataire",

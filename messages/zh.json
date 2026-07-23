@@ -464,7 +464,8 @@
       "name": "姓名",
       "property": "所住房产",
       "startDate": "入住日期",
-      "endDate": "合同结束日期"
+      "endDate": "合同结束日期",
+      "reminder": "提醒"
     },
     "paymentStatus": {
       "noLease": "无租约",
@@ -481,6 +482,26 @@
       "activate": "启用",
       "deleteTitle": "确定删除此租客？",
       "deleteDescription": "删除此租客将同时删除其相关的租约、租金和文档历史数据。"
+    },
+    "reminders": {
+      "column": "提醒",
+      "locked": "Plus",
+      "lockedTooltip": "租金提醒包含在 Plus 和 Portfolio 套餐中。",
+      "disabled": "租金提醒已关闭",
+      "enabledWithDay": "租金提醒已开启，每月 {day} 日发送",
+      "upgradeTitle": "升级到 Plus 使用租金提醒",
+      "upgradeCopy": "租金提醒包含在 Plus 和 Portfolio 套餐中。系统会在租金到期日前后自动邮件提醒租客，减少手动催收。",
+      "upgradeLater": "稍后",
+      "upgradeAction": "查看套餐",
+      "editTitle": "4. 租金提醒",
+      "editCopy": "系统会根据当前有效租约决定何时提醒该租客支付房租。",
+      "enableLabel": "开启每月租金提醒",
+      "dayLabel": "每月付款日",
+      "dayOption": "{day} 日",
+      "daysBeforeLabel": "提醒时间",
+      "daysBeforeOption": "{days, plural, =0 {付款当天} other {提前 # 天}}",
+      "leaseFallback": "当前有效租约",
+      "noLease": "请先创建有效租约，再配置租金提醒。"
     },
     "form": {
       "identityTitle": "1. 租客身份信息",

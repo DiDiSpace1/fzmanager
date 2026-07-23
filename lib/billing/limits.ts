@@ -1,6 +1,6 @@
 import type {SupabaseClient} from '@supabase/supabase-js';
 
-import {type BillableResource, type BillingStatus, getPlanLimits, hasPaidAccess} from './config';
+import {type BillableResource, type BillingStatus, getPlanLimits, hasPaidAccess, normalizeBillingPlan} from './config';
 
 const resourceTables: Record<BillableResource, string> = {
   documents: 'documents',
@@ -16,6 +16,14 @@ export async function getWorkspaceBilling(supabase: SupabaseClient, workspaceId:
     .maybeSingle<BillingStatus>();
 
   return data ?? null;
+}
+
+export function canUseRentReminders(billing: BillingStatus | null | undefined) {
+  if (!hasPaidAccess(billing)) {
+    return false;
+  }
+
+  return ['plus', 'portfolio'].includes(normalizeBillingPlan(billing?.plan));
 }
 
 export async function getPlanUsage(supabase: SupabaseClient, workspaceId: string, resource: BillableResource) {

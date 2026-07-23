@@ -464,7 +464,8 @@
       "name": "Name",
       "property": "Occupied property",
       "startDate": "Move-in date",
-      "endDate": "Lease end"
+      "endDate": "Lease end",
+      "reminder": "Reminder"
     },
     "paymentStatus": {
       "noLease": "No lease",
@@ -481,6 +482,26 @@
       "activate": "Activate",
       "deleteTitle": "Delete this tenant?",
       "deleteDescription": "Deleting this tenant will also delete historical data linked to leases, rents and documents."
+    },
+    "reminders": {
+      "column": "Reminder",
+      "locked": "Plus",
+      "lockedTooltip": "Rent reminders are included in Plus and Portfolio.",
+      "disabled": "Rent reminder off",
+      "enabledWithDay": "Rent reminder on, every month on day {day}",
+      "upgradeTitle": "Upgrade to Plus for rent reminders",
+      "upgradeCopy": "Rent reminders are included in Plus and Portfolio. Automatically email tenants around the rent due date and reduce manual follow-up.",
+      "upgradeLater": "Later",
+      "upgradeAction": "View plans",
+      "editTitle": "4. Rent reminder",
+      "editCopy": "Use the active lease to decide when this tenant should be reminded to pay rent.",
+      "enableLabel": "Enable monthly rent reminder",
+      "dayLabel": "Monthly payment day",
+      "dayOption": "Day {day}",
+      "daysBeforeLabel": "Send reminder",
+      "daysBeforeOption": "{days, plural, =0 {On the payment day} one {# day before} other {# days before}}",
+      "leaseFallback": "Active lease",
+      "noLease": "Create an active lease before configuring rent reminders."
     },
     "form": {
       "identityTitle": "1. Tenant identity",
