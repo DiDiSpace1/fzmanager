@@ -56,10 +56,10 @@ This is the important part: higher forfaits should unlock stronger capabilities,
 | Rent payment status | Basic | Included | Included | Included |
 | Property photos | No | 5 per property | 10 per property | 20 per property |
 | Document upload | 10 docs / 50 MB | 150 docs / 500 MB | 400 docs / 1.5 GB | 1000 docs / 4 GB |
-| Quittance generation | No | Single manual generation | Single + batch generation | Single + batch + future automatic generation |
+| Quittance generation | No | Single manual generation | Single + batch generation | Single + batch + automatic generation after paid rent |
 | Tax export | No | Basic export | Export with better dashboard context | Portfolio-scale export workflow |
 | Dashboard | Basic dashboard | Basic dashboard | Professional Plus dashboard | Professional Portfolio dashboard |
-| Rent reminders | No | No | Per-tenant / per-lease reminders | Per-tenant reminders + future batch reminder center |
+| Rent reminders | No | No | Per-tenant / per-lease reminders | Per-tenant reminders + batch reminder center |
 | Batch management | No | No | Limited batch workflows | Portfolio batch workflows |
 | Priority support | No | Standard paid support | Priority support | Priority support |
 

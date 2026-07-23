@@ -115,6 +115,59 @@ export async function updateAccountSettingsAction(formData: FormData) {
   redirect(`${localizedPath(nextLocale, '/settings')}?saved=settings`);
 }
 
+function passwordSettingsHref(locale: string, params: Record<string, string>) {
+  return appendParams(localizedPath(locale, '/settings?tab=securite'), params);
+}
+
+function hasStrongPassword(value: string) {
+  return value.length >= 12 && /[A-Z]/.test(value) && /\d/.test(value);
+}
+
+export async function updatePasswordAction(formData: FormData) {
+  const locale = value(formData, 'locale') || 'fr';
+  const oldPassword = value(formData, 'old_password');
+  const newPassword = value(formData, 'new_password');
+  const confirmPassword = value(formData, 'confirm_password');
+
+  if (!oldPassword || !newPassword || !confirmPassword) {
+    redirect(passwordSettingsHref(locale, {error: 'password_missing'}));
+  }
+
+  if (newPassword !== confirmPassword) {
+    redirect(passwordSettingsHref(locale, {error: 'password_mismatch'}));
+  }
+
+  if (!hasStrongPassword(newPassword)) {
+    redirect(passwordSettingsHref(locale, {error: 'password_strength'}));
+  }
+
+  const {supabase, user} = await getCurrentUserWorkspace(locale);
+  const email = user.email;
+
+  if (!email) {
+    redirect(passwordSettingsHref(locale, {error: 'password_update_failed'}));
+  }
+
+  const {error: signInError} = await supabase.auth.signInWithPassword({
+    email,
+    password: oldPassword
+  });
+
+  if (signInError) {
+    redirect(passwordSettingsHref(locale, {error: 'password_invalid_current'}));
+  }
+
+  const {error} = await supabase.auth.updateUser({
+    password: newPassword
+  });
+
+  if (error) {
+    redirect(passwordSettingsHref(locale, {error: 'password_update_failed'}));
+  }
+
+  redirect(passwordSettingsHref(locale, {saved: 'password'}));
+}
+
 async function ensureStripeCustomer(locale: string) {
   const {profile, supabase, user, workspaceId} = await getCurrentUserWorkspace(locale);
   const billing = await getWorkspaceBilling(supabase, workspaceId);

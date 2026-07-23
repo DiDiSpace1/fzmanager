@@ -834,13 +834,19 @@
         "billing_customer_missing": "Aucun client Stripe n'est encore associé à cet espace.",
         "checkout_failed": "Impossible de créer la session Stripe. Réessayez dans un instant.",
         "delete_confirmation": "Saisissez SUPPRIMER pour confirmer la suppression du compte.",
-        "delete_failed": "Impossible de supprimer le compte. Réessayez dans un instant.",
-        "plan_change_failed": "Impossible de planifier le changement de forfait. Réessayez dans un instant.",
-        "settings_failed": "Impossible d'enregistrer les paramètres du compte.",
-        "stripe_price_missing": "Les Price IDs Stripe ne sont pas configurés."
-      },
-      "saved": "Paramètres enregistrés."
+      "delete_failed": "Impossible de supprimer le compte. Réessayez dans un instant.",
+      "password_invalid_current": "L'ancien mot de passe est incorrect.",
+      "password_mismatch": "Les deux nouveaux mots de passe ne correspondent pas.",
+      "password_missing": "Veuillez remplir tous les champs de mot de passe.",
+      "password_strength": "Le nouveau mot de passe doit contenir au moins 12 caractères, une majuscule et un chiffre.",
+      "password_update_failed": "Impossible de mettre à jour le mot de passe. Réessayez dans un instant.",
+      "plan_change_failed": "Impossible de planifier le changement de forfait. Réessayez dans un instant.",
+      "settings_failed": "Impossible d'enregistrer les paramètres du compte.",
+      "stripe_price_missing": "Les Price IDs Stripe ne sont pas configurés."
     },
+    "saved": "Paramètres enregistrés.",
+    "passwordSaved": "Mot de passe mis à jour."
+  },
     "subscription": {
       "currentPlan": "Forfait actuel",
       "planDetails": "Détails de votre engagement Loyelio",

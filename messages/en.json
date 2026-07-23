@@ -834,13 +834,19 @@
         "billing_customer_missing": "No Stripe customer is associated with this workspace yet.",
         "checkout_failed": "Unable to create the Stripe session. Please try again in a moment.",
         "delete_confirmation": "Type DELETE to confirm account deletion.",
-        "delete_failed": "Unable to delete the account. Please try again in a moment.",
-        "plan_change_failed": "Unable to schedule the plan change. Please try again in a moment.",
-        "settings_failed": "Unable to save the account settings.",
-        "stripe_price_missing": "Stripe Price IDs are not configured."
-      },
-      "saved": "Settings saved."
+      "delete_failed": "Unable to delete the account. Please try again in a moment.",
+      "password_invalid_current": "The current password is incorrect.",
+      "password_mismatch": "The two new passwords do not match.",
+      "password_missing": "Fill in all password fields.",
+      "password_strength": "The new password must contain at least 12 characters, one uppercase letter and one number.",
+      "password_update_failed": "Unable to update the password. Please try again in a moment.",
+      "plan_change_failed": "Unable to schedule the plan change. Please try again in a moment.",
+      "settings_failed": "Unable to save the account settings.",
+      "stripe_price_missing": "Stripe Price IDs are not configured."
     },
+    "saved": "Settings saved.",
+    "passwordSaved": "Password updated."
+  },
     "subscription": {
       "currentPlan": "Current plan",
       "planDetails": "Your Loyelio commitment details",

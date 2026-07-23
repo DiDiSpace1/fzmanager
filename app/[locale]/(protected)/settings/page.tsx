@@ -8,7 +8,7 @@ import {pendingReplacementFromStripeCustomer, syncWorkspaceBillingFromStripe, sy
 import {localizedPath} from '@/lib/navigation';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
 
-import {createBillingPortalSessionAction, createCheckoutSessionAction, deleteAccountAction, updateAccountSettingsAction} from './actions';
+import {createBillingPortalSessionAction, createCheckoutSessionAction, deleteAccountAction, updateAccountSettingsAction, updatePasswordAction} from './actions';
 import {PlanChangeForm} from './PlanChangeForm';
 
 type SettingsPageProps = {
@@ -38,6 +38,11 @@ const errorMessageKeys = new Set([
   'checkout_failed',
   'delete_confirmation',
   'delete_failed',
+  'password_invalid_current',
+  'password_mismatch',
+  'password_missing',
+  'password_strength',
+  'password_update_failed',
   'plan_change_failed',
   'settings_failed',
   'stripe_price_missing'
@@ -173,7 +178,7 @@ export default async function SettingsPage({searchParams}: SettingsPageProps) {
         />
       ) : null}
 
-      {activeTab === 'securite' ? <SecurityTab /> : null}
+      {activeTab === 'securite' ? <SecurityTab locale={locale} /> : null}
 
       {activeTab === 'donnees' ? <DataTab locale={locale} storageLimit={currentLimits.storageBytes} storageUsage={storageUsage} /> : null}
     </>
@@ -235,6 +240,7 @@ function StatusMessages({
       {checkout === 'cancelled' ? <Message tone="warning">{t('checkoutCancelled')}</Message> : null}
       {error ? <Message tone="danger">{debug ? `${errorMessage} ${t('debugId', {id: debug})}` : errorMessage}</Message> : null}
       {saved === 'settings' ? <Message tone="success">{t('saved')}</Message> : null}
+      {saved === 'password' ? <Message tone="success">{t('passwordSaved')}</Message> : null}
     </>
   );
 }
@@ -492,36 +498,37 @@ function SubscriptionTab({
   );
 }
 
-function SecurityTab() {
+function SecurityTab({locale}: {locale: string}) {
   const t = useTranslations('settings.security');
 
   return (
     <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
-      <section className="rounded-xl border border-[var(--line-soft)] bg-white shadow-sm">
+      <form action={updatePasswordAction} className="rounded-xl border border-[var(--line-soft)] bg-white shadow-sm">
+        <input name="locale" type="hidden" value={locale} />
         <div className="border-b border-[var(--line-soft)] bg-[#f0f5f2] px-6 py-5">
           <h2 className="text-lg font-semibold">{t('changePassword')}</h2>
         </div>
         <div className="grid gap-5 p-6">
           <label className="grid gap-2 text-sm font-medium text-[#33413f]">
             {t('oldPassword')}
-            <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-4" type="password" />
+            <input autoComplete="current-password" className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-4" name="old_password" required type="password" />
           </label>
           <div className="grid gap-5 md:grid-cols-2">
             <label className="grid gap-2 text-sm font-medium text-[#33413f]">
               {t('newPassword')}
-              <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-4" type="password" />
+              <input autoComplete="new-password" className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-4" minLength={12} name="new_password" required type="password" />
             </label>
             <label className="grid gap-2 text-sm font-medium text-[#33413f]">
               {t('confirmPassword')}
-              <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-4" type="password" />
+              <input autoComplete="new-password" className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-4" minLength={12} name="confirm_password" required type="password" />
             </label>
           </div>
           <p className="text-sm leading-6 text-[var(--muted)]">{t('passwordHint')}</p>
-          <button className="focus-ring min-h-11 w-fit rounded-lg bg-[var(--accent)] px-6 text-sm font-semibold text-white" type="button">
+          <button className="focus-ring min-h-11 w-fit rounded-lg bg-[var(--accent)] px-6 text-sm font-semibold text-white" type="submit">
             {t('updatePassword')}
           </button>
         </div>
-      </section>
+      </form>
       <aside className="rounded-xl border border-[#c7d2fe] bg-[#eef2ff] p-6 text-sm text-[#1e3a8a]">
         <h2 className="text-base font-semibold">{t('tipsTitle')}</h2>
         <ul className="mt-5 grid gap-4 leading-6">
