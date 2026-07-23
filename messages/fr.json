@@ -40,6 +40,7 @@
     "bail": "Bail",
     "transactions": "Transactions",
     "documents": "Documents",
+    "reminders": "Rappels",
     "tax": "Comptabilité",
     "settings": "Paramètres"
   },
@@ -542,6 +543,55 @@
         "partial": "Partiellement payé",
         "unpaid": "Impayé"
       }
+    }
+  },
+  "reminders": {
+    "title": "Centre de rappels",
+    "subtitle": "Gérez en groupe les rappels de loyer de vos baux actifs.",
+    "lockedTitle": "Centre de rappels Portfolio",
+    "lockedCopy": "Le centre de rappels est disponible avec Portfolio. Les utilisateurs Plus peuvent gérer les rappels locataire par locataire ; Portfolio permet de modifier en groupe les jours de paiement, délais de rappel et statuts d'envoi.",
+    "upgradeAction": "Voir les forfaits",
+    "tableTitle": "Rappels des baux actifs",
+    "selectedSummary": "{count, plural, =0 {Aucun bail sélectionné} one {# bail sélectionné} other {# baux sélectionnés}}",
+    "selectAll": "Tout sélectionner",
+    "clearSelection": "Effacer la sélection",
+    "bulkDay": "Jour de paiement",
+    "bulkLeadTime": "Délai",
+    "applySettings": "Appliquer",
+    "enableSelected": "Activer",
+    "disableSelected": "Désactiver",
+    "dayOption": "Jour {day}",
+    "daysBeforeOption": "{days, plural, =0 {Le jour même} one {# jour avant} other {# jours avant}}",
+    "tenant": "Locataire",
+    "property": "Bien",
+    "paymentDay": "Jour de paiement",
+    "status": "Rappel",
+    "nextReminder": "Prochain rappel",
+    "lastSend": "Dernier envoi",
+    "enabled": "Activé",
+    "disabled": "Désactivé",
+    "sent": "Envoyé",
+    "failed": "Échec",
+    "missingEmail": "Email manquant",
+    "empty": "Aucun bail actif à gérer.",
+    "footerSummary": "{selected} sélectionné(s) sur {count} baux actifs.",
+    "metrics": {
+      "activeLeases": "Baux actifs",
+      "enabled": "Rappels activés",
+      "failed": "Envois échoués",
+      "missingEmail": "Emails manquants"
+    },
+    "success": {
+      "enable": "Les rappels sélectionnés ont été activés.",
+      "disable": "Les rappels sélectionnés ont été désactivés.",
+      "update_settings": "Les paramètres de rappel ont été mis à jour."
+    },
+    "errors": {
+      "invalid_operation": "L'action de rappel demandée est invalide.",
+      "loadFailed": "Impossible de charger les rappels.",
+      "no_selection": "Sélectionnez au moins un bail.",
+      "portfolio_required": "Portfolio est requis pour utiliser le centre de rappels.",
+      "update_failed": "Impossible de mettre à jour les rappels sélectionnés."
     }
   },
   "documents": {

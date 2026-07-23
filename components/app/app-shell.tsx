@@ -18,6 +18,7 @@ const navItems = [
   {href: '/bail', key: 'bail'},
   {href: '/transactions', key: 'transactions'},
   {href: '/documents', key: 'documents'},
+  {href: '/reminders', key: 'reminders'},
   {href: '/tax', key: 'tax'},
   {href: '/settings', key: 'settings'}
 ] as const;
@@ -39,6 +40,7 @@ export async function AppShell({children}: {children: React.ReactNode}) {
   let userEmail: string | null = null;
   let userForfait = 'Free';
   let userFullName: string | null = null;
+  let userPlan = 'free';
 
   try {
     const supabase = await createSupabaseServerClient();
@@ -83,6 +85,7 @@ export async function AppShell({children}: {children: React.ReactNode}) {
       }
 
       userForfait = forfaitLabel(billing ?? null);
+      userPlan = billing && hasPaidAccess(billing) ? normalizeBillingPlan(billing.plan) : 'free';
     }
   } catch (error) {
     if (!(error instanceof Error) || error.message !== 'Missing Supabase environment variables.') {
@@ -109,7 +112,9 @@ export async function AppShell({children}: {children: React.ReactNode}) {
         {userEmail ? (
           <SidebarNav
             helpLabel={common('help')}
-            items={navItems.map((item) => ({...item, href: localizedPath(locale, item.href), label: t(item.key)}))}
+            items={navItems
+              .filter((item) => item.key !== 'reminders' || userPlan === 'portfolio')
+              .map((item) => ({...item, href: localizedPath(locale, item.href), label: t(item.key)}))}
             languageLabel={common('language')}
             locale={locale}
             logoutAction={localizedPath(locale, '/logout')}
@@ -124,7 +129,7 @@ export async function AppShell({children}: {children: React.ReactNode}) {
             <span>{common('appName')}</span>
           </div>
           <nav className="mt-3 flex gap-2 overflow-x-auto pb-1">
-            {navItems.map((item) => (
+            {navItems.filter((item) => item.key !== 'reminders' || userPlan === 'portfolio').map((item) => (
               <Link className="shrink-0 rounded-md border border-[var(--line)] px-3 py-2 text-xs" href={localizedPath(locale, item.href)} key={item.key}>
                 {t(item.key)}
               </Link>

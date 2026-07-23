@@ -40,6 +40,7 @@
     "bail": "Lease",
     "transactions": "Transactions",
     "documents": "Documents",
+    "reminders": "Reminders",
     "tax": "Comptabilité",
     "settings": "Settings"
   },
@@ -542,6 +543,55 @@
         "partial": "Partially paid",
         "unpaid": "Unpaid"
       }
+    }
+  },
+  "reminders": {
+    "title": "Reminder center",
+    "subtitle": "Batch-manage rent reminders across active leases.",
+    "lockedTitle": "Portfolio reminder center",
+    "lockedCopy": "The reminder center is available on Portfolio. Plus users can manage reminders one tenant at a time; Portfolio users can batch edit payment days, lead times and sending status.",
+    "upgradeAction": "View plans",
+    "tableTitle": "Active lease reminders",
+    "selectedSummary": "{count, plural, =0 {No lease selected} one {# lease selected} other {# leases selected}}",
+    "selectAll": "Select all",
+    "clearSelection": "Clear selection",
+    "bulkDay": "Payment day",
+    "bulkLeadTime": "Lead time",
+    "applySettings": "Apply settings",
+    "enableSelected": "Enable",
+    "disableSelected": "Disable",
+    "dayOption": "Day {day}",
+    "daysBeforeOption": "{days, plural, =0 {On due date} one {# day before} other {# days before}}",
+    "tenant": "Tenant",
+    "property": "Property",
+    "paymentDay": "Payment day",
+    "status": "Reminder",
+    "nextReminder": "Next reminder",
+    "lastSend": "Last send",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "sent": "Sent",
+    "failed": "Failed",
+    "missingEmail": "Email missing",
+    "empty": "No active lease to manage.",
+    "footerSummary": "{selected} selected out of {count} active leases.",
+    "metrics": {
+      "activeLeases": "Active leases",
+      "enabled": "Reminders enabled",
+      "failed": "Failed sends",
+      "missingEmail": "Missing emails"
+    },
+    "success": {
+      "enable": "Selected reminders have been enabled.",
+      "disable": "Selected reminders have been disabled.",
+      "update_settings": "Reminder settings have been updated."
+    },
+    "errors": {
+      "invalid_operation": "The requested reminder action is invalid.",
+      "loadFailed": "Unable to load reminder data.",
+      "no_selection": "Select at least one lease.",
+      "portfolio_required": "Portfolio is required to use the reminder center.",
+      "update_failed": "Unable to update selected reminders."
     }
   },
   "documents": {

@@ -40,6 +40,7 @@
     "bail": "租约",
     "transactions": "交易记录",
     "documents": "文档",
+    "reminders": "提醒中心",
     "tax": "税务",
     "settings": "设置"
   },
@@ -542,6 +543,55 @@
         "partial": "部分支付",
         "unpaid": "未支付"
       }
+    }
+  },
+  "reminders": {
+    "title": "提醒中心",
+    "subtitle": "批量管理所有有效租约的租金提醒。",
+    "lockedTitle": "Portfolio 提醒中心",
+    "lockedCopy": "提醒中心属于 Portfolio 功能。Plus 用户可以逐个租客管理提醒；Portfolio 用户可以批量修改付款日、提前提醒时间和查看发送状态。",
+    "upgradeAction": "查看套餐",
+    "tableTitle": "有效租约提醒",
+    "selectedSummary": "{count, plural, =0 {未选择租约} other {已选择 # 份租约}}",
+    "selectAll": "全选",
+    "clearSelection": "取消选择",
+    "bulkDay": "付款日",
+    "bulkLeadTime": "提前时间",
+    "applySettings": "应用设置",
+    "enableSelected": "开启",
+    "disableSelected": "关闭",
+    "dayOption": "{day} 日",
+    "daysBeforeOption": "{days, plural, =0 {付款当天} other {提前 # 天}}",
+    "tenant": "租客",
+    "property": "房产",
+    "paymentDay": "付款日",
+    "status": "提醒",
+    "nextReminder": "下次提醒",
+    "lastSend": "最近发送",
+    "enabled": "已开启",
+    "disabled": "已关闭",
+    "sent": "已发送",
+    "failed": "发送失败",
+    "missingEmail": "缺少邮箱",
+    "empty": "暂无可管理的有效租约。",
+    "footerSummary": "已选择 {selected} / {count} 份有效租约。",
+    "metrics": {
+      "activeLeases": "有效租约",
+      "enabled": "已开启提醒",
+      "failed": "发送失败",
+      "missingEmail": "缺少邮箱"
+    },
+    "success": {
+      "enable": "已开启所选提醒。",
+      "disable": "已关闭所选提醒。",
+      "update_settings": "提醒设置已更新。"
+    },
+    "errors": {
+      "invalid_operation": "提醒操作无效。",
+      "loadFailed": "无法加载提醒数据。",
+      "no_selection": "请至少选择一份租约。",
+      "portfolio_required": "需要 Portfolio 套餐才能使用提醒中心。",
+      "update_failed": "无法更新所选提醒。"
     }
   },
   "documents": {

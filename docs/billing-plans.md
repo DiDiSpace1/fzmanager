@@ -173,13 +173,11 @@ Currently implemented:
 - Portfolio uses the advanced dashboard
 - Portfolio can use batch quittance generation
 - Portfolio can use rent reminders
+- Portfolio has a reminder center for batch reminder management
 - Portfolio has the highest limits
 
 Planned Portfolio-only differentiation:
 
-- reminder center: batch enable / disable rent reminders
-- bulk reminder date editing
-- reminder sending history
 - failed reminder retry
 - batch document download ZIP
 - automatic quittance generation after rent is marked as paid
@@ -241,10 +239,16 @@ Required production environment variables:
 - `RESEND_KEY`
 - `RENT_REMINDER_FROM_EMAIL`
 
+Implemented Portfolio reminder center:
+
+- batch enable / disable rent reminders
+- bulk reminder date editing
+- bulk reminder lead-time editing
+- sending history display
+- missing-email and failed-send counters
+
 Remaining reminder work:
 
-- Portfolio reminder center
-- sending history UI
 - failed reminder retry UI
 
 ## Dashboard Strategy
