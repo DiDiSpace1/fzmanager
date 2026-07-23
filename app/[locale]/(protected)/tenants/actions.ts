@@ -6,8 +6,6 @@ import {redirect} from 'next/navigation';
 import {canCreateResource, canUseAutoQuittance, canUseRentReminders, getWorkspaceBilling} from '@/lib/billing/limits';
 import {localizedPath} from '@/lib/navigation';
 import {createQuittanceDocument} from '@/lib/quittance/service';
-import {sendRentReminderEmail} from '@/lib/reminders/email';
-import {createSupabaseAdminClient} from '@/lib/supabase/admin';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
 
 function value(formData: FormData, key: string) {
@@ -54,24 +52,6 @@ function tenantsHref(locale: string, formData: FormData) {
 
 function withStatus(url: string, key: 'error' | 'success', value: string) {
   return `${url}${url.includes('?') ? '&' : '?'}${key}=${value}`;
-}
-
-function todayIso() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function currentReminderMonth() {
-  return `${todayIso().slice(0, 7)}-01`;
-}
-
-function daysInMonth(year: number, month: number) {
-  return new Date(Date.UTC(year, month, 0)).getUTCDate();
-}
-
-function dueDateForReminder(month: string, preferredDay: number | null | undefined) {
-  const [year, monthIndex] = month.slice(0, 7).split('-').map(Number);
-  const day = Math.min(Math.max(preferredDay ?? 1, 1), daysInMonth(year, monthIndex));
-  return `${month.slice(0, 7)}-${String(day).padStart(2, '0')}`;
 }
 
 export async function createTenantAction(formData: FormData) {
@@ -216,112 +196,6 @@ export async function updateLeaseReminderAction(formData: FormData) {
 
   revalidatePath(localizedPath(locale, '/tenants'));
   redirect(withStatus(tenantsHref(locale, formData), 'success', enabled ? 'reminder_enabled' : 'reminder_disabled'));
-}
-
-export async function sendTestRentReminderAction(formData: FormData) {
-  const locale = value(formData, 'locale') || 'fr';
-  const leaseId = value(formData, 'lease_id');
-
-  if (!leaseId) {
-    redirect(withStatus(tenantsHref(locale, formData), 'error', 'test_reminder_missing_lease'));
-  }
-
-  const {profile, supabase, workspaceId} = await getCurrentUserWorkspace(locale);
-  const billing = await getWorkspaceBilling(supabase, workspaceId);
-
-  if (!canUseRentReminders(billing)) {
-    redirect(withStatus(tenantsHref(locale, formData), 'error', 'reminder_upgrade_required'));
-  }
-
-  const {data: workspace} = await supabase.from('workspaces').select('name').eq('id', workspaceId).single<{name: string}>();
-  const {data: lease, error: leaseError} = await supabase
-    .from('leases')
-    .select(
-      'id, workspace_id, tenant_id, monthly_rent, charges_amount, rent_reminder_day, tenants(full_name, email), properties(name), units(name), rent_charges(period_month, status, total_due)'
-    )
-    .eq('id', leaseId)
-    .eq('workspace_id', workspaceId)
-    .eq('status', 'active')
-    .single<{
-      charges_amount: number;
-      id: string;
-      monthly_rent: number;
-      properties: {name: string} | null;
-      rent_charges: {period_month: string; status: string; total_due: number}[];
-      rent_reminder_day: number | null;
-      tenant_id: string;
-      tenants: {email: string | null; full_name: string} | null;
-      units: {name: string} | null;
-      workspace_id: string;
-    }>();
-
-  if (leaseError || !lease) {
-    redirect(withStatus(tenantsHref(locale, formData), 'error', 'test_reminder_missing_lease'));
-  }
-
-  if (!lease.tenants?.email) {
-    redirect(withStatus(tenantsHref(locale, formData), 'error', 'test_reminder_missing_email'));
-  }
-
-  const reminderMonth = currentReminderMonth();
-  const rentCharge = lease.rent_charges.find((charge) => charge.period_month === reminderMonth);
-  const totalDue = Number(rentCharge?.total_due ?? Number(lease.monthly_rent ?? 0) + Number(lease.charges_amount ?? 0));
-  const dueDate = dueDateForReminder(reminderMonth, lease.rent_reminder_day);
-  const propertyLabel = [lease.properties?.name, lease.units?.name].filter(Boolean).join(' - ') || workspace?.name || 'votre logement';
-  const admin = createSupabaseAdminClient();
-
-  try {
-    const providerMessageId = await sendRentReminderEmail({
-      amount: totalDue,
-      dueDate,
-      ownerName: profile.full_name || workspace?.name || 'Votre bailleur',
-      propertyLabel,
-      reminderMonth,
-      tenantEmail: lease.tenants.email,
-      tenantName: lease.tenants.full_name
-    });
-
-    await admin.from('rent_reminder_logs').upsert(
-      {
-        due_date: dueDate,
-        email_to: lease.tenants.email,
-        error_message: null,
-        lease_id: lease.id,
-        provider_message_id: providerMessageId,
-        reminder_month: reminderMonth,
-        reminder_type: 'manual_test',
-        scheduled_for: todayIso(),
-        sent_at: new Date().toISOString(),
-        status: 'sent',
-        tenant_id: lease.tenant_id,
-        workspace_id: workspaceId
-      },
-      {onConflict: 'lease_id,reminder_month,reminder_type'}
-    );
-  } catch (error) {
-    await admin.from('rent_reminder_logs').upsert(
-      {
-        due_date: dueDate,
-        email_to: lease.tenants.email,
-        error_message: error instanceof Error ? error.message : 'Unknown email error.',
-        lease_id: lease.id,
-        provider_message_id: null,
-        reminder_month: reminderMonth,
-        reminder_type: 'manual_test',
-        scheduled_for: todayIso(),
-        sent_at: null,
-        status: 'failed',
-        tenant_id: lease.tenant_id,
-        workspace_id: workspaceId
-      },
-      {onConflict: 'lease_id,reminder_month,reminder_type'}
-    );
-    redirect(withStatus(tenantsHref(locale, formData), 'error', 'test_reminder_failed'));
-  }
-
-  revalidatePath(localizedPath(locale, '/tenants'));
-  revalidatePath(localizedPath(locale, '/reminders'));
-  redirect(withStatus(tenantsHref(locale, formData), 'success', 'test_reminder_sent'));
 }
 
 export async function deleteTenantAction(formData: FormData) {

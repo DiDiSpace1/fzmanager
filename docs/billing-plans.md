@@ -292,10 +292,6 @@ Implemented Portfolio reminder center:
 - missing-email and failed-send counters
 - failed reminder retry UI
 
-Temporary production-cleanup item:
-
-- the tenant list still exposes the manual test-reminder button and `sendTestRentReminderAction`; remove or restrict this diagnostic control after production email verification is complete
-
 ## Dashboard Strategy
 
 | Dashboard | Free | Solo | Plus | Portfolio |
@@ -336,7 +332,7 @@ Status meanings:
 | Plan limits and Stripe plan mapping | Complete | Keep Stripe price ids and app limits synchronized |
 | Subscription synchronization and scheduled plan changes | Complete | Continue monitoring Stripe webhook and schedule failures |
 | Plus / Portfolio professional dashboard | Complete | Portfolio currently shares the advanced dashboard with Portfolio-specific links |
-| Plus tenant rent reminders | Complete | Remove or restrict the temporary test-send control after verification |
+| Plus tenant rent reminders | Complete | Continue monitoring scheduled delivery and provider failures |
 | Portfolio reminder center | Complete | Consider saved batch selections later |
 | Plus batch quittance generation | Complete | Continue PDF and email regression testing |
 | Portfolio automatic quittance after paid rent | Complete | Add durable automation history later |
@@ -349,11 +345,10 @@ Status meanings:
 
 Recommended implementation order:
 
-1. Remove or restrict the temporary test-reminder control.
-2. Add durable collection audit history and activity display.
-3. Add receipt email delivery results per tenant.
-4. Add broader Portfolio tenant batch operations.
-5. Add the in-app priority support entry point.
+1. Add durable collection audit history and activity display.
+2. Add receipt email delivery results per tenant.
+3. Add broader Portfolio tenant batch operations.
+4. Add the in-app priority support entry point.
 
 ## Stripe Mapping
 

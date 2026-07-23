@@ -450,16 +450,12 @@
     "errors": {
       "loadFailed": "Unable to load tenants. Check that the Supabase migrations are applied.",
       "planLimit": "The free plan includes 3 tenants. Upgrade to Solo from settings to continue.",
-      "plan_limit": "The free plan includes 3 tenants. Upgrade to Solo from settings to continue.",
-      "test_reminder_failed": "The test reminder could not be sent. Check the email provider settings and try again.",
-      "test_reminder_missing_email": "This tenant does not have an email address.",
-      "test_reminder_missing_lease": "No active lease was found for this tenant."
+      "plan_limit": "The free plan includes 3 tenants. Upgrade to Solo from settings to continue."
     },
       "success": {
         "rent_status_updated_receipt_created": "Rent marked as paid. The receipt was generated and archived automatically.",
         "rent_status_updated_receipt_exists": "Rent marked as paid. A receipt already exists for this tenant and month.",
-        "rent_status_updated_receipt_failed": "Rent marked as paid, but the automatic receipt could not be generated.",
-        "test_reminder_sent": "Test reminder email sent to the tenant."
+        "rent_status_updated_receipt_failed": "Rent marked as paid, but the automatic receipt could not be generated."
       },
     "summary": {
       "unassigned": "Unassigned",
@@ -491,7 +487,6 @@
     "actions": {
       "createLease": "Create lease",
       "transaction": "Transaction",
-      "testReminder": "Send test reminder",
       "deactivate": "Deactivate",
       "activate": "Activate",
       "deleteTitle": "Delete this tenant?",

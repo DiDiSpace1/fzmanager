@@ -43,8 +43,8 @@ type TenantsPageProps = {
 
 const MONTH_PARAM_PATTERN = /^\d{4}-\d{2}$/;
 const TENANT_VIEWS = new Set(['all', 'active', 'unassigned', 'expiring', 'overdue']);
-const errorMessageKeys = new Set(['plan_limit', 'test_reminder_failed', 'test_reminder_missing_email', 'test_reminder_missing_lease']);
-const successMessageKeys = new Set(['rent_status_updated_receipt_created', 'rent_status_updated_receipt_exists', 'rent_status_updated_receipt_failed', 'test_reminder_sent']);
+const errorMessageKeys = new Set(['plan_limit']);
+const successMessageKeys = new Set(['rent_status_updated_receipt_created', 'rent_status_updated_receipt_exists', 'rent_status_updated_receipt_failed']);
 
 function isoMonth(date: Date) {
   return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;

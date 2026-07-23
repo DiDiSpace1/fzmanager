@@ -4,7 +4,7 @@ import Link from 'next/link';
 import {useTranslations} from 'next-intl';
 import {useMemo, useState} from 'react';
 
-import {deleteTenantAction, sendTestRentReminderAction, updateLeaseReminderAction, updateTenantActiveAction} from './actions';
+import {deleteTenantAction, updateLeaseReminderAction, updateTenantActiveAction} from './actions';
 import {DeleteTenantButton} from './delete-tenant-button';
 import {TenantActionDetails} from './tenant-action-details';
 
@@ -318,18 +318,6 @@ export function TenantTableClient({
                             {t('actions.createLease')}
                           </Link>
                         )}
-                        {hasReminderAccess && lease?.id && tenant.email ? (
-                          <form action={sendTestRentReminderAction}>
-                            <input name="locale" type="hidden" value={locale} />
-                            <input name="lease_id" type="hidden" value={lease.id} />
-                            <input name="month" type="hidden" value={selectedMonth} />
-                            <input name="view" type="hidden" value={selectedView} />
-                            <input name="q" type="hidden" value={appliedQuery} />
-                            <button className="block w-full rounded-md px-3 py-2 text-left text-[var(--accent)] hover:bg-[#f0f5f2]" type="submit">
-                              {t('actions.testReminder')}
-                            </button>
-                          </form>
-                        ) : null}
                         <form action={updateTenantActiveAction}>
                           <input name="locale" type="hidden" value={locale} />
                           <input name="tenant_id" type="hidden" value={tenant.id} />

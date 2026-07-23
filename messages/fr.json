@@ -450,16 +450,12 @@
     "errors": {
       "loadFailed": "Impossible de charger les locataires. Vérifiez que les migrations Supabase sont bien appliquées.",
       "planLimit": "Le plan gratuit inclut 3 locataires. Passez à Solo depuis les paramètres pour continuer.",
-      "plan_limit": "Le plan gratuit inclut 3 locataires. Passez à Solo depuis les paramètres pour continuer.",
-      "test_reminder_failed": "Le rappel de test n'a pas pu être envoyé. Vérifiez la configuration email puis réessayez.",
-      "test_reminder_missing_email": "Ce locataire n'a pas d'adresse email.",
-      "test_reminder_missing_lease": "Aucun bail actif n'a été trouvé pour ce locataire."
+      "plan_limit": "Le plan gratuit inclut 3 locataires. Passez à Solo depuis les paramètres pour continuer."
     },
       "success": {
         "rent_status_updated_receipt_created": "Loyer marqué comme payé. La quittance a été générée et archivée automatiquement.",
         "rent_status_updated_receipt_exists": "Loyer marqué comme payé. Une quittance existe déjà pour ce locataire et ce mois.",
-        "rent_status_updated_receipt_failed": "Loyer marqué comme payé, mais la quittance automatique n'a pas pu être générée.",
-        "test_reminder_sent": "Email de rappel test envoyé au locataire."
+        "rent_status_updated_receipt_failed": "Loyer marqué comme payé, mais la quittance automatique n'a pas pu être générée."
       },
     "summary": {
       "unassigned": "Non assignés",
@@ -491,7 +487,6 @@
     "actions": {
       "createLease": "Créer un bail",
       "transaction": "Transaction",
-      "testReminder": "Envoyer un rappel test",
       "deactivate": "Désactiver",
       "activate": "Activer",
       "deleteTitle": "Supprimer ce locataire ?",
