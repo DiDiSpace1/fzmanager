@@ -327,6 +327,11 @@ export default async function DashboardPage() {
         cashFlowTotal={cashFlowTotal}
         cashFlowTrend={percentChange(cashFlowTotal, previousCashFlowTotal)}
         chartPoints={advancedChartPoints}
+        collectionHref={
+          currentPlan === 'portfolio'
+            ? `/collections?month=${month.slice(0, 7)}&view=open`
+            : `/tenants?month=${month.slice(0, 7)}&view=overdue`
+        }
         expiringLeases={expiringLeases}
         missingReceiptsCount={missingReceipts.length}
         occupancyRate={occupancyRate}
@@ -440,6 +445,7 @@ type AdvancedDashboardProps = {
     label: string;
     revenue: number;
   }[];
+  collectionHref: string;
   expiringLeases: {
     end_date: string | null;
     propertyName: string;
@@ -473,7 +479,7 @@ type AdvancedDashboardProps = {
   revenueTrend: number;
 };
 
-function AdvancedDashboard({activeLeaseCount, cashFlowTotal, cashFlowTrend, chartPoints, expiringLeases, missingReceiptsCount, occupancyRate, paidTotal, plan, propertyPerformance, receiptCoverage, t, unpaidCharges, unpaidTotal, unpaidTrendChange, unpaidTrendPoints, revenueTrend}: AdvancedDashboardProps) {
+function AdvancedDashboard({activeLeaseCount, cashFlowTotal, cashFlowTrend, chartPoints, collectionHref, expiringLeases, missingReceiptsCount, occupancyRate, paidTotal, plan, propertyPerformance, receiptCoverage, t, unpaidCharges, unpaidTotal, unpaidTrendChange, unpaidTrendPoints, revenueTrend}: AdvancedDashboardProps) {
   const firstUnpaid = unpaidCharges[0];
   const firstExpiring = expiringLeases[0];
   const planLabel = plan === 'portfolio' ? 'Portfolio' : 'Plus';
@@ -502,7 +508,7 @@ function AdvancedDashboard({activeLeaseCount, cashFlowTotal, cashFlowTrend, char
         <section className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <AdvancedMetric icon="account_balance_wallet" label={t('advanced.kpis.revenue')} note={t('advanced.vsLastMonth', {value: formatTrend(revenueTrend)})} tone="primary" value={formatMoney(paidTotal)} />
           <AdvancedMetric icon="trending_up" label={t('advanced.kpis.cashFlow')} note={t('advanced.vsLastMonth', {value: formatTrend(cashFlowTrend)})} tone="primary" value={formatMoney(cashFlowTotal)} />
-          <AdvancedMetric icon="warning" label={t('advanced.kpis.unpaid')} note={t('advanced.unpaidCount', {count: unpaidCharges.length})} tone="error" value={formatMoney(unpaidTotal)} />
+          <AdvancedMetric href={collectionHref} icon="warning" label={t('advanced.kpis.unpaid')} note={t('advanced.unpaidCount', {count: unpaidCharges.length})} tone="error" value={formatMoney(unpaidTotal)} />
           <AdvancedMetric icon="pie_chart" label={t('advanced.kpis.occupancy')} note={t('advanced.activeRentals', {count: activeLeaseCount})} tone="primary" value={`${occupancyRate}%`} />
           <AdvancedMetric icon="event_upcoming" label={t('advanced.kpis.leasesWatch')} note={t('advanced.inSixtyDays')} tone="neutral" value={String(expiringLeases.length)} />
         </section>
@@ -535,7 +541,7 @@ function AdvancedDashboard({activeLeaseCount, cashFlowTotal, cashFlowTrend, char
               ]}
               t={t}
             />
-            <AlertCard expiringLease={firstExpiring} firstUnpaid={firstUnpaid} missingReceiptsCount={missingReceiptsCount} t={t} />
+            <AlertCard collectionHref={collectionHref} expiringLease={firstExpiring} firstUnpaid={firstUnpaid} missingReceiptsCount={missingReceiptsCount} t={t} />
             <RecommendedActions t={t} />
           </aside>
         </section>
@@ -544,7 +550,7 @@ function AdvancedDashboard({activeLeaseCount, cashFlowTotal, cashFlowTrend, char
   );
 }
 
-function AdvancedMetric({icon, label, note, tone, value}: {icon: string; label: string; note: string; tone: 'error' | 'neutral' | 'primary'; value: string}) {
+function AdvancedMetric({href, icon, label, note, tone, value}: {href?: string; icon: string; label: string; note: string; tone: 'error' | 'neutral' | 'primary'; value: string}) {
   const toneClass = {
     error: 'bg-[#ffdad6]/70 text-[#ba1a1a]',
     neutral: 'bg-[#eaf3ef] text-[#006f61]',
@@ -552,15 +558,23 @@ function AdvancedMetric({icon, label, note, tone, value}: {icon: string; label: 
   };
   const valueClass = tone === 'error' ? 'text-[#ba1a1a]' : 'text-[#17201e]';
 
-  return (
-    <section className="rounded-xl border border-[#dce5e1] bg-white p-5 shadow-[0_2px_6px_rgba(20,45,38,0.07)]">
+  const content = (
+    <>
       <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-full ${toneClass[tone]}`}>
         <span className="material-symbols-outlined text-[24px]">{icon}</span>
       </div>
       <p className="text-sm font-medium leading-[1.4] text-[#53615e]">{label}</p>
       <p className={`mt-1 text-[24px] font-semibold leading-[1.2] tabular-nums ${valueClass}`}>{value}</p>
       <p className="mt-2 text-xs leading-[1.4] text-[#66736f]">{note}</p>
-    </section>
+    </>
+  );
+
+  return href ? (
+    <Link className="focus-ring rounded-xl border border-[#dce5e1] bg-white p-5 shadow-[0_2px_6px_rgba(20,45,38,0.07)] transition hover:border-[#9fc9be] hover:bg-[#fbfdfc]" href={href}>
+      {content}
+    </Link>
+  ) : (
+    <section className="rounded-xl border border-[#dce5e1] bg-white p-5 shadow-[0_2px_6px_rgba(20,45,38,0.07)]">{content}</section>
   );
 }
 
@@ -709,11 +723,11 @@ function InsightCard({items, t}: {items: {icon: string; text: string; title: str
   );
 }
 
-function AlertCard({expiringLease, firstUnpaid, missingReceiptsCount, t}: {expiringLease: AdvancedDashboardProps['expiringLeases'][number] | undefined; firstUnpaid: RentCharge | undefined; missingReceiptsCount: number; t: AdvancedDashboardProps['t']}) {
+function AlertCard({collectionHref, expiringLease, firstUnpaid, missingReceiptsCount, t}: {collectionHref: string; expiringLease: AdvancedDashboardProps['expiringLeases'][number] | undefined; firstUnpaid: RentCharge | undefined; missingReceiptsCount: number; t: AdvancedDashboardProps['t']}) {
   const alerts = [
     firstUnpaid
       ? {
-          href: '/tenants',
+          href: collectionHref,
           text: t('advanced.alerts.unpaidText', {amount: formatMoney(remainingAmount(firstUnpaid)), tenant: firstUnpaid.leases?.tenants?.full_name ?? t('advanced.tenantFallback')}),
           title: t('advanced.alerts.unpaid')
         }

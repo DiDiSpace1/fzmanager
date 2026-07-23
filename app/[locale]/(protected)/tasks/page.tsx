@@ -170,7 +170,7 @@ export default async function TasksPage() {
     for (const charge of lease.rent_charges ?? []) {
       if (charge.period_month <= currentPeriod && ['partial', 'unpaid'].includes(charge.status)) {
         tasks.push({
-          actionHref: localizedPath(locale, `/tenants?month=${charge.period_month.slice(0, 7)}&view=overdue`),
+          actionHref: localizedPath(locale, `/collections?month=${charge.period_month.slice(0, 7)}&view=open`),
           actionLabel: t('actions.openRent'),
           description: t(`descriptions.${charge.status === 'partial' ? 'partialPayment' : 'unpaidRent'}`, {month: formatMonth(charge.period_month, locale)}),
           id: `rent-${charge.period_month}-${lease.id}`,
