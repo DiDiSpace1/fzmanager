@@ -770,7 +770,11 @@
     }
   },
   "shell": {
-    "tagline": "房产管理"
+    "tagline": "房产管理",
+    "namePromptTitle": "先完善房东姓名",
+    "namePromptCopy": "生成收据时会自动使用您的姓名作为房东信息。请先到设置页面填写姓名，避免之后生成 quittance 时缺少关键信息。",
+    "namePromptCta": "去填写姓名",
+    "namePromptDismiss": "稍后"
   },
   "cookie": {
     "notice": "Loyelio 仅使用账户运行所必需的 cookie。支付和身份验证工具可能会设置其自身的 cookie。",

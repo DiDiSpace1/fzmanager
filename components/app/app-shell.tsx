@@ -8,6 +8,7 @@ import {syncWorkspaceBillingFromStripe, syncWorkspaceBillingFromStripeCustomer} 
 import {localizedPath} from '@/lib/navigation';
 import {createSupabaseServerClient} from '@/lib/supabase/server';
 
+import {NameOnboardingPrompt} from './name-onboarding-prompt';
 import {SidebarNav} from './sidebar-nav';
 
 const navItems = [
@@ -37,6 +38,7 @@ export async function AppShell({children}: {children: React.ReactNode}) {
   const locale = await getLocale();
   let userEmail: string | null = null;
   let userForfait = 'Free';
+  let userFullName: string | null = null;
 
   try {
     const supabase = await createSupabaseServerClient();
@@ -50,7 +52,8 @@ export async function AppShell({children}: {children: React.ReactNode}) {
 
     userEmail = user.email ?? null;
 
-    const {data: profile} = await supabase.from('profiles').select('default_workspace_id').eq('id', user.id).maybeSingle<{default_workspace_id: string | null}>();
+    const {data: profile} = await supabase.from('profiles').select('default_workspace_id, full_name').eq('id', user.id).maybeSingle<{default_workspace_id: string | null; full_name: string | null}>();
+    userFullName = profile?.full_name ?? null;
 
     if (profile?.default_workspace_id) {
       let {data: billing} = await supabase
@@ -130,6 +133,14 @@ export async function AppShell({children}: {children: React.ReactNode}) {
         </header>
         <main className="mx-auto max-w-[1440px] px-5 py-8 lg:px-8">{children}</main>
       </div>
+      <NameOnboardingPrompt
+        copy={shell('namePromptCopy')}
+        cta={shell('namePromptCta')}
+        dismiss={shell('namePromptDismiss')}
+        href={localizedPath(locale, '/settings?tab=profil')}
+        shouldShow={Boolean(userEmail && !userFullName?.trim())}
+        title={shell('namePromptTitle')}
+      />
     </div>
   );
 }

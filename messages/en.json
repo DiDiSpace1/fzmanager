@@ -770,7 +770,11 @@
     }
   },
   "shell": {
-    "tagline": "Rental management"
+    "tagline": "Rental management",
+    "namePromptTitle": "Complete your landlord name",
+    "namePromptCopy": "Receipts automatically use your name as the landlord. Add it in settings so generated receipts do not miss this information.",
+    "namePromptCta": "Add my name",
+    "namePromptDismiss": "Later"
   },
   "cookie": {
     "notice": "Loyelio only uses cookies required for account functionality. Payment and authentication tools may set their own cookies.",

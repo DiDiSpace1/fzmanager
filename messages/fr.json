@@ -770,7 +770,11 @@
     }
   },
   "shell": {
-    "tagline": "Gestion immobilière"
+    "tagline": "Gestion immobilière",
+    "namePromptTitle": "Complétez votre nom de bailleur",
+    "namePromptCopy": "Les quittances utilisent automatiquement votre nom comme bailleur. Ajoutez-le dans les paramètres pour éviter les informations manquantes lors de la génération.",
+    "namePromptCta": "Renseigner mon nom",
+    "namePromptDismiss": "Plus tard"
   },
   "cookie": {
     "notice": "Loyelio utilise uniquement les cookies nécessaires au fonctionnement du compte. Les outils de paiement et d'authentification peuvent déposer leurs propres cookies.",

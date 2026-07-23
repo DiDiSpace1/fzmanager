@@ -138,6 +138,20 @@ function monthEndDisplayDate(value: string) {
   return new Intl.DateTimeFormat('fr-FR', {day: '2-digit', month: '2-digit', year: 'numeric'}).format(end);
 }
 
+function monthEndIsoDate(value: string) {
+  if (!value) {
+    return '';
+  }
+
+  const [year, month] = value.split('-').map(Number);
+
+  if (!year || !month) {
+    return value;
+  }
+
+  return new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10);
+}
+
 function displayDateToMonth(value: string) {
   const isoDate = frenchDateToIso(value);
 
@@ -364,8 +378,6 @@ export function QuittanceForm({
     propertyId: initialProperty?.id ?? '',
     tenantId: ''
   });
-  const [paidAtDisplay, setPaidAtDisplay] = useState(dateLabel(initialPaidAt));
-  const [periodDisplay, setPeriodDisplay] = useState(monthToDisplayDate(initialPeriodMonth));
   const [showPreview, setShowPreview] = useState(false);
   const [previewLarge, setPreviewLarge] = useState(false);
   const [mode, setMode] = useState<QuittanceMode>('single');
@@ -426,21 +438,11 @@ export function QuittanceForm({
   }
 
   function onPaidAtChange(value: string) {
-    setPaidAtDisplay(value);
-    const nextPaidAt = frenchDateToIso(value);
-
-    if (nextPaidAt) {
-      update({paidAt: nextPaidAt});
-    }
+    update({paidAt: value});
   }
 
   function onPeriodChange(value: string) {
-    setPeriodDisplay(value);
-    const nextPeriod = displayDateToMonth(value);
-
-    if (nextPeriod) {
-      update({periodMonth: nextPeriod});
-    }
+    update({periodMonth: value.slice(0, 7)});
   }
 
   function generatePdf() {
@@ -670,11 +672,11 @@ export function QuittanceForm({
             </label>
             <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
               {t('period')}
-              <input className="focus-ring min-h-11 w-full min-w-0 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" inputMode="numeric" onChange={(event) => onPeriodChange(event.target.value)} placeholder="01/07/2026" value={periodDisplay} />
+              <input className="focus-ring min-h-11 w-full min-w-0 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => onPeriodChange(event.target.value)} type="date" value={`${state.periodMonth}-01`} />
             </label>
             <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
               {t('paymentDate')}
-              <input className="focus-ring min-h-11 w-full min-w-0 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" inputMode="numeric" onChange={(event) => onPaidAtChange(event.target.value)} placeholder="13/07/2026" value={paidAtDisplay} />
+              <input className="focus-ring min-h-11 w-full min-w-0 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => onPaidAtChange(event.target.value)} type="date" value={state.paidAt} />
             </label>
             <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)] md:col-span-2">
               {t('paymentMethod')}
@@ -737,13 +739,13 @@ export function QuittanceForm({
               <label className="grid gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
                 {t('receiptPeriod')}
                 <div className="grid grid-cols-2 gap-2">
-                  <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => setBatchPeriodMonth(displayDateToMonth(event.target.value) ?? batchPeriodMonth)} placeholder="01/07/2026" defaultValue={monthToDisplayDate(batchPeriodMonth)} />
-                  <input className="min-h-11 rounded-lg border border-[var(--line)] bg-[#f8fbfa] px-3 text-sm font-normal normal-case tracking-normal text-[var(--muted)]" readOnly value={monthEndDisplayDate(batchPeriodMonth)} />
+                  <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => setBatchPeriodMonth(event.target.value.slice(0, 7))} type="date" value={`${batchPeriodMonth}-01`} />
+                  <input className="min-h-11 rounded-lg border border-[var(--line)] bg-[#f8fbfa] px-3 text-sm font-normal normal-case tracking-normal text-[var(--muted)]" readOnly type="date" value={monthEndIsoDate(batchPeriodMonth)} />
                 </div>
               </label>
               <label className="grid gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
                 {t('paymentDate')}
-                <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => syncBatchPaidAt(frenchDateToIso(event.target.value) ?? batchPaidAt)} defaultValue={dateLabel(batchPaidAt)} />
+                <input className="focus-ring min-h-11 rounded-lg border border-[var(--line)] px-3 text-sm font-normal normal-case tracking-normal text-[#171d1c]" onChange={(event) => syncBatchPaidAt(event.target.value)} type="date" value={batchPaidAt} />
               </label>
               <label className="grid gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
                 {t('paymentMethod')}
@@ -811,7 +813,7 @@ export function QuittanceForm({
                       <td className="py-3 pr-3"><input className="w-24 rounded-lg border border-[var(--line)] px-2 py-2 text-sm" min="0" onChange={(event) => updateBatchRow(row.id, {amount: event.target.value})} type="number" value={row.amount} /></td>
                       <td className="py-3 pr-3"><input className="w-24 rounded-lg border border-[var(--line)] px-2 py-2 text-sm" min="0" onChange={(event) => updateBatchRow(row.id, {charges: event.target.value})} type="number" value={row.charges} /></td>
                       <td className="py-3 pr-3 font-semibold tabular-nums text-[#171d1c]">{euro(numberValue(row.amount) + numberValue(row.charges), locale)}</td>
-                      <td className="py-3 pr-3"><input className="w-32 rounded-lg border border-[var(--line)] px-2 py-2 text-sm" onChange={(event) => updateBatchRow(row.id, {paidAt: frenchDateToIso(event.target.value) ?? row.paidAt})} defaultValue={dateLabel(row.paidAt)} /></td>
+                      <td className="py-3 pr-3"><input className="w-36 rounded-lg border border-[var(--line)] px-2 py-2 text-sm" onChange={(event) => updateBatchRow(row.id, {paidAt: event.target.value})} type="date" value={row.paidAt} /></td>
                       <td className="py-3 pr-3">
                         <select className="rounded-lg border border-[var(--line)] px-2 py-2 text-sm" onChange={(event) => updateBatchRow(row.id, {selected: event.target.value === 'paid' && !row.issue, status: event.target.value as PaymentStatus})} value={row.status}>
                           <option value="paid">{t('status.paid')}</option>
