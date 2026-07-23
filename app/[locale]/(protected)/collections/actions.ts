@@ -83,8 +83,10 @@ export async function updateCollectionsAction(formData: FormData) {
   const locale = value(formData, 'locale') || 'fr';
   const month = value(formData, 'month');
   const periodMonth = /^\d{4}-\d{2}$/.test(month) ? `${month}-01` : '';
-  const selectedLeaseIds = formData.getAll('lease_ids').filter((id): id is string => typeof id === 'string' && Boolean(id));
-  const nextStatus = value(formData, 'status');
+  const [singleLeaseId = '', singleStatus = ''] = value(formData, 'single_action').split(':');
+  const isSingleUpdate = Boolean(singleLeaseId) && ['paid', 'partial', 'unpaid'].includes(singleStatus);
+  const selectedLeaseIds = isSingleUpdate ? [singleLeaseId] : formData.getAll('lease_ids').filter((id): id is string => typeof id === 'string' && Boolean(id));
+  const nextStatus = isSingleUpdate ? singleStatus : value(formData, 'status');
   const paidAt = value(formData, 'paid_at') || new Date().toISOString().slice(0, 10);
   const returnHref = collectionHref(locale, month, value(formData, 'view'));
 
@@ -147,7 +149,7 @@ export async function updateCollectionsAction(formData: FormData) {
     }
 
     if (nextStatus === 'partial') {
-      const desiredPaid = moneyValue(formData, `amount_${lease.id}`);
+      const desiredPaid = moneyValue(formData, isSingleUpdate ? 'single_amount' : `amount_${lease.id}`);
 
       if (desiredPaid <= 0 || desiredPaid >= totalDue || existingPaid >= desiredPaid) {
         skipped.invalidAmount += 1;

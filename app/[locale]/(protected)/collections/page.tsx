@@ -7,6 +7,7 @@ import {localizedPath} from '@/lib/navigation';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
 
 import {CollectionSelectionControls} from './collection-selection-controls';
+import {CollectionRowActions} from './collection-row-actions';
 import {CollectionSubmitConfirmation} from './collection-submit-confirmation';
 import {updateCollectionsAction} from './actions';
 
@@ -51,6 +52,7 @@ const COLLECTION_FORM_ID = 'portfolio-collections-form';
 const COLLECTION_VIEWS = ['all', 'open', 'unpaid', 'partial', 'paid'] as const;
 
 type CollectionView = (typeof COLLECTION_VIEWS)[number];
+type CollectionStatus = 'paid' | 'partial' | 'unpaid';
 
 function relationOne<T>(value: Relation<T>) {
   return Array.isArray(value) ? (value[0] ?? null) : value;
@@ -77,6 +79,10 @@ function selectedMonth(value?: string) {
 
 function selectedView(value?: string): CollectionView {
   return COLLECTION_VIEWS.includes(value as CollectionView) ? (value as CollectionView) : 'all';
+}
+
+function collectionStatus(value: string | undefined): CollectionStatus {
+  return value === 'paid' || value === 'partial' ? value : 'unpaid';
 }
 
 function viewHref(locale: string, month: string, view: CollectionView) {
@@ -160,7 +166,7 @@ export default async function CollectionsPage({searchParams}: CollectionsPagePro
       const totalDue = rentAmount + chargesAmount;
       const charge = lease.rent_charges.find((row) => row.period_month === periodMonth) ?? null;
       const paid = (charge?.rent_payments ?? []).filter(isRentPayment).reduce((sum, payment) => sum + Number(payment.amount ?? 0), 0);
-      const status = charge?.status === 'paid' || charge?.status === 'partial' ? charge.status : 'unpaid';
+      const status = collectionStatus(charge?.status);
       return {
         charge,
         chargesAmount,
@@ -344,7 +350,7 @@ export default async function CollectionsPage({searchParams}: CollectionsPagePro
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-[920px] w-full text-left text-sm">
+          <table className="min-w-[1040px] w-full text-left text-sm">
             <thead className="bg-[#f8fbfa] text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
               <tr>
                 <th className="w-12 px-5 py-3">{t('columns.select')}</th>
@@ -356,6 +362,7 @@ export default async function CollectionsPage({searchParams}: CollectionsPagePro
                 <th className="px-4 py-3 text-right">{t('columns.paid')}</th>
                 <th className="px-4 py-3">{t('columns.partialAmount')}</th>
                 <th className="px-5 py-3">{t('columns.status')}</th>
+                <th className="px-5 py-3 text-right">{t('columns.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--line-soft)]">
@@ -365,13 +372,14 @@ export default async function CollectionsPage({searchParams}: CollectionsPagePro
                   const property = relationOne(row.lease.properties);
                   const unit = relationOne(row.lease.units);
                   const defaultChecked = row.status !== 'paid' && row.totalDue > 0;
+                  const tenantName = tenant?.full_name ?? t('unknownTenant');
 
                   return (
                     <tr className="align-middle hover:bg-[#fbfdfc]" key={row.lease.id}>
                       <td className="px-5 py-4">
                         <input aria-label={t('columns.select')} className="h-4 w-4 accent-[var(--accent)]" data-collection-status={row.status} defaultChecked={defaultChecked} name="lease_ids" type="checkbox" value={row.lease.id} />
                       </td>
-                      <td className="px-4 py-4 font-semibold text-[#171d1c]">{tenant?.full_name ?? t('unknownTenant')}</td>
+                      <td className="px-4 py-4 font-semibold text-[#171d1c]">{tenantName}</td>
                       <td className="px-4 py-4">
                         <div className="font-medium text-[#171d1c]">{property?.name ?? t('unknownProperty')}</div>
                         {unit?.name ? <div className="text-xs text-[var(--muted)]">{unit.name}</div> : null}
@@ -386,12 +394,33 @@ export default async function CollectionsPage({searchParams}: CollectionsPagePro
                       <td className="px-5 py-4">
                         <span className={`inline-flex rounded-md px-2.5 py-1 text-xs font-semibold ${statusTone(row.status)}`}>{t(`status.${row.status === 'paid' || row.status === 'partial' ? row.status : 'unpaid'}`)}</span>
                       </td>
+                      <td className="px-5 py-4 text-right">
+                        <CollectionRowActions
+                          currentStatus={row.status}
+                          labels={{
+                            cancel: t('rowAction.cancel'),
+                            confirm: t('rowAction.confirm'),
+                            copy: t('rowAction.copy', {tenant: tenantName}),
+                            open: t('rowAction.open'),
+                            partialAmount: t('columns.partialAmount'),
+                            partialNote: t('rowAction.partialNote'),
+                            receiptWarning: t('rowAction.receiptWarning'),
+                            statuses: {
+                              paid: t('status.paid'),
+                              partial: t('status.partial'),
+                              unpaid: t('status.unpaid')
+                            },
+                            title: t('rowAction.title')
+                          }}
+                          leaseId={row.lease.id}
+                        />
+                      </td>
                     </tr>
                   );
                 })
               ) : (
                 <tr>
-                  <td className="px-5 py-10 text-center text-sm text-[var(--muted)]" colSpan={9}>
+                  <td className="px-5 py-10 text-center text-sm text-[var(--muted)]" colSpan={10}>
                     {rows.length ? t('emptyFiltered') : t('empty')}
                   </td>
                 </tr>

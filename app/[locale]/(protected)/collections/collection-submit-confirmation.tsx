@@ -106,7 +106,7 @@ export function CollectionSubmitConfirmation({formId, initialSelected, labels}: 
                 <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{selected > 0 ? labels.copy : labels.noSelection}</p>
               </div>
               <button aria-label={labels.cancel} className="focus-ring flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--line)] text-xl leading-none hover:bg-[#f5faf8]" onClick={() => setOpen(false)} type="button">
-                ×
+                <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
 

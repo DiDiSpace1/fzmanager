@@ -666,6 +666,15 @@
       "cancel": "取消",
       "confirm": "确认"
     },
+    "rowAction": {
+      "open": "快速更新",
+      "title": "更新单笔租金",
+      "copy": "请选择 {tenant} 的新状态。本次只会更新这个租约。",
+      "partialNote": "选择部分付款时，将使用当前行填写的部分付款金额。",
+      "cancel": "取消",
+      "confirm": "确认",
+      "receiptWarning": "标记为已付款后，系统可能自动生成该租金的收据。"
+    },
     "unknownTenant": "租客",
     "unknownProperty": "房产",
     "empty": "该月份没有有效租约。",
@@ -679,7 +688,8 @@
       "total": "合计",
       "paid": "已付",
       "partialAmount": "部分付款金额",
-      "status": "状态"
+      "status": "状态",
+      "actions": "操作"
     },
     "status": {
       "paid": "已付款",

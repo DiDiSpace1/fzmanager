@@ -666,6 +666,15 @@
       "cancel": "Annuler",
       "confirm": "Confirmer"
     },
+    "rowAction": {
+      "open": "Mise à jour rapide",
+      "title": "Mettre à jour un loyer",
+      "copy": "Choisissez le nouveau statut pour {tenant}. Seul ce bail sera mis à jour.",
+      "partialNote": "Le montant partiel saisi sur cette ligne sera utilisé.",
+      "cancel": "Annuler",
+      "confirm": "Confirmer",
+      "receiptWarning": "Marquer ce loyer comme payé peut générer automatiquement sa quittance."
+    },
     "unknownTenant": "Locataire",
     "unknownProperty": "Bien",
     "empty": "Aucun bail actif pour ce mois.",
@@ -679,7 +688,8 @@
       "total": "Total",
       "paid": "Payé",
       "partialAmount": "Montant partiel",
-      "status": "Statut"
+      "status": "Statut",
+      "actions": "Actions"
     },
     "status": {
       "paid": "Payé",

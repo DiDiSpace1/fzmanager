@@ -666,6 +666,15 @@
       "cancel": "Cancel",
       "confirm": "Confirm"
     },
+    "rowAction": {
+      "open": "Quick update",
+      "title": "Update one rent",
+      "copy": "Choose the new status for {tenant}. Only this lease will be updated.",
+      "partialNote": "The partial amount entered in this row will be used.",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "receiptWarning": "Marking this rent as paid may automatically generate its receipt."
+    },
     "unknownTenant": "Tenant",
     "unknownProperty": "Property",
     "empty": "No active lease for this month.",
@@ -679,7 +688,8 @@
       "total": "Total",
       "paid": "Paid",
       "partialAmount": "Partial amount",
-      "status": "Status"
+      "status": "Status",
+      "actions": "Actions"
     },
     "status": {
       "paid": "Paid",
