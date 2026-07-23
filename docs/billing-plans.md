@@ -25,6 +25,8 @@ The intended product ladder is:
 
 ## Current Implemented Snapshot
 
+Last verified against the application: 2026-07-23.
+
 These values are what the app currently enforces in code.
 
 | Area | Free | Solo | Plus | Portfolio |
@@ -61,7 +63,14 @@ This is the important part: higher forfaits should unlock stronger capabilities,
 | Dashboard | Basic dashboard | Basic dashboard | Professional Plus dashboard | Professional Portfolio dashboard |
 | Rent reminders | No | No | Per-tenant / per-lease reminders | Per-tenant reminders + batch reminder center |
 | Batch management | No | No | Limited batch workflows | Portfolio batch workflows, including monthly rent collection updates |
+| Monthly collection center | No | No | No | Batch and single rent updates, filters, CSV export and detailed results |
+| Portfolio task center | No | No | No | Operational tasks with direct links to the relevant workflow |
+| Batch receipt delivery | No | No | No | ZIP download and batch email sending |
 | Priority support | No | Standard paid support | Priority support | Priority support |
+
+Implementation note:
+
+- Priority support is currently a commercial entitlement. There is no dedicated in-app priority support queue yet.
 
 ## What Each Forfait Means
 
@@ -178,15 +187,32 @@ Currently implemented:
 - Portfolio can retry failed reminder sends from the reminder center
 - Portfolio automatically generates a quittance when a rent month is marked as paid
 - Portfolio has a monthly rent collection center for updating payment status across active leases
+- the collection center supports all, to-follow, unpaid, partial and paid views
+- each collection view shows record counts and preserves the selected month and view after updates
+- the collection center supports select-all, open-only and clear-selection controls
+- batch updates require a confirmation step
+- each lease row can be updated individually through a confirmation dialog
+- paid updates can trigger automatic quittance generation
+- partial updates require an explicit paid amount
+- collection updates show tenant-level success and failure details
+- skipped updates explain whether the cause is an existing payment, invalid partial amount, missing rent amount or save failure
+- the current month and current collection view can be exported as a localized CSV
+- CSV exports include tenant, property, unit, rent, charges, total due, paid, remaining and status
+- Portfolio dashboard unpaid-rent actions and task-center rent tasks link directly to the relevant collection month
 - Portfolio can download successful batch-generated quittances as a ZIP archive
 - Portfolio can batch-send generated quittances to tenants by email
 - Portfolio has a task center for failed reminders, overdue rents, missing emails, expiring leases and missing receipts
 - Portfolio has tax ZIP export with PDF summary and supporting receipts
 - Portfolio has the highest limits
 
-Planned Portfolio-only differentiation:
+Remaining Portfolio roadmap:
 
-- none currently listed
+1. Add a durable collection activity history instead of showing only the latest result through redirect state.
+2. Add an audit log recording who changed a rent status, when it changed and the previous value.
+3. Add batch tenant operations beyond reminders, such as assigning tags, updating contact completeness and archiving ended occupancies.
+4. Add saved collection views and reusable filters for larger portfolios.
+5. Add an optional monthly collection report PDF in addition to CSV.
+6. Add a dedicated in-app priority support entry point for Plus and Portfolio.
 
 Product logic:
 
@@ -198,6 +224,10 @@ The monthly collection center is the Portfolio operational hub for recurring ren
 - review every active lease / occupancy record
 - see expected rent, charges, total due, paid amount and current status
 - batch mark selected leases as paid, partially paid or unpaid
+- update one lease without changing the current batch selection
+- filter the table by payment status
+- export the current month and filter as CSV
+- review detailed success and failure results after an update
 - trigger automatic quittance generation when selected rents are marked as paid
 
 Upgrade trigger:
@@ -262,6 +292,10 @@ Implemented Portfolio reminder center:
 - missing-email and failed-send counters
 - failed reminder retry UI
 
+Temporary production-cleanup item:
+
+- the tenant list still exposes the manual test-reminder button and `sendTestRentReminderAction`; remove or restrict this diagnostic control after production email verification is complete
+
 ## Dashboard Strategy
 
 | Dashboard | Free | Solo | Plus | Portfolio |
@@ -282,6 +316,44 @@ The Plus / Portfolio dashboard should focus on:
 - recommended actions
 
 This gives Plus and Portfolio a visible daily value, even before the user hits numerical limits.
+
+Portfolio dashboard integration:
+
+- unpaid-rent KPI links to the current month's collection center
+- unpaid-rent priority alert links to the current month's to-follow view
+- task-center unpaid and partial-payment tasks link to their corresponding collection month
+
+## Delivery Status And Next Steps
+
+Status meanings:
+
+- Complete: implemented, translated and production-build verified
+- Partial: usable, with an identified follow-up
+- Planned: not implemented
+
+| Workstream | Status | Remaining work |
+| --- | --- | --- |
+| Plan limits and Stripe plan mapping | Complete | Keep Stripe price ids and app limits synchronized |
+| Subscription synchronization and scheduled plan changes | Complete | Continue monitoring Stripe webhook and schedule failures |
+| Plus / Portfolio professional dashboard | Complete | Portfolio currently shares the advanced dashboard with Portfolio-specific links |
+| Plus tenant rent reminders | Complete | Remove or restrict the temporary test-send control after verification |
+| Portfolio reminder center | Complete | Consider saved batch selections later |
+| Plus batch quittance generation | Complete | Continue PDF and email regression testing |
+| Portfolio automatic quittance after paid rent | Complete | Add durable automation history later |
+| Portfolio receipt ZIP and batch email | Complete | Add per-recipient delivery reporting later |
+| Portfolio task center | Complete | Add task completion history later |
+| Portfolio monthly collection center | Complete | Core workflow, filters, single and batch updates, CSV and result details are implemented |
+| Collection audit history | Planned | Requires a durable activity model and migration |
+| Broader Portfolio tenant batch management | Planned | Define the first safe batch fields and confirmation rules |
+| In-app priority support workflow | Planned | Define support channel, response target and routing |
+
+Recommended implementation order:
+
+1. Remove or restrict the temporary test-reminder control.
+2. Add durable collection audit history and activity display.
+3. Add receipt email delivery results per tenant.
+4. Add broader Portfolio tenant batch operations.
+5. Add the in-app priority support entry point.
 
 ## Stripe Mapping
 
