@@ -2,6 +2,7 @@
   "common": {
     "appName": "Loyelio",
     "cancel": "取消",
+    "confirm": "确认",
     "save": "保存",
     "soon": "即将推出",
     "start": "开始",
@@ -447,15 +448,33 @@
     "contactMissing": "联系方式待完善",
     "empty": "暂无租客。",
     "pagination": "显示第 {range} 项，共 {count} 位租客",
+    "batch": {
+      "title": "Portfolio 批量管理",
+      "selected": "{count, plural, =0 {未选择租客} other {已选择 # 位租客}}",
+      "manageReminders": "管理提醒",
+      "activate": "启用",
+      "deactivate": "停用",
+      "selectAll": "选择当前结果",
+      "clearAll": "取消当前选择",
+      "confirm": {
+        "activate": {"title": "启用所选租客？", "copy": "将启用 {count} 位租客。"},
+        "deactivate": {"title": "停用所选租客？", "copy": "将从活跃流程中移除 {count} 位租客，已有历史记录会保留。"}
+      }
+    },
     "errors": {
       "loadFailed": "无法加载租客信息。请检查 Supabase 迁移是否已正确应用。",
       "planLimit": "免费套餐支持 3 位租客。请前往设置升级至个人版以继续添加。",
-      "plan_limit": "免费套餐支持 3 位租客。请前往设置升级至个人版以继续添加。"
+      "plan_limit": "免费套餐支持 3 位租客。请前往设置升级至个人版以继续添加。",
+      "batch_invalid": "请至少选择一位租客和有效的批量操作。",
+      "batch_portfolio_required": "租客批量管理需要 Portfolio 套餐。",
+      "batch_update_failed": "无法更新所选租客。"
     },
       "success": {
         "rent_status_updated_receipt_created": "已标记为已付款。收据已自动生成并归档。",
         "rent_status_updated_receipt_exists": "已标记为已付款。该租客本月已有收据，未重复生成。",
-        "rent_status_updated_receipt_failed": "已标记为已付款，但自动生成收据失败。"
+        "rent_status_updated_receipt_failed": "已标记为已付款，但自动生成收据失败。",
+        "tenant_batch_activated": "已启用所选租客。",
+        "tenant_batch_deactivated": "已停用所选租客，其历史记录仍会保留。"
       },
     "summary": {
       "unassigned": "未分配",

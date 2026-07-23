@@ -4,7 +4,7 @@ import Link from 'next/link';
 import {useTranslations} from 'next-intl';
 import {useMemo, useState} from 'react';
 
-import {deleteTenantAction, updateLeaseReminderAction, updateTenantActiveAction} from './actions';
+import {deleteTenantAction, updateLeaseReminderAction, updateTenantActiveAction, updateTenantBatchActiveAction} from './actions';
 import {DeleteTenantButton} from './delete-tenant-button';
 import {TenantActionDetails} from './tenant-action-details';
 
@@ -149,6 +149,7 @@ function sanitizeMonth(month: string) {
 }
 
 export function TenantTableClient({
+  hasPortfolioAccess,
   hasReminderAccess,
   initialMonth,
   initialQuery,
@@ -156,6 +157,7 @@ export function TenantTableClient({
   locale,
   tenants
 }: {
+  hasPortfolioAccess: boolean;
   hasReminderAccess: boolean;
   initialMonth: string;
   initialQuery: string;
@@ -169,6 +171,8 @@ export function TenantTableClient({
   const [queryInput, setQueryInput] = useState(initialQuery);
   const [appliedQuery, setAppliedQuery] = useState(initialQuery);
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [selectedTenantIds, setSelectedTenantIds] = useState<string[]>([]);
+  const [pendingBatchOperation, setPendingBatchOperation] = useState<'activate' | 'deactivate' | null>(null);
   const selectedView = initialView;
 
   const rows = useMemo(() => {
@@ -218,6 +222,23 @@ export function TenantTableClient({
     syncUrl(selectedMonth, '');
   }
 
+  const visibleTenantIds = rows.map((tenant) => tenant.id);
+  const allVisibleSelected = visibleTenantIds.length > 0 && visibleTenantIds.every((id) => selectedTenantIds.includes(id));
+
+  function toggleAllVisible() {
+    setSelectedTenantIds((current) => {
+      if (allVisibleSelected) {
+        return current.filter((id) => !visibleTenantIds.includes(id));
+      }
+
+      return [...new Set([...current, ...visibleTenantIds])];
+    });
+  }
+
+  function toggleTenant(id: string) {
+    setSelectedTenantIds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
+  }
+
   return (
     <section className="mt-6 overflow-visible rounded-lg border border-[var(--line-soft)] bg-white shadow-sm">
       <div className="flex flex-col gap-3 border-b border-[var(--line-soft)] p-4 md:flex-row md:items-center md:justify-between">
@@ -246,10 +267,37 @@ export function TenantTableClient({
         </form>
       </div>
 
+      {hasPortfolioAccess ? (
+        <div className="flex flex-col gap-3 border-b border-[var(--line-soft)] bg-[#f8fbfa] px-4 py-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-[#171d1c]">{t('batch.title')}</p>
+            <p className="mt-1 text-xs text-[var(--muted)]">{t('batch.selected', {count: selectedTenantIds.length})}</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link className="inline-flex min-h-10 items-center rounded-md border border-[var(--line)] px-3 text-sm font-semibold hover:bg-white" href={`/${locale}/reminders`}>
+              {t('batch.manageReminders')}
+            </Link>
+            <button className="min-h-10 rounded-md border border-[var(--line)] px-3 text-sm font-semibold hover:bg-white disabled:opacity-50" disabled={!selectedTenantIds.length} onClick={() => setPendingBatchOperation('activate')} type="button">
+              {t('batch.activate')}
+            </button>
+            <button className="min-h-10 rounded-md border border-[#e7b9b5] px-3 text-sm font-semibold text-[#9d2424] hover:bg-[#fff5f4] disabled:opacity-50" disabled={!selectedTenantIds.length} onClick={() => setPendingBatchOperation('deactivate')} type="button">
+              {t('batch.deactivate')}
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <div className="overflow-x-auto overflow-y-visible">
         <table className="w-full min-w-[1020px] border-collapse text-left">
           <thead className="border-b border-[var(--line-soft)] bg-[#eaefed] text-[11px] font-semibold uppercase text-[var(--muted)]">
             <tr>
+              {hasPortfolioAccess ? (
+                <th className="px-5 py-4">
+                  <button className="focus-ring rounded px-2 py-1 hover:bg-white" onClick={toggleAllVisible} type="button">
+                    {allVisibleSelected ? t('batch.clearAll') : t('batch.selectAll')}
+                  </button>
+                </th>
+              ) : null}
               <th className="px-5 py-4">{t('table.name')}</th>
               <th className="px-5 py-4">{t('table.property')}</th>
               <th className="px-5 py-4">{t('table.startDate')}</th>
@@ -268,6 +316,11 @@ export function TenantTableClient({
 
                 return (
                   <tr className="transition hover:bg-[#f0f5f2]" key={tenant.id}>
+                    {hasPortfolioAccess ? (
+                      <td className="px-5 py-4">
+                        <input checked={selectedTenantIds.includes(tenant.id)} className="h-4 w-4 accent-[var(--accent)]" onChange={() => toggleTenant(tenant.id)} type="checkbox" />
+                      </td>
+                    ) : null}
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#dde1ff] text-sm font-bold uppercase text-[#3755c3]">{initials(tenant.full_name)}</div>
@@ -341,7 +394,7 @@ export function TenantTableClient({
               })
             ) : (
               <tr>
-                <td className="px-5 py-10 text-center text-sm text-[var(--muted)]" colSpan={7}>
+                <td className="px-5 py-10 text-center text-sm text-[var(--muted)]" colSpan={hasPortfolioAccess ? 8 : 7}>
                   {t('empty')}
                 </td>
               </tr>
@@ -377,6 +430,28 @@ export function TenantTableClient({
                 {t('reminders.upgradeAction')}
               </Link>
             </div>
+          </div>
+        </div>
+      ) : null}
+      {pendingBatchOperation ? (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 px-4 py-6" role="dialog" aria-modal="true">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 text-[#17201e] shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold">{t(`batch.confirm.${pendingBatchOperation}.title`)}</h2>
+                <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{t(`batch.confirm.${pendingBatchOperation}.copy`, {count: selectedTenantIds.length})}</p>
+              </div>
+              <button aria-label={common('close')} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#17201e] text-xl leading-none hover:bg-[#f0f5f2]" onClick={() => setPendingBatchOperation(null)} type="button">
+                x
+              </button>
+            </div>
+            <form action={updateTenantBatchActiveAction} className="mt-6 flex justify-end gap-3">
+              <input name="locale" type="hidden" value={locale} />
+              <input name="operation" type="hidden" value={pendingBatchOperation} />
+              {selectedTenantIds.map((id) => <input key={id} name="tenant_ids" type="hidden" value={id} />)}
+              <button className="min-h-10 rounded-lg border border-[var(--line)] px-4 text-sm font-semibold" onClick={() => setPendingBatchOperation(null)} type="button">{common('cancel')}</button>
+              <button className="min-h-10 rounded-lg bg-[var(--accent)] px-4 text-sm font-semibold text-white" style={{color: '#ffffff'}} type="submit">{common('confirm')}</button>
+            </form>
           </div>
         </div>
       ) : null}

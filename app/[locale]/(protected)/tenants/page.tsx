@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import {getLocale, getTranslations} from 'next-intl/server';
 
+import {hasPaidAccess, normalizeBillingPlan} from '@/lib/billing/config';
 import {canUseRentReminders, getWorkspaceBilling} from '@/lib/billing/limits';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
 
@@ -43,8 +44,8 @@ type TenantsPageProps = {
 
 const MONTH_PARAM_PATTERN = /^\d{4}-\d{2}$/;
 const TENANT_VIEWS = new Set(['all', 'active', 'unassigned', 'expiring', 'overdue']);
-const errorMessageKeys = new Set(['plan_limit']);
-const successMessageKeys = new Set(['rent_status_updated_receipt_created', 'rent_status_updated_receipt_exists', 'rent_status_updated_receipt_failed']);
+const errorMessageKeys = new Set(['plan_limit', 'batch_invalid', 'batch_portfolio_required', 'batch_update_failed']);
+const successMessageKeys = new Set(['rent_status_updated_receipt_created', 'rent_status_updated_receipt_exists', 'rent_status_updated_receipt_failed', 'tenant_batch_activated', 'tenant_batch_deactivated']);
 
 function isoMonth(date: Date) {
   return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
@@ -145,6 +146,7 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
   const {data: tenants, error} = await query.returns<TenantRow[]>();
   const billing = await getWorkspaceBilling(supabase, workspaceId);
   const hasReminderAccess = canUseRentReminders(billing);
+  const hasPortfolioAccess = hasPaidAccess(billing) && normalizeBillingPlan(billing?.plan) === 'portfolio';
   const allRows = tenants ?? [];
   const activeTenantRows = allRows.filter((tenant) => tenant.is_active);
   const summaryMonth = isoMonth(new Date());
@@ -232,7 +234,7 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
             </div>
           </section>
 
-          <TenantTableClient hasReminderAccess={hasReminderAccess} initialMonth={selectedMonth} initialQuery={queryText} initialView={selectedView} locale={locale} tenants={allRows} />
+          <TenantTableClient hasPortfolioAccess={hasPortfolioAccess} hasReminderAccess={hasReminderAccess} initialMonth={selectedMonth} initialQuery={queryText} initialView={selectedView} locale={locale} tenants={allRows} />
         </>
       )}
     </>

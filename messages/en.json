@@ -2,6 +2,7 @@
   "common": {
     "appName": "Loyelio",
     "cancel": "Cancel",
+    "confirm": "Confirm",
     "save": "Save",
     "soon": "Soon",
     "start": "Start",
@@ -447,15 +448,33 @@
     "contactMissing": "Contact to complete",
     "empty": "No tenants yet.",
     "pagination": "Showing {range} of {count} tenant(s)",
+    "batch": {
+      "title": "Portfolio batch management",
+      "selected": "{count, plural, =0 {No tenant selected} one {# tenant selected} other {# tenants selected}}",
+      "manageReminders": "Manage reminders",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "selectAll": "Select visible",
+      "clearAll": "Clear visible",
+      "confirm": {
+        "activate": {"title": "Activate selected tenants?", "copy": "{count, plural, one {# tenant will become active.} other {# tenants will become active.}}"},
+        "deactivate": {"title": "Deactivate selected tenants?", "copy": "{count, plural, one {# tenant will be hidden from active workflows. Existing history will be kept.} other {# tenants will be hidden from active workflows. Existing history will be kept.}}"}
+      }
+    },
     "errors": {
       "loadFailed": "Unable to load tenants. Check that the Supabase migrations are applied.",
       "planLimit": "The free plan includes 3 tenants. Upgrade to Solo from settings to continue.",
-      "plan_limit": "The free plan includes 3 tenants. Upgrade to Solo from settings to continue."
+      "plan_limit": "The free plan includes 3 tenants. Upgrade to Solo from settings to continue.",
+      "batch_invalid": "Select at least one tenant and a valid batch action.",
+      "batch_portfolio_required": "Portfolio is required for tenant batch management.",
+      "batch_update_failed": "Unable to update the selected tenants."
     },
       "success": {
         "rent_status_updated_receipt_created": "Rent marked as paid. The receipt was generated and archived automatically.",
         "rent_status_updated_receipt_exists": "Rent marked as paid. A receipt already exists for this tenant and month.",
-        "rent_status_updated_receipt_failed": "Rent marked as paid, but the automatic receipt could not be generated."
+        "rent_status_updated_receipt_failed": "Rent marked as paid, but the automatic receipt could not be generated.",
+        "tenant_batch_activated": "Selected tenants have been activated.",
+        "tenant_batch_deactivated": "Selected tenants have been deactivated. Their history is preserved."
       },
     "summary": {
       "unassigned": "Unassigned",

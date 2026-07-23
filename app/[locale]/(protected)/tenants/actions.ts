@@ -3,6 +3,7 @@
 import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
 
+import {hasPaidAccess, normalizeBillingPlan} from '@/lib/billing/config';
 import {canCreateResource, canUseAutoQuittance, canUseRentReminders, getWorkspaceBilling} from '@/lib/billing/limits';
 import {normalizedCollectionStatus, recordRentCollectionEvent} from '@/lib/collections/audit';
 import {localizedPath} from '@/lib/navigation';
@@ -53,6 +54,32 @@ function tenantsHref(locale: string, formData: FormData) {
 
 function withStatus(url: string, key: 'error' | 'success', value: string) {
   return `${url}${url.includes('?') ? '&' : '?'}${key}=${value}`;
+}
+
+export async function updateTenantBatchActiveAction(formData: FormData) {
+  const locale = value(formData, 'locale') || 'fr';
+  const tenantIds = [...new Set(formData.getAll('tenant_ids').map((item) => (typeof item === 'string' ? item.trim() : '')).filter(Boolean))];
+  const operation = value(formData, 'operation');
+
+  if (!tenantIds.length || !['activate', 'deactivate'].includes(operation)) {
+    redirect(`${localizedPath(locale, '/tenants')}?error=batch_invalid`);
+  }
+
+  const {supabase, workspaceId} = await getCurrentUserWorkspace(locale);
+  const billing = await getWorkspaceBilling(supabase, workspaceId);
+
+  if (!hasPaidAccess(billing) || normalizeBillingPlan(billing?.plan) !== 'portfolio') {
+    redirect(`${localizedPath(locale, '/tenants')}?error=batch_portfolio_required`);
+  }
+
+  const {error} = await supabase.from('tenants').update({is_active: operation === 'activate'}).eq('workspace_id', workspaceId).in('id', tenantIds);
+
+  if (error) {
+    redirect(`${localizedPath(locale, '/tenants')}?error=batch_update_failed`);
+  }
+
+  revalidatePath(localizedPath(locale, '/tenants'));
+  redirect(`${localizedPath(locale, '/tenants')}?success=${operation === 'activate' ? 'tenant_batch_activated' : 'tenant_batch_deactivated'}`);
 }
 
 export async function createTenantAction(formData: FormData) {

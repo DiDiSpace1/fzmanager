@@ -2,6 +2,7 @@
   "common": {
     "appName": "Loyelio",
     "cancel": "Annuler",
+    "confirm": "Confirmer",
     "save": "Enregistrer",
     "soon": "Bientôt",
     "start": "Commencer",
@@ -447,15 +448,33 @@
     "contactMissing": "Contact à compléter",
     "empty": "Aucun locataire pour le moment.",
     "pagination": "Affichage {range} sur {count} locataire(s)",
+    "batch": {
+      "title": "Gestion groupée Portfolio",
+      "selected": "{count, plural, =0 {Aucun locataire sélectionné} one {# locataire sélectionné} other {# locataires sélectionnés}}",
+      "manageReminders": "Gérer les rappels",
+      "activate": "Activer",
+      "deactivate": "Désactiver",
+      "selectAll": "Sélectionner les visibles",
+      "clearAll": "Effacer la sélection visible",
+      "confirm": {
+        "activate": {"title": "Activer les locataires sélectionnés ?", "copy": "{count, plural, one {# locataire sera activé.} other {# locataires seront activés.}}"},
+        "deactivate": {"title": "Désactiver les locataires sélectionnés ?", "copy": "{count, plural, one {# locataire sera retiré des flux actifs. Son historique sera conservé.} other {# locataires seront retirés des flux actifs. Leur historique sera conservé.}}"}
+      }
+    },
     "errors": {
       "loadFailed": "Impossible de charger les locataires. Vérifiez que les migrations Supabase sont bien appliquées.",
       "planLimit": "Le plan gratuit inclut 3 locataires. Passez à Solo depuis les paramètres pour continuer.",
-      "plan_limit": "Le plan gratuit inclut 3 locataires. Passez à Solo depuis les paramètres pour continuer."
+      "plan_limit": "Le plan gratuit inclut 3 locataires. Passez à Solo depuis les paramètres pour continuer.",
+      "batch_invalid": "Sélectionnez au moins un locataire et une action groupée valide.",
+      "batch_portfolio_required": "Portfolio est requis pour la gestion groupée des locataires.",
+      "batch_update_failed": "Impossible de mettre à jour les locataires sélectionnés."
     },
       "success": {
         "rent_status_updated_receipt_created": "Loyer marqué comme payé. La quittance a été générée et archivée automatiquement.",
         "rent_status_updated_receipt_exists": "Loyer marqué comme payé. Une quittance existe déjà pour ce locataire et ce mois.",
-        "rent_status_updated_receipt_failed": "Loyer marqué comme payé, mais la quittance automatique n'a pas pu être générée."
+        "rent_status_updated_receipt_failed": "Loyer marqué comme payé, mais la quittance automatique n'a pas pu être générée.",
+        "tenant_batch_activated": "Les locataires sélectionnés ont été activés.",
+        "tenant_batch_deactivated": "Les locataires sélectionnés ont été désactivés. Leur historique est conservé."
       },
     "summary": {
       "unassigned": "Non assignés",
