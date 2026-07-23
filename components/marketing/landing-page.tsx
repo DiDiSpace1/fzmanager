@@ -286,8 +286,8 @@ function Symbol({children, light = false}: {children: React.ReactNode; light?: b
 function PropertyTile({image, title}: {image: string; title: string}) {
   return (
     <div className="rounded border border-[var(--line-soft)] bg-[var(--panel-muted)] p-4">
-      <div className="mb-3 h-24 overflow-hidden rounded">
-        <img alt="" className="h-full w-full object-cover" src={image} />
+      <div className="relative mb-3 h-24 overflow-hidden rounded">
+        <Image alt="" className="object-cover" fill sizes="(min-width: 768px) 180px, 45vw" src={image} />
       </div>
       <p className="text-xs font-medium text-[var(--muted)]">{title}</p>
     </div>

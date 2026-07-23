@@ -8,6 +8,14 @@ export default withNextIntl({
       bodySizeLimit: '80mb'
     }
   },
+  images: {
+    remotePatterns: [
+      {
+        hostname: 'images.unsplash.com',
+        protocol: 'https'
+      }
+    ]
+  },
   turbopack: {
     root: process.cwd()
   }
