@@ -75,6 +75,13 @@ type BatchResult = {
   status: 'failed' | 'success';
 };
 
+type BatchSendResult = {
+  failed: number;
+  missingEmail: number;
+  notFound: number;
+  sent: number;
+};
+
 function currentMonth() {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -420,6 +427,8 @@ export function QuittanceForm({
   const [batchPreviewOpen, setBatchPreviewOpen] = useState(false);
   const [batchPreviewIndex, setBatchPreviewIndex] = useState(0);
   const [batchResults, setBatchResults] = useState<BatchResult[] | null>(null);
+  const [batchSendResult, setBatchSendResult] = useState<BatchSendResult | null>(null);
+  const [isSendPending, setIsSendPending] = useState(false);
   const [isZipPending, setIsZipPending] = useState(false);
   const [isPending, startTransition] = useTransition();
   const selectedProperty = useMemo(() => properties.find((property) => property.id === state.propertyId) ?? null, [properties, state.propertyId]);
@@ -584,8 +593,13 @@ export function QuittanceForm({
       }
 
       setBatchResults(results);
+      setBatchSendResult(null);
       message.success(t('batchFinished'));
     });
+  }
+
+  function successfulDocumentIds() {
+    return successfulResults.map((result) => result.documentId).filter((id): id is string => Boolean(id));
   }
 
   async function downloadBatchZip() {
@@ -594,7 +608,7 @@ export function QuittanceForm({
       return;
     }
 
-    const documentIds = successfulResults.map((result) => result.documentId).filter((id): id is string => Boolean(id));
+    const documentIds = successfulDocumentIds();
 
     if (!documentIds.length) {
       message.error(t('zipNoDocuments'));
@@ -631,6 +645,48 @@ export function QuittanceForm({
       message.success(t('zipReady'));
     } finally {
       setIsZipPending(false);
+    }
+  }
+
+  async function sendBatchReceipts() {
+    if (currentPlan !== 'portfolio') {
+      setShowUpgrade(true);
+      return;
+    }
+
+    const documentIds = successfulDocumentIds();
+
+    if (!documentIds.length) {
+      message.error(t('sendNoDocuments'));
+      return;
+    }
+
+    setIsSendPending(true);
+
+    try {
+      const response = await fetch('/api/documents/quittance.send', {
+        body: JSON.stringify({documentIds}),
+        headers: {'Content-Type': 'application/json'},
+        method: 'POST'
+      });
+      const result = (await response.json().catch(() => ({}))) as Partial<BatchSendResult> & {error?: string};
+
+      if (!response.ok) {
+        message.error(result.error ?? t('sendError'));
+        return;
+      }
+
+      const normalizedResult = {
+        failed: Number(result.failed ?? 0),
+        missingEmail: Number(result.missingEmail ?? 0),
+        notFound: Number(result.notFound ?? 0),
+        sent: Number(result.sent ?? 0)
+      };
+
+      setBatchSendResult(normalizedResult);
+      message.success(t('sendFinished', normalizedResult));
+    } finally {
+      setIsSendPending(false);
     }
   }
 
@@ -909,7 +965,15 @@ export function QuittanceForm({
                     {isZipPending ? t('zipPreparing') : t('downloadZip')}
                   </button>
                   {currentPlan !== 'portfolio' && successfulResults.length ? <p className="text-xs leading-5 text-[var(--muted)]">{t('zipPortfolioOnly')}</p> : null}
-                  <button className="min-h-10 rounded-lg border border-[var(--line)] px-3 text-sm font-semibold hover:bg-[#f0f5f2]" type="button">{t('sendTenants')}</button>
+                  <button className="min-h-10 rounded-lg border border-[var(--line)] px-3 text-sm font-semibold hover:bg-[#f0f5f2] disabled:opacity-50" disabled={isSendPending || !successfulResults.length} onClick={sendBatchReceipts} type="button">
+                    {isSendPending ? t('sendingTenants') : t('sendTenants')}
+                  </button>
+                  {currentPlan !== 'portfolio' && successfulResults.length ? <p className="text-xs leading-5 text-[var(--muted)]">{t('sendPortfolioOnly')}</p> : null}
+                  {batchSendResult ? (
+                    <p className="rounded-lg bg-[#f8fbfa] px-3 py-2 text-xs leading-5 text-[var(--muted)]">
+                      {t('sendResult', batchSendResult)}
+                    </p>
+                  ) : null}
                   <Link className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[var(--line)] px-3 text-sm font-semibold hover:bg-[#f0f5f2]" href="/documents">{t('viewDocuments')}</Link>
                 </div>
                 <div className="mt-4 grid gap-2 text-sm">
