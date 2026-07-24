@@ -75,6 +75,9 @@ export function RevenueExpenseChart({points}: RevenueExpenseChartProps) {
   const t = useTranslations('dashboard.chart');
   const [showRevenue, setShowRevenue] = useState(true);
   const [showExpense, setShowExpense] = useState(true);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [pinnedIndex, setPinnedIndex] = useState<number | null>(null);
+  const activeIndex = hoveredIndex ?? pinnedIndex;
   const maxValue = useMemo(() => niceMaximum(Math.max(0, ...points.flatMap((point) => [point.revenue, point.expense]))), [points]);
   const axisTicks = useMemo(() => Array.from({length: 5}, (_, index) => (maxValue / 4) * index).reverse(), [maxValue]);
   const revenueValues = points.map((point) => point.revenue);
@@ -136,19 +139,77 @@ export function RevenueExpenseChart({points}: RevenueExpenseChartProps) {
           {points.map((point, index) => {
             const revenuePosition = pointPosition(point.revenue, index, points.length, maxValue);
             const expensePosition = pointPosition(point.expense, index, points.length, maxValue);
+            const hitWidth = (chartWidth - padding.left - padding.right) / Math.max(points.length, 1);
+            const isActive = activeIndex === index;
 
             return (
-              <g key={point.label}>
-                {showRevenue ? <circle cx={revenuePosition.x} cy={revenuePosition.y} fill="#ffffff" r="3.5" stroke="#00796b" strokeWidth="2.5"><title>{`${t('revenue')}: ${formatAxisValue(point.revenue)}`}</title></circle> : null}
-                {showExpense ? <circle cx={expensePosition.x} cy={expensePosition.y} fill="#ffffff" r="3.5" stroke="#ba1a1a" strokeWidth="2.5"><title>{`${t('expenses')}: ${formatAxisValue(point.expense)}`}</title></circle> : null}
+              <g
+                aria-label={`${point.label}, ${t('revenue')}: ${formatMoney(point.revenue)}, ${t('expenses')}: ${formatMoney(point.expense)}`}
+                key={point.label}
+                onBlur={() => setHoveredIndex(null)}
+                onClick={() => setPinnedIndex((value) => value === index ? null : index)}
+                onFocus={() => setHoveredIndex(index)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    setPinnedIndex((value) => value === index ? null : index);
+                  }
+                }}
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                role="button"
+                tabIndex={0}
+              >
+                <rect fill="transparent" height={chartHeight - padding.top} width={hitWidth} x={revenuePosition.x - hitWidth / 2} y={padding.top} />
+                {isActive ? <line stroke="#8aa39b" strokeDasharray="2 3" strokeWidth="1" x1={revenuePosition.x} x2={revenuePosition.x} y1={padding.top} y2={chartHeight - padding.bottom} /> : null}
+                {showRevenue ? <circle cx={revenuePosition.x} cy={revenuePosition.y} fill="#ffffff" r={isActive ? 5 : 3.5} stroke="#00796b" strokeWidth="2.5" /> : null}
+                {showExpense ? <circle cx={expensePosition.x} cy={expensePosition.y} fill="#ffffff" r={isActive ? 5 : 3.5} stroke="#ba1a1a" strokeWidth="2.5" /> : null}
                 <text fill="#53615e" fontSize="10" fontWeight="600" textAnchor="middle" x={revenuePosition.x} y={chartHeight - 9}>
                   {point.label}
                 </text>
               </g>
             );
           })}
+          {activeIndex !== null && points[activeIndex] ? <ChartTooltip expenseLabel={t('expenses')} index={activeIndex} maxValue={maxValue} point={points[activeIndex]} pointCount={points.length} revenueLabel={t('revenue')} /> : null}
         </svg>
       </div>
     </section>
   );
+}
+
+function ChartTooltip({
+  expenseLabel,
+  index,
+  maxValue,
+  point,
+  pointCount,
+  revenueLabel
+}: {
+  expenseLabel: string;
+  index: number;
+  maxValue: number;
+  point: ChartPoint;
+  pointCount: number;
+  revenueLabel: string;
+}) {
+  const position = pointPosition(Math.max(point.revenue, point.expense), index, pointCount, maxValue);
+  const width = 142;
+  const height = 58;
+  const x = Math.min(chartWidth - padding.right - width, Math.max(padding.left, position.x - width / 2));
+  const y = Math.max(padding.top + 3, position.y - height - 10);
+
+  return (
+    <g pointerEvents="none" transform={`translate(${x} ${y})`}>
+      <rect fill="#17201e" height={height} opacity="0.96" rx="6" width={width} />
+      <text fill="#ffffff" fontSize="10" fontWeight="700" x="10" y="16">{point.label}</text>
+      <circle cx="12" cy="31" fill="#65cdb7" r="3" />
+      <text fill="#ffffff" fontSize="9" x="21" y="34">{`${revenueLabel}: ${formatMoney(point.revenue)}`}</text>
+      <circle cx="12" cy="47" fill="#ef5b60" r="3" />
+      <text fill="#ffffff" fontSize="9" x="21" y="50">{`${expenseLabel}: ${formatMoney(point.expense)}`}</text>
+    </g>
+  );
+}
+
+function formatMoney(value: number) {
+  return `${Number(value || 0).toLocaleString('fr-FR', {maximumFractionDigits: 0})} €`;
 }
