@@ -560,9 +560,11 @@ function DataTab({locale, storageLimit, storageUsage}: {locale: string; storageL
                 <FeatureItem>{t('jsonIncludesDocumentIndex')}</FeatureItem>
                 <FeatureItem>{t('jsonExcludesSensitiveData')}</FeatureItem>
               </ul>
-              <Link className="focus-ring mt-6 inline-flex min-h-10 w-full items-center justify-center rounded-lg bg-[var(--accent)] px-4 text-sm font-semibold text-white" style={{color: '#ffffff'}} href="/api/account/export">
-                {t('exportJson')}
-              </Link>
+              <form action="/api/account/export" method="get">
+                <button className="focus-ring mt-6 inline-flex min-h-10 w-full items-center justify-center rounded-lg bg-[var(--accent)] px-4 text-sm font-semibold text-white" style={{color: '#ffffff'}} type="submit">
+                  {t('exportJson')}
+                </button>
+              </form>
             </div>
           </div>
         </section>

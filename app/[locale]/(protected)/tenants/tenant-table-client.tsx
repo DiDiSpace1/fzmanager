@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import {useTranslations} from 'next-intl';
-import {useMemo, useState} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 
 import {leaseHasOverdueRent} from '@/lib/rent/overdue';
 
@@ -224,6 +224,7 @@ export function TenantTableClient({
   }
 
   const visibleTenantIds = rows.map((tenant) => tenant.id);
+  const selectedVisibleCount = visibleTenantIds.filter((id) => selectedTenantIds.includes(id)).length;
   const allVisibleSelected = visibleTenantIds.length > 0 && visibleTenantIds.every((id) => selectedTenantIds.includes(id));
 
   function toggleAllVisible() {
@@ -294,9 +295,12 @@ export function TenantTableClient({
             <tr>
               {hasPortfolioAccess ? (
                 <th className="px-5 py-4">
-                  <button className="focus-ring rounded px-2 py-1 hover:bg-white" onClick={toggleAllVisible} type="button">
-                    {allVisibleSelected ? t('batch.clearAll') : t('batch.selectAll')}
-                  </button>
+                  <SelectAllCheckbox
+                    allSelected={allVisibleSelected}
+                    ariaLabel={allVisibleSelected ? t('batch.clearAll') : t('batch.selectAll')}
+                    onChange={toggleAllVisible}
+                    partiallySelected={selectedVisibleCount > 0 && !allVisibleSelected}
+                  />
                 </th>
               ) : null}
               <th className="px-5 py-4">{t('table.name')}</th>
@@ -448,6 +452,28 @@ export function TenantTableClient({
       ) : null}
     </section>
   );
+}
+
+function SelectAllCheckbox({
+  allSelected,
+  ariaLabel,
+  onChange,
+  partiallySelected
+}: {
+  allSelected: boolean;
+  ariaLabel: string;
+  onChange: () => void;
+  partiallySelected: boolean;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.indeterminate = partiallySelected;
+    }
+  }, [partiallySelected]);
+
+  return <input aria-label={ariaLabel} checked={allSelected} className="h-4 w-4 cursor-pointer accent-[var(--accent)]" onChange={onChange} ref={ref} type="checkbox" />;
 }
 
 function ReminderSwitch({

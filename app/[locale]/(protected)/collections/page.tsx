@@ -6,7 +6,7 @@ import {getWorkspaceBilling} from '@/lib/billing/limits';
 import {localizedPath} from '@/lib/navigation';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
 
-import {CollectionSelectionControls} from './collection-selection-controls';
+import {CollectionSelectAllCheckbox, CollectionSelectionControls} from './collection-selection-controls';
 import {CollectionRowActions} from './collection-row-actions';
 import {CollectionSubmitConfirmation} from './collection-submit-confirmation';
 import {updateCollectionsAction} from './actions';
@@ -295,7 +295,7 @@ export default async function CollectionsPage({searchParams}: CollectionsPagePro
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">{t('subtitle')}</p>
         </div>
         <div className="flex flex-wrap items-end gap-3">
-          <form className="flex flex-wrap items-end gap-3" method="get">
+          <form action={localizedPath(locale, '/collections')} className="flex flex-wrap items-end gap-3" method="get">
             <input name="view" type="hidden" value={view} />
             <label className="grid gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
               {t('month')}
@@ -305,14 +305,14 @@ export default async function CollectionsPage({searchParams}: CollectionsPagePro
               {t('refresh')}
             </button>
           </form>
-          <Link className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--line)] bg-white px-5 text-sm font-semibold hover:bg-[#f5faf8]" href={exportHref(locale, month, view)}>
+          <a className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--line)] bg-white px-5 text-sm font-semibold hover:bg-[#f5faf8]" href={exportHref(locale, month, view)}>
             <span className="material-symbols-outlined text-[20px]">download</span>
             {t('export')}
-          </Link>
-          <Link className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--line)] bg-white px-5 text-sm font-semibold hover:bg-[#f5faf8]" href={reportHref(locale, month, view)}>
+          </a>
+          <a className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--line)] bg-white px-5 text-sm font-semibold hover:bg-[#f5faf8]" href={reportHref(locale, month, view)}>
             <span className="material-symbols-outlined text-[20px]">picture_as_pdf</span>
             {t('pdfReport')}
-          </Link>
+          </a>
         </div>
       </div>
 
@@ -505,7 +505,14 @@ export default async function CollectionsPage({searchParams}: CollectionsPagePro
           <table className="min-w-[1040px] w-full text-left text-sm">
             <thead className="bg-[#f8fbfa] text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
               <tr>
-                <th className="w-12 px-5 py-3">{t('columns.select')}</th>
+                <th className="w-12 px-5 py-3">
+                  <CollectionSelectAllCheckbox
+                    formId={COLLECTION_FORM_ID}
+                    initialSelected={initialSelected}
+                    labels={{clear: t('selection.clear'), selectAll: t('selection.selectAll')}}
+                    total={visibleRows.length}
+                  />
+                </th>
                 <th className="px-4 py-3">{t('columns.tenant')}</th>
                 <th className="px-4 py-3">{t('columns.property')}</th>
                 <th className="px-4 py-3 text-right">{t('columns.rent')}</th>
