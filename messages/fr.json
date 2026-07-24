@@ -530,7 +530,8 @@
       "daysBeforeLabel": "Envoyer le rappel",
       "daysBeforeOption": "{days, plural, =0 {Le jour du paiement} one {# jour avant} other {# jours avant}}",
       "leaseFallback": "Bail actif",
-      "noLease": "Créez un bail actif avant de configurer les rappels de loyer."
+      "noLease": "Créez un bail actif avant de configurer les rappels de loyer.",
+      "createNoLease": "Enregistrez le locataire et créez un bail actif avant de configurer le rappel."
     },
     "form": {
       "identityTitle": "1. Identité du locataire",
@@ -1215,6 +1216,8 @@
     "remove": "Retirer",
     "addAnotherTenant": "Ajouter un autre locataire",
     "addTenantFirst": "Ajoutez un locataire dans la page Locataires avant de continuer.",
+    "needTenantPrompt": "Aucun locataire enregistré ?",
+    "createTenantLink": "Ajouter un locataire",
     "since": "Depuis {date}",
     "confirmEndLease": "Confirmer la fin du contrat pour ce locataire ?",
     "terminateLease": "Terminer le contrat",

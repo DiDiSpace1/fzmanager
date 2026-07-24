@@ -530,7 +530,8 @@
       "daysBeforeLabel": "提醒时间",
       "daysBeforeOption": "{days, plural, =0 {付款当天} other {提前 # 天}}",
       "leaseFallback": "当前有效租约",
-      "noLease": "请先创建有效租约，再配置租金提醒。"
+      "noLease": "请先创建有效租约，再配置租金提醒。",
+      "createNoLease": "请先保存租客并创建有效租约，再配置租金提醒。"
     },
     "form": {
       "identityTitle": "1. 租客身份信息",
@@ -1215,6 +1216,8 @@
     "remove": "移除",
     "addAnotherTenant": "添加另一位租客",
     "addTenantFirst": "请先在租客页面添加租客，然后再继续。",
+    "needTenantPrompt": "还没有租客信息？",
+    "createTenantLink": "前往添加租客",
     "since": "自 {date} 起",
     "confirmEndLease": "确认终止该租客的合同？",
     "terminateLease": "终止合同",

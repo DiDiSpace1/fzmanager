@@ -530,7 +530,8 @@
       "daysBeforeLabel": "Send reminder",
       "daysBeforeOption": "{days, plural, =0 {On the payment day} one {# day before} other {# days before}}",
       "leaseFallback": "Active lease",
-      "noLease": "Create an active lease before configuring rent reminders."
+      "noLease": "Create an active lease before configuring rent reminders.",
+      "createNoLease": "Save the tenant and create an active lease before configuring the reminder."
     },
     "form": {
       "identityTitle": "1. Tenant identity",
@@ -1215,6 +1216,8 @@
     "remove": "Remove",
     "addAnotherTenant": "Add another tenant",
     "addTenantFirst": "Add a tenant on the Tenants page before continuing.",
+    "needTenantPrompt": "No tenant profile yet?",
+    "createTenantLink": "Add a tenant",
     "since": "Since {date}",
     "confirmEndLease": "Confirm the end of this tenant contract?",
     "terminateLease": "End contract",

@@ -104,9 +104,17 @@ export function OccupancyManager({
 
       {status === 'rented' ? (
         <div className="grid gap-5 rounded-lg border border-[var(--line-soft)] bg-[#fbfdfc] p-4">
-          <div>
-            <h3 className="text-sm font-semibold">{t('addTenants')}</h3>
-            <p className="mt-1 text-sm text-[var(--muted)]">{t('addTenantsDescription')}</p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h3 className="text-sm font-semibold">{t('addTenants')}</h3>
+              <p className="mt-1 text-sm text-[var(--muted)]">{t('addTenantsDescription')}</p>
+            </div>
+            <p className="text-sm text-[var(--muted)]">
+              {t('needTenantPrompt')}{' '}
+              <Link className="font-semibold text-[var(--accent)] underline-offset-2 hover:underline" href="/tenants?new=1">
+                {t('createTenantLink')}
+              </Link>
+            </p>
           </div>
           {assignmentRows.map((row, index) => (
             <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-[minmax(150px,1.2fr)_repeat(2,minmax(112px,0.75fr))_repeat(3,minmax(108px,0.65fr))_auto]" key={row.id}>
@@ -130,7 +138,7 @@ export function OccupancyManager({
               <label className="grid min-w-0 gap-2 text-xs font-semibold text-[#33413f]">
                 {t('entryDate')}
                 <DateDisplayInput
-                  className={`focus-ring h-11 min-h-11 w-full rounded-md border px-3 text-sm font-normal ${invalidFields.has(`${index}:start`) ? 'border-[#ba1a1a] bg-[#fff7f6]' : 'border-[var(--line)]'}`}
+                  className={`focus-ring h-11 min-h-11 w-full rounded-md border bg-white px-3 text-sm font-normal ${invalidFields.has(`${index}:start`) ? 'border-[#ba1a1a]' : 'border-[var(--line)]'}`}
                   name="assignment_start_date"
                   onIsoChange={() => setInvalidFields((fields) => withoutField(fields, `${index}:start`))}
                   validationKey={`${index}:start`}
@@ -138,7 +146,7 @@ export function OccupancyManager({
               </label>
               <label className="grid min-w-0 gap-2 text-xs font-semibold text-[#33413f]">
                 {t('exitDate')}
-                <DateDisplayInput className="focus-ring h-11 min-h-11 w-full rounded-md border border-[var(--line)] px-3 text-sm font-normal" name="assignment_end_date" />
+                <DateDisplayInput className="focus-ring h-11 min-h-11 w-full rounded-md border border-[var(--line)] bg-white px-3 text-sm font-normal" name="assignment_end_date" />
               </label>
               <MoneyField invalid={invalidFields.has(`${index}:rent`)} label={t('monthlyRent')} name="assignment_monthly_rent" onChange={() => setInvalidFields((fields) => withoutField(fields, `${index}:rent`))} required validationKey={`${index}:rent`} />
               <MoneyField label={t('charge')} name="assignment_charges_amount" />
@@ -162,11 +170,6 @@ export function OccupancyManager({
               ) : null}
             </div>
           ))}
-          {!tenants.length ? (
-            <Link className="text-sm font-medium text-[#ba1a1a] underline-offset-2 hover:underline" href="/tenants?new=1">
-              {t('addTenantFirst')}
-            </Link>
-          ) : null}
         </div>
       ) : null}
 

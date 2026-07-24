@@ -192,7 +192,7 @@ export default async function TenantsPage({searchParams}: TenantsPageProps) {
       ) : null}
 
       {showCreate ? (
-        <CreateTenantView locale={locale} />
+        <CreateTenantView hasReminderAccess={hasReminderAccess} locale={locale} />
       ) : (
         <>
           <section className="mt-8 grid gap-3">
@@ -293,9 +293,10 @@ function SummaryCard({
   );
 }
 
-async function CreateTenantView({locale}: {locale: string}) {
+async function CreateTenantView({hasReminderAccess, locale}: {hasReminderAccess: boolean; locale: string}) {
   const common = await getTranslations('common');
   const t = await getTranslations('tenants.form');
+  const reminders = await getTranslations('tenants.reminders');
 
   return (
     <form action={createTenantAction} className="mt-8 grid gap-5">
@@ -323,6 +324,34 @@ async function CreateTenantView({locale}: {locale: string}) {
           {t('notes')}
           <textarea className="focus-ring min-h-28 rounded-md border border-[var(--line)] px-3 py-3 text-sm font-normal" name="notes" placeholder={t('notesPlaceholder')} />
         </label>
+      </SectionCard>
+      <SectionCard title={reminders('editTitle')}>
+        <div className="rounded-lg border border-[var(--line-soft)] bg-[#f8fbfa] p-4">
+          <label className="flex items-center justify-between gap-4 text-sm font-semibold text-[#33413f]">
+            <span className="flex items-center gap-2">
+              {reminders('enableLabel')}
+              {!hasReminderAccess ? <span className="rounded bg-[#e5e7eb] px-2 py-1 text-xs text-[#4b5563]">Plus</span> : null}
+            </span>
+            <input className="h-5 w-5" disabled type="checkbox" />
+          </label>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
+              {reminders('dayLabel')}
+              <select className="min-h-11 rounded-md border border-[var(--line)] bg-white px-3 text-sm font-normal disabled:cursor-not-allowed disabled:opacity-70" disabled>
+                <option>{reminders('dayOption', {day: 1})}</option>
+              </select>
+            </label>
+            <label className="grid gap-2 text-xs font-semibold text-[#33413f]">
+              {reminders('daysBeforeLabel')}
+              <select className="min-h-11 rounded-md border border-[var(--line)] bg-white px-3 text-sm font-normal disabled:cursor-not-allowed disabled:opacity-70" disabled>
+                <option>{reminders('daysBeforeOption', {days: 0})}</option>
+              </select>
+            </label>
+          </div>
+          <p className={`mt-4 rounded-md border p-3 text-sm leading-6 ${hasReminderAccess ? 'border-[#b8e5cf] bg-[#edf8f1] text-[#087a55]' : 'border-[#f0d6b6] bg-[#fff8ec] text-[#7a4a11]'}`}>
+            {hasReminderAccess ? reminders('createNoLease') : reminders('upgradeCopy')}
+          </p>
+        </div>
       </SectionCard>
       <div className="flex justify-end gap-3">
         <Link className="focus-ring inline-flex min-h-11 items-center rounded-md border border-[var(--line)] px-5 text-sm font-semibold cursor-pointer" href="/tenants">

@@ -63,6 +63,12 @@ export default async function TenantDetailPage({params}: TenantDetailPageProps) 
   }
 
   const activeLease = tenant.leases.find((lease) => lease.status === 'active') ?? tenant.leases[0] ?? null;
+  const now = new Date();
+  const currentPeriod = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-01`;
+  const recentCharges = [...(activeLease?.rent_charges ?? [])]
+    .filter((charge) => charge.period_month <= currentPeriod)
+    .sort((a, b) => b.period_month.localeCompare(a.period_month))
+    .slice(0, 6);
 
   return (
     <>
@@ -126,12 +132,9 @@ export default async function TenantDetailPage({params}: TenantDetailPageProps) 
             <div className="border-b border-[var(--line-soft)] p-5">
               <h2 className="text-lg font-semibold">{t('recentCharges')}</h2>
             </div>
-            {activeLease?.rent_charges.length ? (
+            {recentCharges.length ? (
               <div className="divide-y divide-[var(--line-soft)]">
-                {[...activeLease.rent_charges]
-                  .sort((a, b) => b.period_month.localeCompare(a.period_month))
-                  .slice(0, 6)
-                  .map((charge) => (
+                {recentCharges.map((charge) => (
                     <div className="flex items-center justify-between p-5" key={charge.period_month}>
                       <div>
                         <p className="font-medium">{charge.period_month.slice(0, 7)}</p>

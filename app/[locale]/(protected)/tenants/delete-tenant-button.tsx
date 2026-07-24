@@ -10,6 +10,7 @@ export function DeleteTenantButton() {
 
   return (
     <ConfirmSubmitButton
+      cancelLabel={common('cancel')}
       className="block w-full rounded-md px-3 py-2 text-left text-[#ba1a1a] hover:bg-[#fff1f1]"
       confirmLabel={common('delete')}
       description={t('deleteDescription')}
