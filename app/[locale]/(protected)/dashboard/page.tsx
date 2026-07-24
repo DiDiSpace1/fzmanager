@@ -108,6 +108,24 @@ function formatMoney(value: number) {
   return `${value.toLocaleString('fr-FR', {maximumFractionDigits: 0})} €`;
 }
 
+function formatCompactMoney(value: number) {
+  if (value >= 1000) {
+    return `${Number((value / 1000).toFixed(value >= 10000 ? 0 : 1))} k€`;
+  }
+
+  return `${Math.round(value)} €`;
+}
+
+function chartMaximum(value: number) {
+  if (value <= 0) {
+    return 100;
+  }
+
+  const magnitude = 10 ** Math.floor(Math.log10(value));
+  const normalized = value / magnitude;
+  return (normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10) * magnitude;
+}
+
 function percentChange(current: number, previous: number) {
   if (previous === 0) {
     return current > 0 ? 100 : 0;
@@ -576,7 +594,8 @@ function AdvancedMetric({href, icon, label, note, tone, value}: {href?: string; 
 }
 
 function MonthlyTrendCard({points, t}: {points: AdvancedDashboardProps['chartPoints']; t: AdvancedDashboardProps['t']}) {
-  const maxValue = Math.max(1, ...points.flatMap((point) => [point.revenue, point.expense, Math.abs(point.cashFlow)]));
+  const maxValue = chartMaximum(Math.max(0, ...points.flatMap((point) => [point.revenue, point.expense, Math.abs(point.cashFlow)])));
+  const axisTicks = Array.from({length: 5}, (_, index) => maxValue - (maxValue / 4) * index);
 
   return (
     <section className="rounded-xl border border-[#dce5e1] bg-white p-6 shadow-[0_2px_6px_rgba(20,45,38,0.07)]">
@@ -589,22 +608,30 @@ function MonthlyTrendCard({points, t}: {points: AdvancedDashboardProps['chartPoi
         </div>
       </div>
       {points.length ? (
-        <div className="mt-6 h-[260px] w-full overflow-hidden">
-          <div className="flex h-full items-end gap-4 border-b border-[#dce5e1] pb-8">
-            {points.map((point) => {
-              const revenueHeight = point.revenue > 0 ? Math.max(6, (point.revenue / maxValue) * 170) : 0;
-              const expenseHeight = point.expense > 0 ? Math.max(6, (point.expense / maxValue) * 170) : 0;
-              const cashFlowTop = 180 - Math.max(0, (point.cashFlow / maxValue) * 150);
+        <div className="mt-6 grid grid-cols-[52px_minmax(0,1fr)] gap-3">
+          <div className="flex h-[230px] flex-col justify-between pb-8 text-right text-[11px] font-medium tabular-nums text-[#66736f]">
+            {axisTicks.map((tick) => <span key={tick}>{formatCompactMoney(tick)}</span>)}
+          </div>
+          <div className="relative h-[230px] min-w-0">
+            <div className="pointer-events-none absolute inset-x-0 bottom-8 top-0 flex flex-col justify-between">
+              {axisTicks.map((tick, index) => <span className={`block border-t ${index === axisTicks.length - 1 ? 'border-[#b9c7c2]' : 'border-dashed border-[#dce5e1]'}`} key={tick} />)}
+            </div>
+            <div className="relative flex h-full items-end gap-4 pb-8">
+              {points.map((point) => {
+                const revenueHeight = point.revenue > 0 ? Math.max(6, (point.revenue / maxValue) * 190) : 0;
+                const expenseHeight = point.expense > 0 ? Math.max(6, (point.expense / maxValue) * 190) : 0;
+                const cashFlowBottom = 8 + Math.max(0, (point.cashFlow / maxValue) * 190);
 
-              return (
-                <div className="relative flex min-w-0 flex-1 items-end justify-center gap-2" key={point.label}>
-                  <div className="w-5 rounded-t-sm bg-[#65cdb7]" style={{height: `${revenueHeight}px`}} title={`${t('chart.revenue')} ${formatMoney(point.revenue)}`} />
-                  <div className="w-5 rounded-t-sm bg-[#ef5b60]" style={{height: `${expenseHeight}px`}} title={`${t('chart.expenses')} ${formatMoney(point.expense)}`} />
-                  <span className="absolute h-2.5 w-2.5 rounded-full bg-[#006f61] shadow-sm" style={{bottom: `${cashFlowTop}px`}} title={`${t('advanced.trend.cashFlow')} ${formatMoney(point.cashFlow)}`} />
-                  <span className="absolute -bottom-7 text-xs font-medium text-[#53615e]">{point.label}</span>
-                </div>
-              );
-            })}
+                return (
+                  <div className="relative flex min-w-0 flex-1 items-end justify-center gap-2" key={point.label}>
+                    <div className="w-5 rounded-t-sm bg-[#65cdb7] shadow-[0_1px_2px_rgba(0,111,97,0.16)]" style={{height: `${revenueHeight}px`}} title={`${t('chart.revenue')} ${formatMoney(point.revenue)}`} />
+                    <div className="w-5 rounded-t-sm bg-[#ef5b60] shadow-[0_1px_2px_rgba(186,26,26,0.12)]" style={{height: `${expenseHeight}px`}} title={`${t('chart.expenses')} ${formatMoney(point.expense)}`} />
+                    <span className="absolute h-3 w-3 rounded-full border-2 border-white bg-[#006f61] shadow-sm" style={{bottom: `${cashFlowBottom}px`}} title={`${t('advanced.trend.cashFlow')} ${formatMoney(point.cashFlow)}`} />
+                    <span className="absolute -bottom-6 text-xs font-medium text-[#53615e]">{point.label}</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       ) : (
