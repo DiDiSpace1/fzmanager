@@ -122,6 +122,7 @@ export function TransactionActionsMenu({
             <input name="revenue_type" type="hidden" value={row.revenueType ?? 'rent'} />
             <input name="id" type="hidden" value={row.id} />
             <ConfirmSubmitButton
+              cancelLabel={common('cancel')}
               className="w-full rounded-md px-3 py-2 text-left text-[#ba1a1a] hover:bg-[#fff3f0] cursor-pointer"
               confirmLabel={common('delete')}
               description={t('deleteDescription')}

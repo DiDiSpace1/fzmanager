@@ -842,8 +842,10 @@
     "recentDocuments": "Documents récents",
     "viewAll": "Tout voir",
     "fileCount": "{count} fichiers",
-    "global": "Global",
-    "empty": "Aucun document pour le moment.",
+      "global": "Global",
+      "empty": "Aucun document pour le moment.",
+      "deleteTitle": "Supprimer ce document ?",
+      "deleteDescription": "Ce document et son fichier stocké seront définitivement supprimés.",
     "types": {
       "lease": "Bail",
       "rentReceipt": "Quittance",
@@ -878,7 +880,7 @@
       "chooseProperty": "Choisir un bien",
       "tenantOptional": "Locataire (optionnel)",
       "noSpecificTenant": "Aucun locataire spécifique",
-      "associatedPropertyRequired": "Bien associ? (obligatoire)",
+      "associatedPropertyRequired": "Bien associé (obligatoire)",
       "tenantRequired": "Locataire (obligatoire)",
       "chooseTenant": "Choisir un locataire"
     },
@@ -946,7 +948,7 @@
     "statusWaived": "Annulé",
     "statusLate": "En retard",
     "disclaimer": "Les catégories sont indicatives et ne remplacent pas un conseil fiscal.",
-    "statusUnpaid": "Non pay?"
+    "statusUnpaid": "Non payé"
   },
   "contact": {
     "title": "Contactez-nous",

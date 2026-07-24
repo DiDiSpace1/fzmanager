@@ -3,6 +3,8 @@
 import {useState} from 'react';
 import {useTranslations} from 'next-intl';
 
+import {PendingSubmitButton} from '@/components/app/pending-submit-button';
+
 import {uploadDocumentAction} from './actions';
 
 type PropertyOption = {
@@ -169,10 +171,10 @@ export function UploadDocumentModal({locale, properties, tenants}: {locale: stri
                 <button className="focus-ring min-h-10 rounded-lg px-4 text-sm font-semibold text-[#171d1c] hover:bg-[#f0f5f2]" onClick={() => setOpen(false)} type="button">
                   {common('cancel')}
                 </button>
-                <button className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white" style={{color: '#ffffff'}} type="submit">
+                <PendingSubmitButton className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white disabled:cursor-wait disabled:opacity-70" style={{color: '#ffffff'}}>
                   <UploadIcon />
                   {t('upload')}
-                </button>
+                </PendingSubmitButton>
               </div>
             </form>
           </div>

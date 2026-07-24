@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import {getLocale, getTranslations} from 'next-intl/server';
 
+import {ConfirmSubmitButton} from '@/components/app/confirm-submit-button';
 import {getCurrentUserWorkspace} from '@/lib/workspace';
 
 import {deleteDocumentAction} from './actions';
@@ -381,9 +382,15 @@ export default async function DocumentsPage({searchParams}: DocumentsPageProps) 
                           <form action={deleteDocumentAction}>
                             <input name="locale" type="hidden" value={locale} />
                             <input name="document_id" type="hidden" value={document.id} />
-                            <button className="block w-full rounded-md px-3 py-2 text-left text-[#ba1a1a] hover:bg-[#fff1f1]" type="submit">
+                            <ConfirmSubmitButton
+                              cancelLabel={common('cancel')}
+                              className="block w-full rounded-md px-3 py-2 text-left text-[#ba1a1a] hover:bg-[#fff1f1]"
+                              confirmLabel={common('delete')}
+                              description={t('deleteDescription')}
+                              title={t('deleteTitle')}
+                            >
                               {common('delete')}
-                            </button>
+                            </ConfirmSubmitButton>
                           </form>
                         </DocumentActionDetails>
                       </td>

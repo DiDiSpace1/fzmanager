@@ -4,6 +4,7 @@ import Link from 'next/link';
 import {useTranslations} from 'next-intl';
 import {useMemo, useState, useTransition} from 'react';
 
+import {LoadingSpinner} from '@/components/app/pending-submit-button';
 import {useMessage} from '@/components/message/MessageProvider';
 
 export type QuittancePropertyOption = {
@@ -235,14 +236,9 @@ function UpgradeModal({onClose}: {onClose: () => void}) {
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/45 p-4" role="dialog" aria-modal="true">
       <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-semibold text-[#171d1c]">{t('upgradeTitle')}</h2>
-            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{t('upgradeCopy')}</p>
-          </div>
-          <button className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--line)] text-sm hover:bg-[#f0f5f2]" onClick={onClose} type="button">
-            x
-          </button>
+        <div>
+          <h2 className="text-xl font-semibold text-[#171d1c]">{t('upgradeTitle')}</h2>
+          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{t('upgradeCopy')}</p>
         </div>
         <div className="mt-6 flex justify-end gap-3">
           <button className="min-h-10 rounded-lg border border-[var(--line)] px-4 text-sm font-semibold hover:bg-[#f0f5f2]" onClick={onClose} type="button">
@@ -698,7 +694,8 @@ export function QuittanceForm({
           <button className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--line)] bg-white px-5 text-sm font-semibold text-[#171d1c] shadow-sm hover:bg-[#f0f5f2]" onClick={() => setShowPreview(true)} type="button">
             {t('preview')}
           </button>
-          <button className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white shadow-sm disabled:opacity-60" disabled={isPending || !properties.length} onClick={generatePdf} style={{color: '#ffffff'}} type="button">
+          <button className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-lg bg-[var(--accent)] px-5 text-sm font-semibold text-white shadow-sm disabled:cursor-wait disabled:opacity-60" disabled={isPending || !properties.length} onClick={generatePdf} style={{color: '#ffffff'}} type="button">
+            {isPending ? <LoadingSpinner /> : null}
             {isPending ? t('generating') : t('generate')}
           </button>
         </div> : null}
@@ -925,7 +922,10 @@ export function QuittanceForm({
               </div>
               <div className="mt-5 grid gap-3">
                 <button className="min-h-11 rounded-lg border border-[var(--line)] px-4 text-sm font-semibold hover:bg-[#f0f5f2] disabled:opacity-50" disabled={!selectedRows.length} onClick={() => setBatchPreviewOpen(true)} type="button">{t('previewAll')}</button>
-                <button className="min-h-11 rounded-lg bg-[var(--accent)] px-4 text-sm font-semibold text-white disabled:opacity-60" disabled={isPending || !selectedRows.length} onClick={generateBatch} style={{color: '#ffffff'}} type="button">{isPending ? t('generating') : t('generateBatch', {count: selectedRows.length})}</button>
+                <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-4 text-sm font-semibold text-white disabled:cursor-wait disabled:opacity-60" disabled={isPending || !selectedRows.length} onClick={generateBatch} style={{color: '#ffffff'}} type="button">
+                  {isPending ? <LoadingSpinner /> : null}
+                  {isPending ? t('generating') : t('generateBatch', {count: selectedRows.length})}
+                </button>
               </div>
             </section>
 

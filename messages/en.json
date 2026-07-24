@@ -842,8 +842,10 @@
     "recentDocuments": "Recent documents",
     "viewAll": "View all",
     "fileCount": "{count} files",
-    "global": "Global",
-    "empty": "No documents yet.",
+      "global": "Global",
+      "empty": "No documents yet.",
+      "deleteTitle": "Delete this document?",
+      "deleteDescription": "This document and its stored file will be permanently deleted.",
     "types": {
       "lease": "Lease",
       "rentReceipt": "Receipt",

@@ -3,6 +3,8 @@
 import {useState} from 'react';
 import {useTranslations} from 'next-intl';
 
+import {PendingSubmitButton} from '@/components/app/pending-submit-button';
+
 import {attachExpenseReceiptAction} from './actions';
 
 export function ReceiptUploadButton({expenseId, locale}: {expenseId: string; locale: string}) {
@@ -45,10 +47,10 @@ export function ReceiptUploadButton({expenseId, locale}: {expenseId: string; loc
               <button className="focus-ring min-h-10 rounded-md px-4 text-sm font-semibold text-[#171d1c] hover:bg-[#f0f5f2]" onClick={() => setOpen(false)} type="button">
                 {common('cancel')}
               </button>
-              <button className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-md bg-[var(--accent)] px-4 text-sm font-semibold text-white" style={{color: '#ffffff'}} type="submit">
+              <PendingSubmitButton className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-md bg-[var(--accent)] px-4 text-sm font-semibold text-white disabled:cursor-wait disabled:opacity-70" style={{color: '#ffffff'}}>
                 <span className="material-symbols-outlined text-[20px]">upload</span>
                 {common('upload')}
-              </button>
+              </PendingSubmitButton>
             </div>
           </form>
         </div>

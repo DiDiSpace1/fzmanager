@@ -842,8 +842,10 @@
     "recentDocuments": "最近文档",
     "viewAll": "查看全部",
     "fileCount": "{count} 个文件",
-    "global": "全局",
-    "empty": "暂无文档。",
+      "global": "全局",
+      "empty": "暂无文档。",
+      "deleteTitle": "确定删除此文档？",
+      "deleteDescription": "该文档及其已存储文件将被永久删除。",
     "types": {
       "lease": "租约",
       "rentReceipt": "收据",
