@@ -453,7 +453,7 @@ export default async function CollectionsPage({searchParams}: CollectionsPagePro
                     clear: t('selection.clear'),
                     onlyOpen: t('selection.onlyOpen'),
                     selectAll: t('selection.selectAll'),
-                    selected: t('selection.selected')
+                    selected: t.raw('selection.selected')
                   }}
                   total={visibleRows.length}
                 />
